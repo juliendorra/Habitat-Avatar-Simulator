@@ -675,19 +675,18 @@ async function drawHead(pose) {
   const headState = pose.head_state || 0;
   const celIndices = getHeadCelsForView(currentHead, headState);
 
-  // Head position derived from head_placeholder cel 0
-  // Placeholder: x_offset=2, y_offset=58 (side); x_offset=-1, y_offset=57 (front)
-  let headBaseX, headBaseY;
-  if (headState === 0) { // side
-    headBaseX = BASE_X + (2 * 8 * SCALE / 2);
-    headBaseY = BASE_Y - (58 * SCALE);
-  } else if (headState === 1) { // front
-    headBaseX = BASE_X + (-1 * 8 * SCALE / 2);
-    headBaseY = BASE_Y - (57 * SCALE);
-  } else { // back
-    headBaseX = BASE_X + (-1 * 8 * SCALE / 2);
-    headBaseY = BASE_Y - (62 * SCALE);
-  }
+  // Head position derived from head_placeholder cels
+  // The placeholder defines the anchor point where the head attaches
+  // Placeholder cels: side(x=2,y=58,w=8nat), front(x=-1,y=57,w=8nat), back(x=-1,y=62,w=12nat)
+  const placeholders = [
+    { xo:2, yo:58, nw:8 },   // 0: side
+    { xo:-1, yo:57, nw:8 },  // 1: front
+    { xo:-1, yo:62, nw:12 }, // 2: back
+  ];
+  const ph = placeholders[headState] || placeholders[0];
+  const phX = BASE_X + (ph.xo * 8 * SCALE / 2);
+  const phY = BASE_Y - (ph.yo * SCALE);
+  const phW = ph.nw * 2 * SCALE; // native * 2x stretch * display scale
 
   for (const celIdx of celIndices) {
     const letter = "abcdefg"[celIdx];
@@ -706,9 +705,17 @@ async function drawHead(pose) {
     const drawW = img.width * SCALE;
     const drawH = img.height * SCALE;
 
-    // Center the head image at the placeholder position
-    const drawX = headBaseX - drawW * 0.3;
-    const drawY = headBaseY;
+    // Side: align head to placeholder position
+    // Front/Back: center head on avatar origin (BASE_X)
+    let drawX, drawY;
+    if (headState === 0) {
+      // Side view: position at placeholder X
+      drawX = phX + (phW - drawW) / 2;
+    } else {
+      // Front/back: center on body
+      drawX = BASE_X - drawW / 2 + 4 * SCALE;
+    }
+    drawY = phY;
 
     ctx.drawImage(tmp, drawX, drawY, drawW, drawH);
   }
