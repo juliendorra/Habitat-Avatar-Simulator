@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Habitat Avatar Simulator (1986)</title>
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --panel: #16213e;
+    --accent: #0f3460;
+    --highlight: #e94560;
+    --text: #eee;
+    --text-dim: #999;
+    --border: #2a2a4a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Courier New', monospace;
+    min-height: 100vh;
+  }
+  header {
+    text-align: center;
+    padding: 16px;
+    border-bottom: 2px solid var(--border);
+    background: var(--panel);
+  }
+  header h1 { font-size: 1.4em; letter-spacing: 2px; color: var(--highlight); }
+  header p { color: var(--text-dim); font-size: 0.8em; margin-top: 2px; }
+  .app {
+    display: flex;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  /* Left panel */
+  .preview-panel {
+    flex: 0 0 360px;
+    padding: 16px;
+    border-right: 2px solid var(--border);
+    background: var(--panel);
+    min-height: calc(100vh - 60px);
+    overflow-y: auto;
+  }
+  .canvas-wrap {
+    background: #A3A3A3;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  #avatarCanvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    display: block;
+    margin: 0 auto;
+  }
+  .view-label {
+    text-align: center;
+    font-size: 0.7em;
+    color: #555;
+    margin-top: 4px;
+  }
+  .controls { width: 100%; }
+  .control-group { margin-bottom: 12px; }
+  .control-group label {
+    display: block; font-size: 0.75em; color: var(--text-dim);
+    margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px;
+  }
+  .btn-row { display: flex; gap: 4px; width: 100%; flex-wrap: wrap; }
+  .btn {
+    flex: 1; padding: 7px 10px; background: var(--accent); color: var(--text);
+    border: 1px solid var(--border); border-radius: 4px; cursor: pointer;
+    font-family: inherit; font-size: 0.8em; transition: background 0.15s;
+    text-align: center; min-width: 60px;
+  }
+  .btn:hover { background: var(--highlight); }
+  .btn.active { background: var(--highlight); font-weight: bold; }
+  .btn.primary { background: var(--highlight); font-size: 0.9em; padding: 10px; }
+  .btn.primary:hover { background: #ff5a75; }
+  .btn.full { flex: 0 0 100%; }
+  .head-info {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 10px; font-size: 0.75em; width: 100%; margin-top: 8px;
+  }
+  .head-info h3 { color: var(--highlight); margin-bottom: 4px; text-transform: capitalize; }
+  .head-info .detail { color: var(--text-dim); margin-bottom: 2px; }
+  .tag {
+    display: inline-block; background: var(--accent); padding: 2px 6px;
+    border-radius: 3px; font-size: 0.8em; margin: 1px;
+  }
+  .tag.player { background: #2e7d32; }
+  .tag.animated { background: #8b5e3c; }
+  .tag.female { background: #7b3080; }
+  .palette-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+  .palette-row span { font-size: 0.7em; color: var(--text-dim); width: 55px; }
+  .palette-row input[type="color"] {
+    width: 36px; height: 24px; border: 1px solid var(--border);
+    border-radius: 3px; cursor: pointer; background: none; padding: 0;
+  }
+  .palette-presets { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 4px; }
+  .palette-preset {
+    display: flex; gap: 1px; cursor: pointer; border: 2px solid transparent;
+    border-radius: 3px; padding: 1px; transition: border-color 0.15s;
+  }
+  .palette-preset:hover, .palette-preset.active { border-color: var(--highlight); }
+  .palette-preset .swatch { width: 12px; height: 12px; border-radius: 1px; }
+  /* Right panel */
+  .browse-panel {
+    flex: 1; min-width: 300px; padding: 16px;
+    overflow-y: auto; max-height: calc(100vh - 60px);
+  }
+  .filter-bar {
+    display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;
+  }
+  .filter-bar input[type="text"] {
+    flex: 1; min-width: 150px; padding: 6px 10px; background: var(--panel);
+    border: 1px solid var(--border); border-radius: 4px; color: var(--text);
+    font-family: inherit; font-size: 0.85em;
+  }
+  .filter-bar select {
+    padding: 6px 8px; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 4px; color: var(--text); font-family: inherit; cursor: pointer;
+  }
+  .head-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 6px;
+  }
+  .head-card {
+    background: var(--panel); border: 2px solid var(--border); border-radius: 5px;
+    padding: 6px; cursor: pointer; text-align: center;
+    transition: border-color 0.15s, transform 0.1s; position: relative;
+  }
+  .head-card:hover { border-color: var(--highlight); transform: translateY(-1px); }
+  .head-card.selected { border-color: var(--highlight); background: var(--accent); }
+  .head-card canvas {
+    image-rendering: pixelated; image-rendering: crisp-edges;
+    display: block; margin: 0 auto 3px; background: #A3A3A3; border-radius: 2px;
+  }
+  .head-card .name { font-size: 0.6em; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .head-card .badge {
+    position: absolute; top: 2px; right: 2px; width: 7px; height: 7px; border-radius: 50%;
+  }
+  .head-card .badge.anim { background: #f0a020; }
+  .stats { text-align: center; font-size: 0.7em; color: var(--text-dim); margin-bottom: 8px; }
+  @media (max-width: 800px) {
+    .app { flex-direction: column; }
+    .preview-panel { flex: none; border-right: none; border-bottom: 2px solid var(--border); min-height: auto; }
+    .browse-panel { max-height: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>HABITAT AVATAR SIMULATOR</h1>
+  <p>Lucasfilm Games / Quantum Link, 1986 &mdash; Assemble and explore avatars from the first MMO</p>
+</header>
+
+<div class="app">
+  <div class="preview-panel">
+    <div class="canvas-wrap">
+      <canvas id="avatarCanvas" width="320" height="320"></canvas>
+      <div class="view-label" id="viewLabel">Side View &mdash; Standing</div>
+    </div>
+
+    <div class="controls">
+      <div class="control-group">
+        <label>View</label>
+        <div class="btn-row">
+          <button class="btn active" data-view="side">Side</button>
+          <button class="btn" data-view="front">Front</button>
+          <button class="btn" data-view="back">Back</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>Pose</label>
+        <div class="btn-row">
+          <button class="btn active" data-pose="stand">Stand</button>
+          <button class="btn" data-pose="walk">Walk</button>
+          <button class="btn" data-pose="wave">Wave</button>
+          <button class="btn" data-pose="point">Point</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="btn-row">
+          <button class="btn primary full" id="randomBtn">Shuffle Random Avatar</button>
+        </div>
+        <div class="btn-row" style="margin-top:4px">
+          <button class="btn" id="prevBtn">&larr; Prev</button>
+          <button class="btn" id="nextBtn">Next &rarr;</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>Body Colors (C64 Palette)</label>
+        <div class="palette-row">
+          <span>Outline</span>
+          <input type="color" id="bodyColor1" value="#000000">
+        </div>
+        <div class="palette-row">
+          <span>Fill</span>
+          <input type="color" id="bodyColor2" value="#352879">
+        </div>
+        <div class="palette-row">
+          <span>Detail</span>
+          <input type="color" id="bodyColor3" value="#6c5eb5">
+        </div>
+        <label style="margin-top:6px">Head Colors</label>
+        <div class="palette-row">
+          <span>Outline</span>
+          <input type="color" id="headColor1" value="#000000">
+        </div>
+        <div class="palette-row">
+          <span>Fill</span>
+          <input type="color" id="headColor2" value="#352879">
+        </div>
+        <div class="palette-row">
+          <span>Detail</span>
+          <input type="color" id="headColor3" value="#6c5eb5">
+        </div>
+        <label style="margin-top:6px">Presets</label>
+        <div class="palette-presets" id="palettePresets"></div>
+      </div>
+
+      <div class="head-info" id="headInfo">
+        <h3>Select a head</h3>
+        <div class="detail">Click any head or press Shuffle</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="browse-panel">
+    <div class="filter-bar">
+      <input type="text" id="searchInput" placeholder="Search heads...">
+      <select id="categoryFilter">
+        <option value="all">All Heads</option>
+        <option value="player">Player (0-7)</option>
+        <option value="human">Human</option>
+        <option value="animal">Animal</option>
+        <option value="monster">Monster</option>
+        <option value="occupation">Occupation</option>
+        <option value="popculture">Pop Culture</option>
+        <option value="animated">Animated</option>
+      </select>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div class="head-grid" id="headGrid"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// HEAD CATALOG - from Object_data
+// ============================================================
+const HEADS = [
+  // Player heads (0-7)
+  {name:"head0",cels:2,masks:["10000000","01000000"],cat:"player",gender:"m"},
+  {name:"head1",cels:3,masks:["10000000","01000000","01100000"],cat:"player",gender:"m"},
+  {name:"head2",cels:3,masks:["10000000","01000000","01100000"],cat:"player",gender:"m"},
+  {name:"head3",cels:2,masks:["10000000","01000000"],cat:"player",gender:"m"},
+  {name:"head4",cels:2,masks:["10000000","01000000"],cat:"player",gender:"m"},
+  {name:"head5",cels:3,masks:["10100000","01000000"],cat:"player",gender:"f"},
+  {name:"head6",cels:2,masks:["10000000","01000000"],cat:"player",gender:"f"},
+  {name:"head7",cels:2,masks:["10000000","01000000"],cat:"player",gender:"f"},
+  {name:"head8",cels:4,masks:["10000000","01000000","00100000","00010000"],cat:"human",anim:true},
+  {name:"fhead",cels:4,masks:["10000000","01000000","00100000","00010000"],cat:"human",anim:true,gender:"f"},
+  // Human
+  {name:"sheriff",cels:3,masks:["10000000","01000000","01100000"],cat:"occupation"},
+  {name:"monk",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"bride",cels:3,masks:["10000000","01000000","01100000"],cat:"human",gender:"f"},
+  {name:"groom",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"minister",cels:3,masks:["10000000","01000000","01100000"],cat:"occupation"},
+  {name:"necknod",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"steve",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"george",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"beard0",cels:2,masks:["10000000","01000000"],cat:"human"},
+  {name:"woman0",cels:2,masks:["10000000","01000000"],cat:"human",gender:"f"},
+  {name:"block0",cels:2,masks:["10000000","01000000"],cat:"human"},
+  {name:"buckw0",cels:2,masks:["10000000","01000000"],cat:"human"},
+  {name:"shades0",cels:2,masks:["10000000","01000000"],cat:"human"},
+  {name:"bolthead",cels:2,masks:["10000000","01000000"],cat:"monster"},
+  {name:"dandy0",cels:2,masks:["10000000","01000000"],cat:"human"},
+  {name:"oldman0",cels:2,masks:["10000000","01000000"],cat:"human"},
+  {name:"scruffy0",cels:2,masks:["10000000","01000000"],cat:"human"},
+  {name:"hunter0",cels:2,masks:["10000000","01000000"],cat:"human"},
+  {name:"metro0",cels:2,masks:["10000000","01000000"],cat:"human"},
+  {name:"phair0",cels:2,masks:["10000000","01000000"],cat:"human"},
+  {name:"bman0",cels:2,masks:["10000000","01000000"],cat:"human"},
+  {name:"arrowgag",cels:2,masks:["10000000","01000000"],cat:"human"},
+  {name:"brow",cels:2,masks:["10000000","01000000"],cat:"human"},
+  {name:"baron",cels:2,masks:["10000000","01000000"],cat:"human"},
+  {name:"peakhead",cels:2,masks:["10000000","01000000"],cat:"human"},
+  {name:"cent0",cels:2,masks:["10000000","01000000"],cat:"human"},
+  {name:"afro0",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"ascot0",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"bean0",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"bigmama0",cels:3,masks:["10000000","01000000","01100000"],cat:"human",gender:"f"},
+  {name:"bimbi",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"bizzaro0",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"bum0",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"chaplin0",cels:3,masks:["10000000","01000000","01100000"],cat:"popculture"},
+  {name:"coldlady0",cels:3,masks:["10000000","01000000","01100000"],cat:"human",gender:"f"},
+  {name:"fhippie0",cels:3,masks:["10000000","01000000","01100000"],cat:"human",gender:"f"},
+  {name:"fstien0",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
+  {name:"gabor0",cels:3,masks:["10000000","01000000","01100000"],cat:"popculture",gender:"f"},
+  {name:"grandma0",cels:3,masks:["10000000","01000000","01100000"],cat:"human",gender:"f"},
+  {name:"grit0",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"groucho",cels:3,masks:["10000000","01000000","01100000"],cat:"popculture"},
+  {name:"hammer0",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"hillbilly0",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"irma0",cels:3,masks:["10000000","01000000","01100000"],cat:"human",gender:"f"},
+  {name:"jerk0",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"juvie0",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"melvin",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"milkman0",cels:3,masks:["10000000","01000000","01100000"],cat:"occupation"},
+  {name:"mr_mike0",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"nailhead0",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"newhab1",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"newsboy0",cels:3,masks:["10000000","01000000","01100000"],cat:"occupation"},
+  {name:"plughead",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"rivithead",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"riotcop",cels:3,masks:["10000000","01000000","01100000"],cat:"occupation"},
+  {name:"sherlock0",cels:3,masks:["10000000","01000000","01100000"],cat:"popculture"},
+  {name:"statesman0",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"tasha0",cels:3,masks:["10000000","01000000","01100000"],cat:"human",gender:"f"},
+  {name:"thug0",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"tknot1",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"tophat0",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"turban0",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"wimpy0",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"woman1",cels:3,masks:["10000000","01000000","01100000"],cat:"human",gender:"f"},
+  {name:"dodo0",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"tonto0",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"tonto1",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"rhood",cels:3,masks:["10000000","01000000","01100000"],cat:"popculture"},
+  {name:"mask",cels:3,masks:["10000000","01000000","01100000"],cat:"human"},
+  {name:"dobbs0",cels:3,masks:["10000000","01000000","01100000"],cat:"popculture"},
+  {name:"tknot2",cels:2,masks:["10000000","01000000"],cat:"human"},
+  // Animals
+  {name:"bluegill",cels:3,masks:["10000000","01000000","01100000"],cat:"animal"},
+  {name:"deer",cels:3,masks:["10000000","01000000","01100000"],cat:"animal"},
+  {name:"kitty3",cels:3,masks:["10000000","01000000","01100000"],cat:"animal"},
+  {name:"duck0",cels:2,masks:["10000000","01000000"],cat:"animal"},
+  {name:"coolcat0",cels:3,masks:["10000000","01000000","01100000"],cat:"animal"},
+  {name:"lioness",cels:2,masks:["10000000","01000000"],cat:"animal"},
+  {name:"tiger",cels:3,masks:["10000000","01000000","01100000"],cat:"animal"},
+  {name:"dragon0",cels:3,masks:["10000000","01000000","01100000"],cat:"animal"},
+  {name:"ostrich0",cels:3,masks:["10000000","01000000","01100000"],cat:"animal"},
+  {name:"turkey0",cels:3,masks:["10000000","01000000","01100000"],cat:"animal"},
+  {name:"oink0",cels:2,masks:["10000000","01000000"],cat:"animal"},
+  {name:"mouse0",cels:3,masks:["10000000","01000000","01100000"],cat:"animal"},
+  {name:"rabbit0",cels:3,masks:["10000000","01000000","01100000"],cat:"animal"},
+  {name:"beaver0",cels:3,masks:["10000000","01000000","01100000"],cat:"animal"},
+  {name:"phydeaux0",cels:3,masks:["10000000","01000000","01100000"],cat:"animal"},
+  {name:"penguin0",cels:3,masks:["10000000","01000000","01100000"],cat:"animal"},
+  {name:"fishead0",cels:2,masks:["10000000","01000000"],cat:"animal"},
+  {name:"unicorn0",cels:3,masks:["10000000","01000000","01100000"],cat:"animal"},
+  {name:"elephead",cels:3,masks:["10000000","01100000","01000000"],cat:"animal"},
+  {name:"jaws0",cels:4,masks:["10000000","01000000","01110000"],cat:"animal"},
+  // Monsters
+  {name:"skull0",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
+  {name:"fly0",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
+  {name:"vampire0",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
+  {name:"cyclops0",cels:4,masks:["10000000","01000000","01100000","01010000"],cat:"monster",anim:true},
+  {name:"demon1",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
+  {name:"demon2",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
+  {name:"satan0",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
+  {name:"brain0",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
+  {name:"brain",cels:3,masks:["10000000","01100000","01000000"],cat:"monster"},
+  {name:"wwolf",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
+  {name:"bem1",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
+  {name:"bem2",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
+  {name:"bem3",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
+  {name:"bluehorn",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
+  {name:"pothead",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
+  {name:"rotohead",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
+  {name:"invsman",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
+  {name:"stalk0",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
+  {name:"smiley0",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
+  {name:"lizard0",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
+  {name:"cootie0",cels:6,masks:["10111000","01101000","01101110"],cat:"monster"},
+  {name:"fstien0",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
+  // Occupations
+  {name:"sailor0",cels:3,masks:["10000000","01000000","01100000"],cat:"occupation"},
+  {name:"doctor0",cels:3,masks:["10000000","01000000","01100000"],cat:"occupation"},
+  {name:"madsci0",cels:3,masks:["10000000","01000000","01100000"],cat:"occupation"},
+  {name:"chef0",cels:3,masks:["10000000","01000000","01100000"],cat:"occupation"},
+  {name:"ninja0",cels:3,masks:["10000000","01000000","01100000"],cat:"occupation"},
+  {name:"army0",cels:3,masks:["10000000","01000000","01100000"],cat:"occupation"},
+  {name:"army1",cels:3,masks:["10000000","01000000","01100000"],cat:"occupation"},
+  {name:"airforce0",cels:3,masks:["10000000","01000000","01100000"],cat:"occupation"},
+  {name:"hardhat0",cels:3,masks:["10000000","01000000","01100000"],cat:"occupation"},
+  {name:"executioner0",cels:3,masks:["10000000","01000000","01100000"],cat:"occupation"},
+  {name:"keystone0",cels:3,masks:["10000000","01000000","01100000"],cat:"occupation"},
+  {name:"pirate1",cels:2,masks:["10000000","01000000"],cat:"occupation"},
+  {name:"pirate2",cels:3,masks:["10000000","01000000","01100000"],cat:"occupation"},
+  {name:"spacesuit0",cels:3,masks:["10100000","01100000"],cat:"occupation"},
+  {name:"helmet0",cels:3,masks:["10000000","01000000","01100000"],cat:"occupation"},
+  {name:"moto0",cels:3,masks:["10000000","01000000","01100000"],cat:"occupation"},
+  {name:"motohead",cels:3,masks:["10000000","01000000","00100000"],cat:"human"},
+  // Pop culture
+  {name:"darth0",cels:3,masks:["10000000","01000000","01100000"],cat:"popculture"},
+  {name:"gamorrean0",cels:3,masks:["10000000","01000000","01100000"],cat:"popculture"},
+  {name:"bozo0",cels:3,masks:["10000000","01000000","01100000"],cat:"popculture"},
+  {name:"santa0",cels:3,masks:["10000000","01000000","01100000"],cat:"popculture"},
+  {name:"viking0",cels:3,masks:["10000000","01000000","01100000"],cat:"popculture"},
+  {name:"knight1",cels:3,masks:["10000000","01000000","01100000"],cat:"popculture"},
+  {name:"knight2",cels:3,masks:["10000000","01000000","01100000"],cat:"popculture"},
+  {name:"king",cels:3,masks:["10000000","01000000","01100000"],cat:"popculture"},
+  {name:"princess0",cels:2,masks:["10000000","01000000"],cat:"popculture",gender:"f"},
+  {name:"princess1",cels:4,masks:["10000000","01000000","01110000"],cat:"popculture",gender:"f"},
+  {name:"cleo",cels:3,masks:["10000000","01000000","01100000"],cat:"popculture",gender:"f"},
+  {name:"angel0",cels:2,masks:["10000000","01000000"],cat:"popculture"},
+  {name:"angel1",cels:3,masks:["10000000","01000000","01100000"],cat:"popculture"},
+  // Complex multi-layer
+  {name:"ming0",cels:5,masks:["10100000","01010000","01011000"],cat:"human"},
+  {name:"witch0",cels:7,masks:["10011000","01000110","01100110"],cat:"monster",gender:"f"},
+  {name:"wizard0",cels:4,masks:["10010000","01010000","01110000"],cat:"monster"},
+  {name:"boone0",cels:4,masks:["10010000","01010000","01110000"],cat:"human"},
+  {name:"hiawatha0",cels:4,masks:["10010000","01010000","01110000"],cat:"human"},
+  {name:"pigtail0",cels:4,masks:["10010000","01000000","01100000"],cat:"human",gender:"f"},
+  {name:"tex0",cels:4,masks:["10010000","01001000","01101000"],cat:"human"},
+  {name:"pony4",cels:4,masks:["10010000","01000000","01100000"],cat:"human",gender:"f"},
+  {name:"deviltail",cels:4,masks:["10010000","01000000","01110000"],cat:"monster"},
+  {name:"resident",cels:5,masks:["10011000","01010000","01110000","00010000"],cat:"human"},
+  {name:"jaggi",cels:4,masks:["10000000","01000000","01110000"],cat:"human"},
+  {name:"robot0",cels:6,masks:["10001000","10011000","01000100","01100100"],cat:"monster",anim:true},
+  {name:"mbeany0",cels:5,masks:["10010000","10001000","10000100","10001000"],cat:"human",anim:true},
+  {name:"fbeany0",cels:6,masks:["10001000","10000100","10000010","10000100"],cat:"human",anim:true,gender:"f"},
+];
+
+// ============================================================
+// BODY CEL POSITIONS - from decoded Avatar.bin
+// Choreography: which cel to use per limb per pose
+// ============================================================
+// Limb state arrays (state index → cel number)
+const LIMB_STATES = {
+  legs_right: [4,0,1,2,3,7,8,5,6,6,6,6,7,5,5,4,13,9,10,11,12,14],
+  legs_left: [255,0,1,2,3],  // 255=not drawn
+  left_arm: [255,0,1,2,255,3,255,2,1,4,5,6,5],
+  torso: [0,1,2,3,2,0,4,5],
+  head_placeholder: [0,1,2,3], // 0=side,1=front,2=back,3=frown
+  right_arm: [11,0,1,9,2,3,2,9,1,9,10,9,11,9,5,8,3,2,9,7,1,1,11,9,5,6,5,6,5,9,11,9,4,4,9,11,13,12,13,14,13,0,1,2,3,3,9,5,6,7,9,0,1,3,1,3,1,11,9,0,6,9,5,6,8,6,8,5,6,8,5,8,1,1,2,1,1,1,9,11],
+};
+
+// Pose definitions: which state index for each limb
+// Derived from the choreography table in the original source
+const POSES = {
+  stand: {
+    side: { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:0, head_state:0 },
+    front: { legs_right:16, legs_left:null, left_arm:3, torso:6, right_arm:10, head_state:1 },
+    back: { legs_right:16, legs_left:null, left_arm:5, torso:7, right_arm:12, head_state:2 },
+  },
+  walk: {
+    side: [
+      { legs_right:1, legs_left:1, left_arm:1, torso:0, right_arm:1, head_state:0 },
+      { legs_right:2, legs_left:null, left_arm:null, torso:0, right_arm:2, head_state:0 },
+      { legs_right:3, legs_left:2, left_arm:1, torso:0, right_arm:1, head_state:0 },
+      { legs_right:4, legs_left:null, left_arm:null, torso:0, right_arm:2, head_state:0 },
+    ],
+    front: [
+      { legs_right:17, legs_left:null, left_arm:3, torso:6, right_arm:10, head_state:1 },
+      { legs_right:18, legs_left:null, left_arm:2, torso:6, right_arm:11, head_state:1 },
+      { legs_right:19, legs_left:null, left_arm:3, torso:6, right_arm:10, head_state:1 },
+      { legs_right:20, legs_left:null, left_arm:2, torso:6, right_arm:11, head_state:1 },
+    ],
+    back: [
+      { legs_right:17, legs_left:null, left_arm:5, torso:7, right_arm:12, head_state:2 },
+      { legs_right:18, legs_left:null, left_arm:2, torso:7, right_arm:11, head_state:2 },
+      { legs_right:19, legs_left:null, left_arm:5, torso:7, right_arm:12, head_state:2 },
+      { legs_right:20, legs_left:null, left_arm:2, torso:7, right_arm:11, head_state:2 },
+    ],
+  },
+  wave: {
+    side: { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:9, head_state:0 },
+    front: { legs_right:16, legs_left:null, left_arm:3, torso:6, right_arm:10, head_state:1 },
+    back: { legs_right:16, legs_left:null, left_arm:5, torso:7, right_arm:12, head_state:2 },
+  },
+  point: {
+    side: { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:4, head_state:0 },
+    front: { legs_right:16, legs_left:null, left_arm:3, torso:6, right_arm:10, head_state:1 },
+    back: { legs_right:16, legs_left:null, left_arm:5, torso:7, right_arm:12, head_state:2 },
+  },
+};
+
+// Draw order per view
+const DRAW_ORDER = {
+  side: ['legs_right','legs_left','left_arm','torso','head','right_arm'],
+  front: ['legs_right','legs_left','torso','head','left_arm','right_arm'],
+  back: ['right_arm','left_arm','head','legs_right','legs_left','torso'],
+};
+
+// ============================================================
+// C64 PALETTE PRESETS
+// ============================================================
+const PALETTES = [
+  { name:"C64 Default", body:["#000000","#352879","#6c5eb5"], head:["#000000","#352879","#6c5eb5"] },
+  { name:"C64 Skin", body:["#000000","#352879","#6c5eb5"], head:["#000000","#68372b","#9a6759"] },
+  { name:"C64 Cyan", body:["#000000","#352879","#6c5eb5"], head:["#000000","#70a4b2","#959595"] },
+  { name:"C64 Green", body:["#000000","#588d43","#9ad284"], head:["#000000","#588d43","#9ad284"] },
+  { name:"C64 Purple", body:["#000000","#6f3d86","#6c5eb5"], head:["#000000","#6f3d86","#6c5eb5"] },
+  { name:"C64 Red", body:["#000000","#68372b","#9a6759"], head:["#000000","#68372b","#9a6759"] },
+  { name:"C64 Brown", body:["#000000","#433900","#6f4f25"], head:["#000000","#433900","#6f4f25"] },
+  { name:"C64 Gray", body:["#000000","#444444","#6c6c6c"], head:["#000000","#444444","#6c6c6c"] },
+  { name:"Monochrome", body:["#000000","#555555","#aaaaaa"], head:["#000000","#555555","#aaaaaa"] },
+  { name:"Converter Default", body:["#000000","#0000ff","#ff55ff"], head:["#000000","#0000ff","#ff55ff"] },
+];
+
+// ============================================================
+// IMAGE LOADING
+// ============================================================
+const imgCache = {};
+function loadImg(src) {
+  if (imgCache[src]) return Promise.resolve(imgCache[src]);
+  return new Promise(r => {
+    const img = new Image();
+    img.onload = () => { imgCache[src] = img; r(img); };
+    img.onerror = () => r(null);
+    img.src = src;
+  });
+}
+
+// Source palette in head PNGs (from habitat_renderer.py defaults)
+const HEAD_SRC_COLORS = [[0,0,0],[0,0,255],[255,85,255]];
+// Source palette in body PNGs (C64 colors from our decoder)
+const BODY_SRC_COLORS = [[0,0,0],[53,40,121],[108,94,181]];
+
+function hexToRgb(h) {
+  return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+}
+
+function recolorCanvas(srcCanvas, srcColors, targetHexColors) {
+  const target = targetHexColors.map(hexToRgb);
+  const ctx = srcCanvas.getContext('2d');
+  const d = ctx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
+  const px = d.data;
+  for (let i = 0; i < px.length; i += 4) {
+    if (px[i+3] < 128) continue;
+    for (let c = 0; c < srcColors.length; c++) {
+      const [sr,sg,sb] = srcColors[c];
+      if (Math.abs(px[i]-sr)<40 && Math.abs(px[i+1]-sg)<40 && Math.abs(px[i+2]-sb)<40) {
+        px[i]=target[c][0]; px[i+1]=target[c][1]; px[i+2]=target[c][2];
+        break;
+      }
+    }
+  }
+  ctx.putImageData(d, 0, 0);
+}
+
+// ============================================================
+// BODY MANIFEST (loaded async)
+// ============================================================
+let bodyManifest = null;
+
+async function loadBodyManifest() {
+  try {
+    const r = await fetch('habitat_images_final/body/body_manifest.json');
+    bodyManifest = await r.json();
+  } catch(e) {
+    console.error('Failed to load body manifest:', e);
+  }
+}
+
+async function getBodyCelImage(limbName, celIdx) {
+  if (!bodyManifest || !bodyManifest[limbName]) return null;
+  const celData = bodyManifest[limbName].cels[String(celIdx)];
+  if (!celData) return null;
+  const img = await loadImg('habitat_images_final/body/' + celData.file);
+  return img ? { img, ...celData } : null;
+}
+
+// ============================================================
+// AVATAR RENDERER
+// ============================================================
+const canvas = document.getElementById('avatarCanvas');
+const ctx = canvas.getContext('2d');
+const CW = 320, CH = 320;
+const SCALE = 4; // Display scale (images are small pixel art)
+
+// Avatar anchor point (feet position) in canvas space
+const BASE_X = CW / 2 - 10;
+const BASE_Y = CH - 40;
+
+let currentHead = null;
+let currentView = 'side';
+let currentPose = 'stand';
+let walkFrame = 0;
+let animInterval = null;
+let bodyColors = ["#000000","#352879","#6c5eb5"];
+let headColors = ["#000000","#352879","#6c5eb5"];
+
+function getCelNum(limbName, stateIdx) {
+  if (stateIdx === null || stateIdx === undefined) return null;
+  const states = LIMB_STATES[limbName];
+  if (!states || stateIdx >= states.length) return null;
+  const cel = states[stateIdx];
+  return cel === 255 ? null : cel;
+}
+
+function getPoseConfig() {
+  const poseData = POSES[currentPose];
+  if (!poseData) return POSES.stand.side;
+  const viewData = poseData[currentView] || poseData.side;
+  if (Array.isArray(viewData)) {
+    return viewData[walkFrame % viewData.length];
+  }
+  return viewData;
+}
+
+function getHeadCelsForView(head, viewState) {
+  // viewState: 0=side, 1=front, 2=back
+  if (viewState >= head.masks.length) viewState = Math.min(viewState, head.masks.length - 1);
+  const mask = head.masks[viewState];
+  const cels = [];
+  for (let i = 0; i < mask.length; i++) {
+    if (mask[i] === '1') cels.push(i);
+  }
+  return cels;
+}
+
+async function renderAvatar() {
+  ctx.clearRect(0, 0, CW, CH);
+  ctx.fillStyle = '#A3A3A3';
+  ctx.fillRect(0, 0, CW, CH);
+
+  const pose = getPoseConfig();
+  const drawOrder = DRAW_ORDER[currentView] || DRAW_ORDER.side;
+
+  ctx.imageSmoothingEnabled = false;
+
+  for (const limbKey of drawOrder) {
+    if (limbKey === 'head') {
+      await drawHead(pose);
+    } else {
+      await drawBodyLimb(limbKey, pose);
+    }
+  }
+}
+
+async function drawBodyLimb(limbName, pose) {
+  const stateIdx = pose[limbName];
+  if (stateIdx === null || stateIdx === undefined) return;
+
+  const celNum = getCelNum(limbName, stateIdx);
+  if (celNum === null) return;
+
+  const celData = await getBodyCelImage(limbName, celNum);
+  if (!celData || !celData.img) return;
+
+  // Position: x_offset is in byte units (1 byte = 4 native px = 8 stretched px)
+  // Since images already have 2x stretch, multiply offset by 8
+  const drawX = BASE_X + (celData.x_offset * 8 * SCALE / 2);
+  const drawY = BASE_Y - (celData.y_offset * SCALE);
+  const drawW = celData.img.width * SCALE;
+  const drawH = celData.img.height * SCALE;
+
+  // Recolor to temp canvas
+  const tmp = document.createElement('canvas');
+  tmp.width = celData.img.width;
+  tmp.height = celData.img.height;
+  const tc = tmp.getContext('2d');
+  tc.drawImage(celData.img, 0, 0);
+  recolorCanvas(tmp, BODY_SRC_COLORS, bodyColors);
+
+  ctx.drawImage(tmp, drawX, drawY, drawW, drawH);
+}
+
+async function drawHead(pose) {
+  if (!currentHead) return;
+
+  const headState = pose.head_state || 0;
+  const celIndices = getHeadCelsForView(currentHead, headState);
+
+  // Head position derived from head_placeholder cel 0
+  // Placeholder: x_offset=2, y_offset=58 (side); x_offset=-1, y_offset=57 (front)
+  let headBaseX, headBaseY;
+  if (headState === 0) { // side
+    headBaseX = BASE_X + (2 * 8 * SCALE / 2);
+    headBaseY = BASE_Y - (58 * SCALE);
+  } else if (headState === 1) { // front
+    headBaseX = BASE_X + (-1 * 8 * SCALE / 2);
+    headBaseY = BASE_Y - (57 * SCALE);
+  } else { // back
+    headBaseX = BASE_X + (-1 * 8 * SCALE / 2);
+    headBaseY = BASE_Y - (62 * SCALE);
+  }
+
+  for (const celIdx of celIndices) {
+    const letter = "abcdefg"[celIdx];
+    const src = `habitat_images_final/heads/${currentHead.name}_${currentHead.name}_data_${letter}.png`;
+    const img = await loadImg(src);
+    if (!img) continue;
+
+    const tmp = document.createElement('canvas');
+    tmp.width = img.width;
+    tmp.height = img.height;
+    const tc = tmp.getContext('2d');
+    tc.drawImage(img, 0, 0);
+    recolorCanvas(tmp, HEAD_SRC_COLORS, headColors);
+
+    // No extra stretch - images already have 2x applied
+    const drawW = img.width * SCALE;
+    const drawH = img.height * SCALE;
+
+    // Center the head image at the placeholder position
+    const drawX = headBaseX - drawW * 0.3;
+    const drawY = headBaseY;
+
+    ctx.drawImage(tmp, drawX, drawY, drawW, drawH);
+  }
+}
+
+// ============================================================
+// ANIMATION
+// ============================================================
+function startAnimation() {
+  stopAnimation();
+  if (currentPose === 'walk') {
+    animInterval = setInterval(() => {
+      walkFrame = (walkFrame + 1) % 4;
+      renderAvatar();
+    }, 250);
+  }
+}
+
+function stopAnimation() {
+  if (animInterval) { clearInterval(animInterval); animInterval = null; }
+  walkFrame = 0;
+}
+
+// ============================================================
+// HEAD GRID
+// ============================================================
+const headGrid = document.getElementById('headGrid');
+const searchInput = document.getElementById('searchInput');
+const categoryFilter = document.getElementById('categoryFilter');
+
+function buildGrid() {
+  const search = searchInput.value.toLowerCase();
+  const cat = categoryFilter.value;
+  headGrid.innerHTML = '';
+
+  const filtered = HEADS.filter(h => {
+    if (search && !h.name.includes(search)) return false;
+    if (cat === 'all') return true;
+    if (cat === 'animated') return !!h.anim;
+    return h.cat === cat;
+  });
+
+  document.getElementById('stats').textContent = `${filtered.length} of ${HEADS.length} heads`;
+
+  for (const head of filtered) {
+    const card = document.createElement('div');
+    card.className = 'head-card' + (currentHead?.name === head.name ? ' selected' : '');
+    card.dataset.name = head.name;
+
+    const c = document.createElement('canvas');
+    c.width = 56; c.height = 56;
+    card.appendChild(c);
+    renderThumb(head, c);
+
+    const n = document.createElement('div');
+    n.className = 'name';
+    n.textContent = head.name;
+    card.appendChild(n);
+
+    if (head.anim) {
+      const b = document.createElement('div');
+      b.className = 'badge anim'; b.title = 'Animated';
+      card.appendChild(b);
+    }
+
+    card.addEventListener('click', () => selectHead(head));
+    headGrid.appendChild(card);
+  }
+}
+
+async function renderThumb(head, thumbCanvas) {
+  const celIndices = getHeadCelsForView(head, 0); // side view
+  const tc = thumbCanvas.getContext('2d');
+  tc.fillStyle = '#A3A3A3';
+  tc.fillRect(0, 0, 56, 56);
+  tc.imageSmoothingEnabled = false;
+
+  for (const ci of celIndices.length > 0 ? celIndices : [0]) {
+    const letter = "abcdefg"[ci];
+    const src = `habitat_images_final/heads/${head.name}_${head.name}_data_${letter}.png`;
+    const img = await loadImg(src);
+    if (!img) continue;
+
+    const tmp = document.createElement('canvas');
+    tmp.width = img.width; tmp.height = img.height;
+    const tmpCtx = tmp.getContext('2d');
+    tmpCtx.drawImage(img, 0, 0);
+    recolorCanvas(tmp, HEAD_SRC_COLORS, headColors);
+
+    // Fit in thumbnail - no extra stretch
+    const scale = Math.min(50/img.width, 50/img.height, 3);
+    const dw = img.width * scale, dh = img.height * scale;
+    tc.drawImage(tmp, (56-dw)/2, (56-dh)/2, dw, dh);
+  }
+}
+
+function selectHead(head) {
+  currentHead = head;
+  renderAvatar();
+  updateInfo(head);
+  document.querySelectorAll('.head-card').forEach(c =>
+    c.classList.toggle('selected', c.dataset.name === head.name));
+}
+
+function updateInfo(head) {
+  const info = document.getElementById('headInfo');
+  const tags = [];
+  if (head.cat === 'player') tags.push('<span class="tag player">Player Head</span>');
+  tags.push(`<span class="tag">${head.cat}</span>`);
+  if (head.gender) tags.push(`<span class="tag female">${head.gender==='f'?'Female':'Male'}</span>`);
+  if (head.anim) tags.push('<span class="tag animated">Animated</span>');
+  info.innerHTML = `<h3>${head.name}</h3><div class="detail">${tags.join(' ')}</div>
+    <div class="detail">Cels: ${head.cels} | States: ${head.masks.length}</div>
+    ${head.cat==='player' ? '<div class="detail" style="color:#4caf50">Player-selectable at character creation</div>' : ''}`;
+}
+
+// ============================================================
+// UI EVENTS
+// ============================================================
+// View buttons
+document.querySelectorAll('[data-view]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentView = btn.dataset.view;
+    document.querySelectorAll('[data-view]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const labels = { side:'Side View', front:'Front View', back:'Back View' };
+    document.getElementById('viewLabel').textContent = labels[currentView] + ' \u2014 ' +
+      currentPose.charAt(0).toUpperCase() + currentPose.slice(1);
+    if (currentPose === 'walk') startAnimation(); else renderAvatar();
+  });
+});
+
+// Pose buttons
+document.querySelectorAll('[data-pose]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentPose = btn.dataset.pose;
+    document.querySelectorAll('[data-pose]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const labels = { side:'Side View', front:'Front View', back:'Back View' };
+    document.getElementById('viewLabel').textContent = labels[currentView] + ' \u2014 ' +
+      currentPose.charAt(0).toUpperCase() + currentPose.slice(1);
+    if (currentPose === 'walk') startAnimation();
+    else { stopAnimation(); renderAvatar(); }
+  });
+});
+
+// Random
+document.getElementById('randomBtn').addEventListener('click', () => {
+  selectHead(HEADS[Math.floor(Math.random() * HEADS.length)]);
+  const card = document.querySelector(`.head-card[data-name="${currentHead.name}"]`);
+  if (card) card.scrollIntoView({ behavior:'smooth', block:'nearest' });
+});
+
+// Prev/Next
+document.getElementById('prevBtn').addEventListener('click', () => {
+  if (!currentHead) return selectHead(HEADS[0]);
+  const i = HEADS.indexOf(currentHead);
+  selectHead(HEADS[(i-1+HEADS.length) % HEADS.length]);
+});
+document.getElementById('nextBtn').addEventListener('click', () => {
+  if (!currentHead) return selectHead(HEADS[0]);
+  const i = HEADS.indexOf(currentHead);
+  selectHead(HEADS[(i+1) % HEADS.length]);
+});
+
+// Search/filter
+searchInput.addEventListener('input', buildGrid);
+categoryFilter.addEventListener('change', buildGrid);
+
+// Palette
+function readPalette() {
+  bodyColors = [
+    document.getElementById('bodyColor1').value,
+    document.getElementById('bodyColor2').value,
+    document.getElementById('bodyColor3').value,
+  ];
+  headColors = [
+    document.getElementById('headColor1').value,
+    document.getElementById('headColor2').value,
+    document.getElementById('headColor3').value,
+  ];
+}
+
+function onPaletteChange() {
+  readPalette();
+  renderAvatar();
+  buildGrid();
+}
+
+['bodyColor1','bodyColor2','bodyColor3','headColor1','headColor2','headColor3'].forEach(id =>
+  document.getElementById(id).addEventListener('input', onPaletteChange));
+
+// Palette presets
+(function buildPresets() {
+  const container = document.getElementById('palettePresets');
+  for (const p of PALETTES) {
+    const el = document.createElement('div');
+    el.className = 'palette-preset';
+    el.title = p.name;
+    for (const c of [...p.body, ...p.head]) {
+      const sw = document.createElement('div');
+      sw.className = 'swatch';
+      sw.style.background = c;
+      el.appendChild(sw);
+    }
+    el.addEventListener('click', () => {
+      document.getElementById('bodyColor1').value = p.body[0];
+      document.getElementById('bodyColor2').value = p.body[1];
+      document.getElementById('bodyColor3').value = p.body[2];
+      document.getElementById('headColor1').value = p.head[0];
+      document.getElementById('headColor2').value = p.head[1];
+      document.getElementById('headColor3').value = p.head[2];
+      onPaletteChange();
+    });
+    container.appendChild(el);
+  }
+})();
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight') document.getElementById('nextBtn').click();
+  else if (e.key === 'ArrowLeft') document.getElementById('prevBtn').click();
+  else if (e.key === ' ' || e.key === 'r') { e.preventDefault(); document.getElementById('randomBtn').click(); }
+  else if (e.key === '1') document.querySelector('[data-view="side"]').click();
+  else if (e.key === '2') document.querySelector('[data-view="front"]').click();
+  else if (e.key === '3') document.querySelector('[data-view="back"]').click();
+});
+
+// ============================================================
+// INIT
+// ============================================================
+loadBodyManifest().then(() => {
+  buildGrid();
+  selectHead(HEADS[Math.floor(Math.random() * HEADS.length)]);
+});
+</script>
+</body>
+</html>
