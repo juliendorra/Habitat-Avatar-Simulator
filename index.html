@@ -187,7 +187,7 @@
 <div class="app">
   <div class="preview-panel">
     <div class="canvas-wrap">
-      <canvas id="avatarCanvas" width="320" height="320"></canvas>
+      <canvas id="avatarCanvas" width="400" height="360"></canvas>
       <div class="view-label" id="viewLabel">Side View &mdash; Standing</div>
     </div>
 
@@ -632,12 +632,23 @@ async function getBodyCelImage(limbName, celIdx) {
 // ============================================================
 const canvas = document.getElementById('avatarCanvas');
 const ctx = canvas.getContext('2d');
-const CW = 320, CH = 320;
+const CW = 400, CH = 360;
 const SCALE = 4; // Display scale (images are small pixel art)
 
 // Avatar anchor point (feet position) in canvas space
-const BASE_X = CW / 2 - 30;
+const BASE_X = 110;
 const BASE_Y = CH - 40;
+
+// Head container origin offsets per view state
+// From body head_placeholder cels: cel 0=side, 1=front, 2=back, 3=frown
+// The head_placeholder position defines where the head object's origin sits
+// relative to the body base point. Head cel offsets are then relative to this origin.
+const HEAD_PLACEHOLDER = [
+  { x_off: 2, y_off: 58 },   // state 0: side
+  { x_off: -1, y_off: 57 },  // state 1: front
+  { x_off: -1, y_off: 62 },  // state 2: back
+  { x_off: 2, y_off: 59 },   // state 3: frown
+];
 
 let currentHead = null;
 let currentView = 'side';
@@ -744,7 +755,14 @@ async function drawHead(pose) {
   const headState = pose.head_state || 0;
   const celIndices = getHeadCelsForView(currentHead, headState);
 
-  // Use head manifest for per-head offsets if available, else fall back to heuristic
+  // Head container origin: shares body's X, Y height from head_placeholder
+  // In the original game, the head noid shares the body's X position.
+  // The placeholder's y_offset determines the vertical attachment point.
+  // Head cel offsets are then relative to this origin.
+  const ph = HEAD_PLACEHOLDER[headState] || HEAD_PLACEHOLDER[0];
+  const headOriginX = BASE_X;
+  const headOriginY = BASE_Y - (ph.y_off * SCALE);
+
   for (const celIdx of celIndices) {
     const letter = "abcdefg"[celIdx];
     const src = `habitat_images_final/heads/${currentHead.name}_${currentHead.name}_data_${letter}.png`;
@@ -766,21 +784,15 @@ async function drawHead(pose) {
     const celMeta = headManifest ? headManifest[manifestKey] : null;
 
     let drawX, drawY;
-    if (celMeta) {
-      // Use actual offsets from cel header (same formula as body parts)
-      // x_offset is in byte units (1 byte = 4 native px = 8 PNG px)
-      drawX = BASE_X + (celMeta.x_offset * 8 * SCALE);
-      drawY = BASE_Y - (celMeta.y_offset * SCALE);
+    if (celMeta && celMeta.height < 100) {
+      // Use actual offsets: head cel offset is relative to head container origin
+      // x_offset in byte units (1 byte = 8 PNG px), y_offset in native pixels
+      drawX = headOriginX + (celMeta.x_offset * 8 * SCALE);
+      drawY = headOriginY - (celMeta.y_offset * SCALE);
     } else {
-      // Heuristic fallback: position head image top at fixed height
-      // Back view y_offset=62 works well; use for all views
-      const headTopY = BASE_Y - 62 * SCALE;
-      if (headState === 0) {
-        drawX = BASE_X - drawW / 2 + 6 * SCALE;
-      } else {
-        drawX = BASE_X - drawW / 2 + 4 * SCALE;
-      }
-      drawY = headTopY;
+      // Heuristic fallback: center head image above body
+      drawX = headOriginX - drawW / 2 + 4 * SCALE;
+      drawY = headOriginY - drawH / 2;
     }
 
     ctx.drawImage(tmp, drawX, drawY, drawW, drawH);
