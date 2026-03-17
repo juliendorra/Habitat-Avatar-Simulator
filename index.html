@@ -81,6 +81,32 @@
   .btn.primary { background: var(--highlight); font-size: 0.9em; padding: 10px; }
   .btn.primary:hover { background: #ff5a75; }
   .btn.full { flex: 0 0 100%; }
+  .btn.sequence { background: #8b5e3c; }
+  .btn.sequence:hover { background: #a06e4c; }
+  .btn.sequence.active { background: #a06e4c; font-weight: bold; }
+  .sequence-panel {
+    display: none; background: var(--bg); border: 2px solid #8b5e3c; border-radius: 6px;
+    padding: 10px; margin-top: 8px;
+  }
+  .sequence-panel.active { display: block; }
+  .sequence-step {
+    font-size: 0.8em; color: var(--text); margin-bottom: 8px;
+    padding: 6px 8px; background: var(--panel); border-radius: 4px;
+    border-left: 3px solid #8b5e3c;
+  }
+  .sequence-step .step-num { color: #8b5e3c; font-weight: bold; }
+  .sequence-step .step-desc { color: var(--text-dim); font-size: 0.9em; }
+  .sequence-controls { display: flex; gap: 4px; margin-top: 6px; }
+  .sequence-controls .btn { font-size: 0.75em; }
+  .sequence-progress {
+    display: flex; gap: 2px; margin-bottom: 6px;
+  }
+  .sequence-progress .pip {
+    flex: 1; height: 4px; border-radius: 2px; background: var(--border);
+    transition: background 0.3s;
+  }
+  .sequence-progress .pip.done { background: #8b5e3c; }
+  .sequence-progress .pip.current { background: var(--highlight); }
   .head-info {
     background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
     padding: 10px; font-size: 0.75em; width: 100%; margin-top: 8px;
@@ -196,6 +222,20 @@
         </div>
         <div class="btn-row" style="margin-top:4px">
           <button class="btn full" id="showHeadBtn">Show in Grid</button>
+        </div>
+        <div class="btn-row" style="margin-top:4px">
+          <button class="btn sequence full" id="headChangeBtn">Head Change Sequence</button>
+        </div>
+        <div class="sequence-panel" id="sequencePanel">
+          <div class="sequence-progress" id="sequenceProgress"></div>
+          <div class="sequence-step" id="sequenceStep">
+            <span class="step-num"></span> <span class="step-desc"></span>
+          </div>
+          <div class="sequence-controls">
+            <button class="btn sequence" id="seqAutoBtn">Autoplay</button>
+            <button class="btn sequence" id="seqNextBtn">Start</button>
+            <button class="btn" id="seqStopBtn">Exit</button>
+          </div>
         </div>
       </div>
 
@@ -591,6 +631,15 @@ let currentView = 'side';
 let currentPose = 'stand';
 let walkFrame = 0;
 let animInterval = null;
+
+// Head change sequence state (initialized here, logic defined later)
+let seqActive = false;
+let seqStep = 0;
+let seqAutoplay = false;
+let seqAutoTimer = null;
+let seqOldHead = null;
+let seqNewHead = null;
+let seqFlipped = false;
 // "As seen on screen" CRT-attenuated defaults
 let bodyColors = ["#312893","#000000","#A96F63"];
 let headColors = ["#312893","#000000","#A96F63"];
@@ -625,6 +674,11 @@ function getHeadCelsForView(head, viewState) {
 }
 
 async function renderAvatar() {
+  // If sequence is active, delegate to sequence renderer
+  if (seqActive) {
+    renderSequenceFrame(HEAD_CHANGE_STEPS[seqStep]);
+    return;
+  }
   ctx.clearRect(0, 0, CW, CH);
   ctx.fillStyle = '#A3A3A3';
   ctx.fillRect(0, 0, CW, CH);
@@ -946,6 +1000,274 @@ document.getElementById('pureColors').addEventListener('change', function() {
     container.appendChild(el);
   }
 })();
+
+// ============================================================
+// HEAD CHANGE SEQUENCE
+// Simulates the in-game flow: GET head, PUT on ground, turn,
+// GET new head, PUT head on — as described in the Avatar Handbook
+// ============================================================
+const HEAD_CHANGE_STEPS = [
+  { action:"Standing",           desc:"Avatar with current head",     pose:"stand", view:"side", showHead:true,  holdHead:false, groundHead:false, headType:"old" },
+  { action:"Point at head",      desc:"Cursor points at own head",    pose:"point", view:"side", showHead:true,  holdHead:false, groundHead:false, headType:"old" },
+  { action:'Choose "GET"',       desc:"Select GET from menu",         pose:"point", view:"side", showHead:true,  holdHead:false, groundHead:false, headType:"old", showMenu:"GET" },
+  { action:"GET head",           desc:"Head comes off into hands",    pose:"bend",  view:"side", showHead:false, holdHead:true,  groundHead:false, headType:"old" },
+  { action:"Holding head",       desc:"Standing headless, holding head", pose:"stand", view:"side", showHead:false, holdHead:true,  groundHead:false, headType:"old" },
+  { action:'Choose "PUT"',       desc:"Select PUT to place head",     pose:"stand", view:"side", showHead:false, holdHead:true,  groundHead:false, headType:"old", showMenu:"PUT" },
+  { action:"PUT head down",      desc:"Bending to place head",        pose:"bend",  view:"side", showHead:false, holdHead:false, groundHead:true,  headType:"old" },
+  { action:"Head on ground",     desc:"Standing headless, head on ground", pose:"stand", view:"side", showHead:false, holdHead:false, groundHead:true,  headType:"old" },
+  { action:"Turn around",        desc:"Turning to face the new head", pose:"stand", view:"front", showHead:false, holdHead:false, groundHead:false, headType:null },
+  { action:"Facing other side",  desc:"New head is on this side",     pose:"stand", view:"side", showHead:false, holdHead:false, groundHead:true,  headType:"new", flipped:true },
+  { action:"GET new head",       desc:"Bending to pick up new head",  pose:"bend",  view:"side", showHead:false, holdHead:false, groundHead:true,  headType:"new", flipped:true },
+  { action:"Holding new head",   desc:"Standing with new head in hand", pose:"stand", view:"side", showHead:false, holdHead:true,  groundHead:false, headType:"new", flipped:true },
+  { action:'Point at self',      desc:"Cursor points at own body",    pose:"point", view:"side", showHead:false, holdHead:true,  groundHead:false, headType:"new", flipped:true },
+  { action:'Choose "PUT"',       desc:"Select PUT to wear head",      pose:"point", view:"side", showHead:false, holdHead:true,  groundHead:false, headType:"new", flipped:true, showMenu:"PUT" },
+  { action:"PUT head on",        desc:"New head goes on shoulders!",  pose:"stand", view:"side", showHead:true,  holdHead:false, groundHead:false, headType:"new", flipped:true },
+  { action:"Done!",              desc:"Avatar with new head",         pose:"stand", view:"side", showHead:true,  holdHead:false, groundHead:false, headType:"new" },
+];
+
+function startSequence() {
+  if (!currentHead) { selectHead(HEADS[0]); }
+  seqOldHead = currentHead;
+  // Pick a different random head for the new head
+  let newIdx;
+  do { newIdx = Math.floor(Math.random() * HEADS.length); } while (HEADS[newIdx] === seqOldHead);
+  seqNewHead = HEADS[newIdx];
+  seqStep = 0;
+  seqActive = true;
+  seqAutoplay = false;
+  seqFlipped = false;
+  stopAnimation();
+  document.getElementById('sequencePanel').classList.add('active');
+  document.getElementById('headChangeBtn').classList.add('active');
+  buildSequenceProgress();
+  applySequenceStep();
+}
+
+function stopSequence() {
+  seqActive = false;
+  seqAutoplay = false;
+  if (seqAutoTimer) { clearTimeout(seqAutoTimer); seqAutoTimer = null; }
+  document.getElementById('sequencePanel').classList.remove('active');
+  document.getElementById('headChangeBtn').classList.remove('active');
+  // Restore to final head if completed, else restore old
+  if (seqStep >= HEAD_CHANGE_STEPS.length - 1) {
+    currentHead = seqNewHead;
+    selectHead(seqNewHead);
+  } else {
+    currentHead = seqOldHead;
+  }
+  currentView = 'side';
+  currentPose = 'stand';
+  document.querySelectorAll('[data-view]').forEach(b => {
+    b.classList.toggle('active', b.dataset.view === 'side');
+  });
+  document.querySelectorAll('[data-pose]').forEach(b => {
+    b.classList.toggle('active', b.dataset.pose === 'stand');
+  });
+  document.getElementById('viewLabel').textContent = 'Side View \u2014 Standing';
+  renderAvatar();
+}
+
+function buildSequenceProgress() {
+  const container = document.getElementById('sequenceProgress');
+  container.innerHTML = '';
+  for (let i = 0; i < HEAD_CHANGE_STEPS.length; i++) {
+    const pip = document.createElement('div');
+    pip.className = 'pip';
+    container.appendChild(pip);
+  }
+  updateSequenceProgress();
+}
+
+function updateSequenceProgress() {
+  const pips = document.querySelectorAll('#sequenceProgress .pip');
+  pips.forEach((p, i) => {
+    p.className = 'pip' + (i < seqStep ? ' done' : '') + (i === seqStep ? ' current' : '');
+  });
+}
+
+function applySequenceStep() {
+  const step = HEAD_CHANGE_STEPS[seqStep];
+  // Update step display
+  document.querySelector('#sequenceStep .step-num').textContent = `${seqStep + 1}/${HEAD_CHANGE_STEPS.length}`;
+  document.querySelector('#sequenceStep .step-desc').textContent = `${step.action} — ${step.desc}`;
+  // Update next button text
+  const nextBtn = document.getElementById('seqNextBtn');
+  if (seqStep >= HEAD_CHANGE_STEPS.length - 1) {
+    nextBtn.textContent = 'Finish';
+  } else {
+    const next = HEAD_CHANGE_STEPS[seqStep + 1];
+    nextBtn.textContent = next.action;
+  }
+  updateSequenceProgress();
+
+  // Apply pose/view
+  currentPose = step.pose;
+  currentView = step.view;
+  seqFlipped = !!step.flipped;
+
+  // Set head for rendering
+  if (step.headType === 'old') currentHead = seqOldHead;
+  else if (step.headType === 'new') currentHead = seqNewHead;
+
+  // Update view label
+  const labels = { side:'Side View', front:'Front View', back:'Back View' };
+  document.getElementById('viewLabel').textContent = labels[currentView] + ' \u2014 ' + step.action;
+
+  renderSequenceFrame(step);
+
+  // Auto-advance
+  if (seqAutoplay && seqStep < HEAD_CHANGE_STEPS.length - 1) {
+    const delay = step.showMenu ? 1500 : 1000;
+    seqAutoTimer = setTimeout(() => { advanceSequence(); }, delay);
+  }
+}
+
+function advanceSequence() {
+  if (seqStep >= HEAD_CHANGE_STEPS.length - 1) {
+    stopSequence();
+    return;
+  }
+  seqStep++;
+  applySequenceStep();
+}
+
+async function renderSequenceFrame(step) {
+  ctx.clearRect(0, 0, CW, CH);
+  ctx.fillStyle = '#A3A3A3';
+  ctx.fillRect(0, 0, CW, CH);
+  ctx.imageSmoothingEnabled = false;
+
+  const pose = getPoseConfig();
+  const drawOrder = DRAW_ORDER[currentView] || DRAW_ORDER.side;
+
+  // If flipped, mirror the canvas
+  if (seqFlipped) {
+    ctx.save();
+    ctx.translate(CW, 0);
+    ctx.scale(-1, 1);
+  }
+
+  for (const limbKey of drawOrder) {
+    if (limbKey === 'head') {
+      if (step.showHead) await drawHead(pose);
+    } else {
+      await drawBodyLimb(limbKey, pose);
+    }
+  }
+
+  // Draw held head (near hand/arm position)
+  if (step.holdHead && currentHead) {
+    const headForHold = step.headType === 'new' ? seqNewHead : seqOldHead;
+    await drawMiniHead(headForHold, step.pose === 'bend' ? 'low' : 'mid');
+  }
+
+  // Draw head on ground
+  if (step.groundHead) {
+    const headForGround = step.headType === 'new' ? seqNewHead : seqOldHead;
+    await drawMiniHead(headForGround, 'ground');
+  }
+
+  if (seqFlipped) {
+    ctx.restore();
+  }
+
+  // Draw menu overlay
+  if (step.showMenu) {
+    drawMenuOverlay(step.showMenu);
+  }
+}
+
+async function drawMiniHead(head, position) {
+  if (!head) return;
+  const celIndices = getHeadCelsForView(head, 0); // side view
+  for (const ci of celIndices.length > 0 ? celIndices : [0]) {
+    const letter = "abcdefg"[ci];
+    const src = `habitat_images_final/heads/${head.name}_${head.name}_data_${letter}.png`;
+    const img = await loadImg(src);
+    if (!img) continue;
+
+    const tmp = document.createElement('canvas');
+    tmp.width = img.width; tmp.height = img.height;
+    const tc = tmp.getContext('2d');
+    tc.drawImage(img, 0, 0);
+    recolorCanvas(tmp, SRC_COLORS, headColors);
+
+    const miniScale = SCALE * 0.7;
+    const drawW = img.width * miniScale;
+    const drawH = img.height * miniScale;
+
+    let drawX, drawY;
+    if (position === 'ground') {
+      // On the ground, slightly to the side
+      drawX = BASE_X + 60;
+      drawY = BASE_Y - drawH - 4;
+    } else if (position === 'low') {
+      // In hands while bending (low position)
+      drawX = BASE_X + 40;
+      drawY = BASE_Y - drawH - 20;
+    } else {
+      // Mid position (held while standing)
+      drawX = BASE_X + 35;
+      drawY = BASE_Y - 120;
+    }
+
+    ctx.drawImage(tmp, drawX, drawY, drawW, drawH);
+  }
+}
+
+function drawMenuOverlay(menuAction) {
+  // Draw a simple C64-style menu popup
+  const menuX = CW - 90, menuY = 40;
+  ctx.fillStyle = 'rgba(0,0,0,0.85)';
+  ctx.fillRect(menuX, menuY, 80, 60);
+  ctx.strokeStyle = '#6c5eb5';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(menuX, menuY, 80, 60);
+
+  ctx.font = '10px "Courier New", monospace';
+  ctx.fillStyle = '#6c5eb5';
+  ctx.fillText('DO:', menuX + 8, menuY + 16);
+
+  const items = ['GET', 'PUT', 'GO'];
+  for (let i = 0; i < items.length; i++) {
+    if (items[i] === menuAction) {
+      ctx.fillStyle = '#e94560';
+      ctx.fillRect(menuX + 4, menuY + 21 + i * 13, 72, 12);
+      ctx.fillStyle = '#fff';
+    } else {
+      ctx.fillStyle = '#999';
+    }
+    ctx.fillText(items[i], menuX + 8, menuY + 31 + i * 13);
+  }
+}
+
+// Sequence UI events
+document.getElementById('headChangeBtn').addEventListener('click', () => {
+  if (seqActive) stopSequence();
+  else startSequence();
+});
+
+document.getElementById('seqNextBtn').addEventListener('click', () => {
+  if (seqAutoplay) {
+    seqAutoplay = false;
+    if (seqAutoTimer) { clearTimeout(seqAutoTimer); seqAutoTimer = null; }
+    document.getElementById('seqAutoBtn').textContent = 'Autoplay';
+  }
+  advanceSequence();
+});
+
+document.getElementById('seqAutoBtn').addEventListener('click', () => {
+  seqAutoplay = !seqAutoplay;
+  document.getElementById('seqAutoBtn').textContent = seqAutoplay ? 'Pause' : 'Autoplay';
+  if (seqAutoplay) {
+    applySequenceStep(); // triggers auto-advance
+  } else {
+    if (seqAutoTimer) { clearTimeout(seqAutoTimer); seqAutoTimer = null; }
+  }
+});
+
+document.getElementById('seqStopBtn').addEventListener('click', stopSequence);
 
 // Keyboard
 document.addEventListener('keydown', e => {
