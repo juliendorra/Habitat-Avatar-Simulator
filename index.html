@@ -182,6 +182,7 @@
           <button class="btn" data-pose="walk">Walk</button>
           <button class="btn" data-pose="wave">Wave</button>
           <button class="btn" data-pose="point">Point</button>
+          <button class="btn" data-pose="bend">Bend</button>
         </div>
       </div>
 
@@ -193,34 +194,27 @@
           <button class="btn" id="prevBtn">&larr; Prev</button>
           <button class="btn" id="nextBtn">Next &rarr;</button>
         </div>
+        <div class="btn-row" style="margin-top:4px">
+          <button class="btn full" id="showHeadBtn">Show in Grid</button>
+        </div>
       </div>
 
       <div class="control-group">
-        <label>Body Colors (C64 Palette)</label>
+        <label>Body Colors</label>
         <div class="palette-row">
-          <span>Outline</span>
-          <input type="color" id="bodyColor1" value="#000000">
+          <label><input type="checkbox" id="pureColors"> Pure emulated colors</label>
         </div>
         <div class="palette-row">
-          <span>Fill</span>
-          <input type="color" id="bodyColor2" value="#352879">
+          <span>Blue</span>
+          <input type="color" id="color1" value="#312893">
         </div>
         <div class="palette-row">
-          <span>Detail</span>
-          <input type="color" id="bodyColor3" value="#6c5eb5">
-        </div>
-        <label style="margin-top:6px">Head Colors</label>
-        <div class="palette-row">
-          <span>Outline</span>
-          <input type="color" id="headColor1" value="#000000">
+          <span>Black</span>
+          <input type="color" id="color2" value="#000000">
         </div>
         <div class="palette-row">
-          <span>Fill</span>
-          <input type="color" id="headColor2" value="#352879">
-        </div>
-        <div class="palette-row">
-          <span>Detail</span>
-          <input type="color" id="headColor3" value="#6c5eb5">
+          <span>Pink</span>
+          <input type="color" id="color3" value="#A96F63">
         </div>
         <label style="margin-top:6px">Presets</label>
         <div class="palette-presets" id="palettePresets"></div>
@@ -453,7 +447,7 @@ const POSES = {
   stand: {
     side: { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:0, head_state:0 },
     front: { legs_right:16, legs_left:null, left_arm:3, torso:6, right_arm:10, head_state:1 },
-    back: { legs_right:16, legs_left:null, left_arm:5, torso:7, right_arm:12, head_state:2 },
+    back: { legs_right:16, legs_left:null, left_arm:5, torso:7, right_arm:36, head_state:2 },
   },
   walk: {
     side: [
@@ -469,21 +463,26 @@ const POSES = {
       { legs_right:20, legs_left:null, left_arm:2, torso:6, right_arm:11, head_state:1 },
     ],
     back: [
-      { legs_right:17, legs_left:null, left_arm:5, torso:7, right_arm:12, head_state:2 },
-      { legs_right:18, legs_left:null, left_arm:2, torso:7, right_arm:11, head_state:2 },
-      { legs_right:19, legs_left:null, left_arm:5, torso:7, right_arm:12, head_state:2 },
-      { legs_right:20, legs_left:null, left_arm:2, torso:7, right_arm:11, head_state:2 },
+      { legs_right:17, legs_left:null, left_arm:5, torso:7, right_arm:36, head_state:2 },
+      { legs_right:18, legs_left:null, left_arm:11, torso:7, right_arm:37, head_state:2 },
+      { legs_right:19, legs_left:null, left_arm:5, torso:7, right_arm:36, head_state:2 },
+      { legs_right:20, legs_left:null, left_arm:11, torso:7, right_arm:37, head_state:2 },
     ],
   },
   wave: {
-    side: { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:9, head_state:0 },
+    side: { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:32, head_state:0 },
     front: { legs_right:16, legs_left:null, left_arm:3, torso:6, right_arm:10, head_state:1 },
-    back: { legs_right:16, legs_left:null, left_arm:5, torso:7, right_arm:12, head_state:2 },
+    back: { legs_right:16, legs_left:null, left_arm:5, torso:7, right_arm:36, head_state:2 },
   },
   point: {
-    side: { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:4, head_state:0 },
+    side: { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:15, head_state:0 },
     front: { legs_right:16, legs_left:null, left_arm:3, torso:6, right_arm:10, head_state:1 },
-    back: { legs_right:16, legs_left:null, left_arm:5, torso:7, right_arm:12, head_state:2 },
+    back: { legs_right:16, legs_left:null, left_arm:5, torso:7, right_arm:36, head_state:2 },
+  },
+  bend: {
+    side: { legs_right:0, legs_left:null, left_arm:null, torso:2, right_arm:4, head_state:0 },
+    front: { legs_right:16, legs_left:null, left_arm:3, torso:6, right_arm:10, head_state:1 },
+    back: { legs_right:16, legs_left:null, left_arm:5, torso:7, right_arm:36, head_state:2 },
   },
 };
 
@@ -497,17 +496,20 @@ const DRAW_ORDER = {
 // ============================================================
 // C64 PALETTE PRESETS
 // ============================================================
+// Palette format: [blue_target, black_target, pink_target]
+// Source colors in PNGs: blue(0,0,255), black(0,0,0), pink(255,85,255)
+// Two color modes: CRT-attenuated ("as seen on screen") and pure emulated
+const CRT_COLORS = { blue:"#312893", black:"#000000", pink:"#A96F63" };
+const EMU_COLORS = { blue:"#0000ff", black:"#000000", pink:"#ff55ff" };
+let usePureColors = false;
+
 const PALETTES = [
-  { name:"C64 Default", body:["#000000","#352879","#6c5eb5"], head:["#000000","#352879","#6c5eb5"] },
-  { name:"C64 Skin", body:["#000000","#352879","#6c5eb5"], head:["#000000","#68372b","#9a6759"] },
-  { name:"C64 Cyan", body:["#000000","#352879","#6c5eb5"], head:["#000000","#70a4b2","#959595"] },
-  { name:"C64 Green", body:["#000000","#588d43","#9ad284"], head:["#000000","#588d43","#9ad284"] },
-  { name:"C64 Purple", body:["#000000","#6f3d86","#6c5eb5"], head:["#000000","#6f3d86","#6c5eb5"] },
-  { name:"C64 Red", body:["#000000","#68372b","#9a6759"], head:["#000000","#68372b","#9a6759"] },
-  { name:"C64 Brown", body:["#000000","#433900","#6f4f25"], head:["#000000","#433900","#6f4f25"] },
-  { name:"C64 Gray", body:["#000000","#444444","#6c6c6c"], head:["#000000","#444444","#6c6c6c"] },
-  { name:"Monochrome", body:["#000000","#555555","#aaaaaa"], head:["#000000","#555555","#aaaaaa"] },
-  { name:"Converter Default", body:["#000000","#0000ff","#ff55ff"], head:["#000000","#0000ff","#ff55ff"] },
+  { name:"Default", body:["#312893","#000000","#A96F63"] },
+  { name:"C64 Blue", body:["#352879","#000000","#6c5eb5"] },
+  { name:"C64 Green", body:["#588d43","#000000","#9ad284"] },
+  { name:"C64 Purple", body:["#6f3d86","#000000","#6c5eb5"] },
+  { name:"C64 Red", body:["#68372b","#000000","#9a6759"] },
+  { name:"C64 Gray", body:["#444444","#000000","#6c6c6c"] },
 ];
 
 // ============================================================
@@ -524,10 +526,9 @@ function loadImg(src) {
   });
 }
 
-// Source palette in head PNGs (from habitat_renderer.py defaults)
-const HEAD_SRC_COLORS = [[0,0,0],[0,0,255],[255,85,255]];
-// Source palette in body PNGs (C64 colors from our decoder)
-const BODY_SRC_COLORS = [[0,0,0],[53,40,121],[108,94,181]];
+// Source palette in both head and body PNGs: blue, black, pink
+// (same palette for heads and bodies)
+const SRC_COLORS = [[0,0,255],[0,0,0],[255,85,255]];
 
 function hexToRgb(h) {
   return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
@@ -582,7 +583,7 @@ const CW = 320, CH = 320;
 const SCALE = 4; // Display scale (images are small pixel art)
 
 // Avatar anchor point (feet position) in canvas space
-const BASE_X = CW / 2 - 10;
+const BASE_X = CW / 2 - 30;
 const BASE_Y = CH - 40;
 
 let currentHead = null;
@@ -590,8 +591,9 @@ let currentView = 'side';
 let currentPose = 'stand';
 let walkFrame = 0;
 let animInterval = null;
-let bodyColors = ["#000000","#352879","#6c5eb5"];
-let headColors = ["#000000","#352879","#6c5eb5"];
+// "As seen on screen" CRT-attenuated defaults
+let bodyColors = ["#312893","#000000","#A96F63"];
+let headColors = ["#312893","#000000","#A96F63"];
 
 function getCelNum(limbName, stateIdx) {
   if (stateIdx === null || stateIdx === undefined) return null;
@@ -652,8 +654,8 @@ async function drawBodyLimb(limbName, pose) {
   if (!celData || !celData.img) return;
 
   // Position: x_offset is in byte units (1 byte = 4 native px = 8 stretched px)
-  // Since images already have 2x stretch, multiply offset by 8
-  const drawX = BASE_X + (celData.x_offset * 8 * SCALE / 2);
+  // Each byte unit = 8 PNG pixels * SCALE display pixels
+  const drawX = BASE_X + (celData.x_offset * 8 * SCALE);
   const drawY = BASE_Y - (celData.y_offset * SCALE);
   const drawW = celData.img.width * SCALE;
   const drawH = celData.img.height * SCALE;
@@ -664,7 +666,7 @@ async function drawBodyLimb(limbName, pose) {
   tmp.height = celData.img.height;
   const tc = tmp.getContext('2d');
   tc.drawImage(celData.img, 0, 0);
-  recolorCanvas(tmp, BODY_SRC_COLORS, bodyColors);
+  recolorCanvas(tmp, SRC_COLORS, bodyColors);
 
   ctx.drawImage(tmp, drawX, drawY, drawW, drawH);
 }
@@ -684,7 +686,7 @@ async function drawHead(pose) {
     { xo:-1, yo:62, nw:12 }, // 2: back
   ];
   const ph = placeholders[headState] || placeholders[0];
-  const phX = BASE_X + (ph.xo * 8 * SCALE / 2);
+  const phX = BASE_X + (ph.xo * 8 * SCALE);
   const phY = BASE_Y - (ph.yo * SCALE);
   const phW = ph.nw * 2 * SCALE; // native * 2x stretch * display scale
 
@@ -699,23 +701,25 @@ async function drawHead(pose) {
     tmp.height = img.height;
     const tc = tmp.getContext('2d');
     tc.drawImage(img, 0, 0);
-    recolorCanvas(tmp, HEAD_SRC_COLORS, headColors);
+    recolorCanvas(tmp, SRC_COLORS, headColors);
 
     // No extra stretch - images already have 2x applied
     const drawW = img.width * SCALE;
     const drawH = img.height * SCALE;
 
-    // Side: align head to placeholder position
-    // Front/Back: center head on avatar origin (BASE_X)
-    let drawX, drawY;
+    // Position head: center on body torso, consistent height
+    // Back view y_offset=62 is confirmed correct; use it for all views
+    // to avoid heads appearing too low in front/side
+    const headTopY = BASE_Y - 62 * SCALE;
+    let drawX;
     if (headState === 0) {
-      // Side view: position at placeholder X
-      drawX = phX + (phW - drawW) / 2;
+      // Side view: center on torso, slight rightward shift for face direction
+      drawX = BASE_X - drawW / 2 + 6 * SCALE;
     } else {
-      // Front/back: center on body
+      // Front/back: center on torso
       drawX = BASE_X - drawW / 2 + 4 * SCALE;
     }
-    drawY = phY;
+    const drawY = headTopY;
 
     ctx.drawImage(tmp, drawX, drawY, drawW, drawH);
   }
@@ -803,7 +807,7 @@ async function renderThumb(head, thumbCanvas) {
     tmp.width = img.width; tmp.height = img.height;
     const tmpCtx = tmp.getContext('2d');
     tmpCtx.drawImage(img, 0, 0);
-    recolorCanvas(tmp, HEAD_SRC_COLORS, headColors);
+    recolorCanvas(tmp, SRC_COLORS, headColors);
 
     // Fit in thumbnail - no extra stretch
     const scale = Math.min(50/img.width, 50/img.height, 3);
@@ -865,6 +869,11 @@ document.querySelectorAll('[data-pose]').forEach(btn => {
 // Random
 document.getElementById('randomBtn').addEventListener('click', () => {
   selectHead(HEADS[Math.floor(Math.random() * HEADS.length)]);
+});
+
+// Show in grid
+document.getElementById('showHeadBtn').addEventListener('click', () => {
+  if (!currentHead) return;
   const card = document.querySelector(`.head-card[data-name="${currentHead.name}"]`);
   if (card) card.scrollIntoView({ behavior:'smooth', block:'nearest' });
 });
@@ -885,18 +894,15 @@ document.getElementById('nextBtn').addEventListener('click', () => {
 searchInput.addEventListener('input', buildGrid);
 categoryFilter.addEventListener('change', buildGrid);
 
-// Palette
+// Palette (single palette for both body and head, as in the game)
 function readPalette() {
-  bodyColors = [
-    document.getElementById('bodyColor1').value,
-    document.getElementById('bodyColor2').value,
-    document.getElementById('bodyColor3').value,
+  const colors = [
+    document.getElementById('color1').value,
+    document.getElementById('color2').value,
+    document.getElementById('color3').value,
   ];
-  headColors = [
-    document.getElementById('headColor1').value,
-    document.getElementById('headColor2').value,
-    document.getElementById('headColor3').value,
-  ];
+  bodyColors = colors;
+  headColors = colors;
 }
 
 function onPaletteChange() {
@@ -905,8 +911,18 @@ function onPaletteChange() {
   buildGrid();
 }
 
-['bodyColor1','bodyColor2','bodyColor3','headColor1','headColor2','headColor3'].forEach(id =>
+['color1','color2','color3'].forEach(id =>
   document.getElementById(id).addEventListener('input', onPaletteChange));
+
+// Pure emulated colors toggle
+document.getElementById('pureColors').addEventListener('change', function() {
+  usePureColors = this.checked;
+  const c = usePureColors ? EMU_COLORS : CRT_COLORS;
+  document.getElementById('color1').value = c.blue;
+  document.getElementById('color2').value = c.black;
+  document.getElementById('color3').value = c.pink;
+  onPaletteChange();
+});
 
 // Palette presets
 (function buildPresets() {
@@ -915,19 +931,16 @@ function onPaletteChange() {
     const el = document.createElement('div');
     el.className = 'palette-preset';
     el.title = p.name;
-    for (const c of [...p.body, ...p.head]) {
+    for (const c of p.body) {
       const sw = document.createElement('div');
       sw.className = 'swatch';
       sw.style.background = c;
       el.appendChild(sw);
     }
     el.addEventListener('click', () => {
-      document.getElementById('bodyColor1').value = p.body[0];
-      document.getElementById('bodyColor2').value = p.body[1];
-      document.getElementById('bodyColor3').value = p.body[2];
-      document.getElementById('headColor1').value = p.head[0];
-      document.getElementById('headColor2').value = p.head[1];
-      document.getElementById('headColor3').value = p.head[2];
+      document.getElementById('color1').value = p.body[0];
+      document.getElementById('color2').value = p.body[1];
+      document.getElementById('color3').value = p.body[2];
       onPaletteChange();
     });
     container.appendChild(el);

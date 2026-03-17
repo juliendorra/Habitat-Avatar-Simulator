@@ -51,17 +51,18 @@ C64_PALETTE = {
     15: (149, 149, 149),  # Light Gray
 }
 
-# Default avatar cel colors (what the game used)
+# Avatar cel color registers (from C64 Habitat)
+# Same palette as heads: transparent, blue, black, pink
 # Pixel value mapping:
 # 0 = transparent
-# 1 = outline color (black, C64 index 0)
-# 2 = foreground (blue, C64 index 6)
-# 3 = wild/pattern (light blue, C64 index 14)
+# 1 = blue (body foreground / outline)
+# 2 = black (detail / shading)
+# 3 = pink (highlights / skin)
 AVATAR_PALETTE = [
     (0, 0, 0, 0),           # 0: transparent
-    (0, 0, 0, 255),          # 1: outline (black)
-    (53, 40, 121, 255),      # 2: foreground (C64 blue)
-    (108, 94, 181, 255),     # 3: wild/pattern (C64 light blue)
+    (0, 0, 255, 255),        # 1: blue
+    (0, 0, 0, 255),          # 2: black
+    (255, 85, 255, 255),     # 3: pink
 ]
 
 
