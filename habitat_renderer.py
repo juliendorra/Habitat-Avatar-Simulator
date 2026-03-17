@@ -32,6 +32,7 @@ Props directories you can call it twice or specify their common parent.
 """
 
 import argparse
+import json
 import os
 import re
 from typing import Dict, List, Optional
@@ -161,7 +162,12 @@ def expand_tokens(tokens: List[str]) -> List[int]:
     return result
 
 
-def decode_bitmap(data: List[int]) -> Optional[List[List[int]]]:
+def signed_byte(b: int) -> int:
+    """Convert unsigned byte to signed."""
+    return b if b < 128 else b - 256
+
+
+def decode_bitmap(data: List[int]) -> Optional[Dict]:
     """Decode a raw Habitat bitmap into a 2‑D array of pixel values.
 
     The first six bytes of the data are the cel header.  The low nibble
@@ -177,7 +183,8 @@ def decode_bitmap(data: List[int]) -> Optional[List[List[int]]]:
         data: A list of integers representing the cel bytes.
 
     Returns:
-        A two‑dimensional list of ints (0–3) representing pixel values,
+        A dict with 'bitmap' (2-D list of ints 0-3), 'width_bytes',
+        'height', 'x_offset', 'y_offset', 'x_rel', 'y_rel',
         or None if the header is invalid.
     """
     # validate header
@@ -185,6 +192,10 @@ def decode_bitmap(data: List[int]) -> Optional[List[List[int]]]:
         return None
     width_bytes = data[0] & 0x0F
     height = data[1]
+    x_offset = signed_byte(data[2])
+    y_offset = signed_byte(data[3])
+    x_rel = signed_byte(data[4])
+    y_rel = signed_byte(data[5])
     if width_bytes == 0 or height == 0:
         return None
     total_bytes = width_bytes * height
@@ -234,7 +245,17 @@ def decode_bitmap(data: List[int]) -> Optional[List[List[int]]]:
     # decide orientation by choosing the bitmap with more non‑transparent pixels
     count_vert = sum(1 for row in bmp_vert for p in row if p != 0)
     count_horiz = sum(1 for row in bmp_horiz for p in row if p != 0)
-    return bmp_horiz if count_horiz > count_vert else bmp_vert
+    bitmap = bmp_horiz if count_horiz > count_vert else bmp_vert
+    return {
+        'bitmap': bitmap,
+        'width_bytes': width_bytes,
+        'pixel_width': width_bytes * 4,
+        'height': height,
+        'x_offset': x_offset,
+        'y_offset': y_offset,
+        'x_rel': x_rel,
+        'y_rel': y_rel,
+    }
 
 
 def save_bitmap_as_png(bitmap: List[List[int]], out_path: str, *,
@@ -345,23 +366,34 @@ def process_m_file(path: str, out_dir: str, *, palette: Optional[List[tuple]] = 
         A list of output file paths created.
     """
     out_files: List[str] = []
+    cel_metadata: Dict[str, dict] = {}
     # parse the file for data blocks
     blocks = parse_m_file(path)
     base_name = os.path.splitext(os.path.basename(path))[0]
     # For each block, expand tokens and decode
     for label, tokens in blocks.items():
         data = expand_tokens(tokens)
-        bmp = decode_bitmap(data)
-        if bmp:
+        result = decode_bitmap(data)
+        if result:
             out_name = f"{base_name}_{label}.png"
             out_path = os.path.join(out_dir, out_name)
-            save_bitmap_as_png(bmp, out_path, palette=palette, scale=scale)
+            save_bitmap_as_png(result['bitmap'], out_path, palette=palette, scale=scale)
             out_files.append(out_path)
-    return out_files
+            cel_metadata[out_name] = {
+                'file': out_name,
+                'width': result['pixel_width'] * (scale if scale > 1 else 1),
+                'height': result['height'],
+                'native_width': result['pixel_width'],
+                'x_offset': result['x_offset'],
+                'y_offset': result['y_offset'],
+                'x_rel': result['x_rel'],
+                'y_rel': result['y_rel'],
+            }
+    return out_files, cel_metadata
 
 
 def process_directory(src_dir: str, out_dir: str, *, palette: Optional[List[tuple]] = None,
-                      scale: int = 1) -> List[str]:
+                      scale: int = 1) -> tuple:
     """Recursively process all .m files under a directory.
 
     Args:
@@ -371,15 +403,18 @@ def process_directory(src_dir: str, out_dir: str, *, palette: Optional[List[tupl
         scale: Horizontal scaling factor.
 
     Returns:
-        A list of all output file paths created.
+        A tuple of (list of output file paths, dict of all cel metadata).
     """
     outputs: List[str] = []
+    all_metadata: Dict[str, dict] = {}
     for root, _dirs, files in os.walk(src_dir):
         for fname in files:
             if fname.lower().endswith('.m'):
                 path = os.path.join(root, fname)
-                outputs.extend(process_m_file(path, out_dir, palette=palette, scale=scale))
-    return outputs
+                files_out, metadata = process_m_file(path, out_dir, palette=palette, scale=scale)
+                outputs.extend(files_out)
+                all_metadata.update(metadata)
+    return outputs, all_metadata
 
 
 def main() -> None:
@@ -414,8 +449,14 @@ def main() -> None:
             except Exception:
                 palette = None
     scale = args.scale if args.scale and args.scale > 0 else 1
-    outputs = process_directory(os.path.abspath(args.src), out_dir, palette=palette, scale=scale)
+    outputs, metadata = process_directory(os.path.abspath(args.src), out_dir, palette=palette, scale=scale)
     print(f"Converted {len(outputs)} images to {out_dir}")
+    # Save manifest with cel offset metadata
+    if metadata:
+        manifest_path = os.path.join(out_dir, 'heads_manifest.json')
+        with open(manifest_path, 'w') as f:
+            json.dump(metadata, f, indent=2, sort_keys=True)
+        print(f"Saved manifest with {len(metadata)} cels to {manifest_path}")
 
 
 if __name__ == '__main__':

@@ -596,6 +596,7 @@ function recolorCanvas(srcCanvas, srcColors, targetHexColors) {
 // BODY MANIFEST (loaded async)
 // ============================================================
 let bodyManifest = null;
+let headManifest = null;
 
 async function loadBodyManifest() {
   try {
@@ -603,6 +604,18 @@ async function loadBodyManifest() {
     bodyManifest = await r.json();
   } catch(e) {
     console.error('Failed to load body manifest:', e);
+  }
+}
+
+async function loadHeadManifest() {
+  try {
+    const r = await fetch('habitat_images_final/heads/heads_manifest.json');
+    headManifest = await r.json();
+    console.log(`Loaded head manifest with ${Object.keys(headManifest).length} cels`);
+  } catch(e) {
+    // Manifest may not exist yet - fall back to heuristic positioning
+    console.log('Head manifest not found, using heuristic head positioning');
+    headManifest = null;
   }
 }
 
@@ -731,19 +744,7 @@ async function drawHead(pose) {
   const headState = pose.head_state || 0;
   const celIndices = getHeadCelsForView(currentHead, headState);
 
-  // Head position derived from head_placeholder cels
-  // The placeholder defines the anchor point where the head attaches
-  // Placeholder cels: side(x=2,y=58,w=8nat), front(x=-1,y=57,w=8nat), back(x=-1,y=62,w=12nat)
-  const placeholders = [
-    { xo:2, yo:58, nw:8 },   // 0: side
-    { xo:-1, yo:57, nw:8 },  // 1: front
-    { xo:-1, yo:62, nw:12 }, // 2: back
-  ];
-  const ph = placeholders[headState] || placeholders[0];
-  const phX = BASE_X + (ph.xo * 8 * SCALE);
-  const phY = BASE_Y - (ph.yo * SCALE);
-  const phW = ph.nw * 2 * SCALE; // native * 2x stretch * display scale
-
+  // Use head manifest for per-head offsets if available, else fall back to heuristic
   for (const celIdx of celIndices) {
     const letter = "abcdefg"[celIdx];
     const src = `habitat_images_final/heads/${currentHead.name}_${currentHead.name}_data_${letter}.png`;
@@ -757,23 +758,30 @@ async function drawHead(pose) {
     tc.drawImage(img, 0, 0);
     recolorCanvas(tmp, SRC_COLORS, headColors);
 
-    // No extra stretch - images already have 2x applied
     const drawW = img.width * SCALE;
     const drawH = img.height * SCALE;
 
-    // Position head: center on body torso, consistent height
-    // Back view y_offset=62 is confirmed correct; use it for all views
-    // to avoid heads appearing too low in front/side
-    const headTopY = BASE_Y - 62 * SCALE;
-    let drawX;
-    if (headState === 0) {
-      // Side view: center on torso, slight rightward shift for face direction
-      drawX = BASE_X - drawW / 2 + 6 * SCALE;
+    // Check if we have per-head offset metadata from manifest
+    const manifestKey = `${currentHead.name}_${currentHead.name}_data_${letter}.png`;
+    const celMeta = headManifest ? headManifest[manifestKey] : null;
+
+    let drawX, drawY;
+    if (celMeta) {
+      // Use actual offsets from cel header (same formula as body parts)
+      // x_offset is in byte units (1 byte = 4 native px = 8 PNG px)
+      drawX = BASE_X + (celMeta.x_offset * 8 * SCALE);
+      drawY = BASE_Y - (celMeta.y_offset * SCALE);
     } else {
-      // Front/back: center on torso
-      drawX = BASE_X - drawW / 2 + 4 * SCALE;
+      // Heuristic fallback: position head image top at fixed height
+      // Back view y_offset=62 works well; use for all views
+      const headTopY = BASE_Y - 62 * SCALE;
+      if (headState === 0) {
+        drawX = BASE_X - drawW / 2 + 6 * SCALE;
+      } else {
+        drawX = BASE_X - drawW / 2 + 4 * SCALE;
+      }
+      drawY = headTopY;
     }
-    const drawY = headTopY;
 
     ctx.drawImage(tmp, drawX, drawY, drawW, drawH);
   }
@@ -1283,7 +1291,7 @@ document.addEventListener('keydown', e => {
 // ============================================================
 // INIT
 // ============================================================
-loadBodyManifest().then(() => {
+Promise.all([loadBodyManifest(), loadHeadManifest()]).then(() => {
   buildGrid();
   selectHead(HEADS[Math.floor(Math.random() * HEADS.length)]);
 });
