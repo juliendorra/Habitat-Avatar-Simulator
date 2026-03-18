@@ -640,73 +640,87 @@ function getAnimFrameCount() {
 function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
 function lcm(a, b) { return (a * b) / gcd(a, b); }
 
+// Helper: set a limb to a given graphic state
+function setLimbGS(limbName, gs) {
+  const se = avatarAnim ? avatarAnim.start_end[limbName] : null;
+  if (se && gs < se.length) {
+    const range = se[gs];
+    limbAnimState[limbName] = {
+      gs, start: range.start, end: range.end,
+      cycle: range.cycle, frame: range.start,
+    };
+  } else {
+    limbAnimState[limbName] = { gs: 0, start: 0, end: 0, cycle: false, frame: 0 };
+  }
+}
+
 // Initialize the animation engine for a given pose+view
+// C64 layered system:
+//   1. All limbs start at gs0 (side standing defaults)
+//   2. Apply base action choreography (stand/walk/wave/point/bend_over)
+//   3. Apply view overlay (stand_front/stand_back/walk_front/walk_back)
+//   4. Walk: movement system sets locomotion limbs to walk cycle
 function initAnimAction(poseName, viewName) {
-  const key = `${poseName}_${viewName}`;
-  const actionName = ACTION_FOR_POSE_VIEW[key] || 'stand';
+  if (!avatarAnim) return;
 
-  // Reset all limb states to defaults for this view
-  const viewDefaults = {
-    'side': { legs_right: 0, legs_left: 0, left_arm: 0, torso: 0, head_placeholder: 0, right_arm: 0 },
-    'front': { legs_right: 6, legs_left: 0, left_arm: 2, torso: 4, head_placeholder: 1, right_arm: 8 },
-    'back': { legs_right: 6, legs_left: 0, left_arm: 2, torso: 4, head_placeholder: 2, right_arm: 9 },
-  };
-  const defaults = viewDefaults[viewName] || viewDefaults.side;
-
-  // Init all limbs to their view defaults
+  // Step 1: All limbs to gs0 (standing side defaults)
   for (const limbName of LIMB_NAMES) {
-    const gs = defaults[limbName] || 0;
-    const se = avatarAnim ? avatarAnim.start_end[limbName] : null;
-    if (se && gs < se.length) {
-      const range = se[gs];
-      limbAnimState[limbName] = {
-        gs: gs,
-        start: range.start,
-        end: range.end,
-        cycle: range.cycle,
-        frame: range.start,
-      };
-    } else {
-      limbAnimState[limbName] = { gs: 0, start: 0, end: 0, cycle: false, frame: 0 };
+    setLimbGS(limbName, 0);
+  }
+
+  // Step 2: Apply base action choreography
+  const baseAction = poseName === 'bend' ? 'bend_over' : poseName;
+  applyAction(baseAction);
+
+  // Step 3: Apply view-specific overlay
+  if (viewName === 'front') {
+    // C64: stand_front overlays on base
+    applyAction('stand_front');
+    if (poseName === 'walk') applyAction('walk_front');
+  } else if (viewName === 'back') {
+    applyAction('stand_back');
+    if (poseName === 'walk') applyAction('walk_back');
+  }
+
+  // Step 4: Front/back facing overrides (applied AFTER choreography)
+  // The C64 facing system sets view-specific defaults for legs, torso, arms
+  if (viewName === 'front' || viewName === 'back') {
+    setLimbGS('legs_right', 6);  // gs6 = front/back standing legs (cel 13)
+    if (viewName === 'front') setLimbGS('torso', 5); // gs5 = front torso
+    else setLimbGS('torso', 4); // gs4 = back torso
+    setLimbGS('left_arm', 2);   // gs2 = front/back arm
+    setLimbGS('head_placeholder', viewName === 'front' ? 1 : 2);
+    // Apply view-specific overlay choreography on top
+    if (viewName === 'front') applyAction('stand_front');
+    else applyAction('stand_back');
+    if (poseName === 'walk') {
+      if (viewName === 'front') applyAction('walk_front');
+      else applyAction('walk_back');
     }
   }
 
-  // Apply the action's choreography on top
-  applyAction(actionName);
-
-  // Walk override: C64 walk animation is triggered by the movement system,
-  // not choreography. The chore data for 'walk' is identical to 'stand'.
-  // We manually set all locomotion limbs to gs1 (walk cycle).
-  if (poseName === 'walk' && viewName === 'side') {
-    for (const limb of ['legs_right', 'legs_left', 'left_arm', 'right_arm']) {
-      const se = avatarAnim.start_end[limb];
-      if (se && se.length > 1) {
-        const range = se[1]; // gs1 = walk cycle
-        limbAnimState[limb] = {
-          gs: 1, start: range.start, end: range.end,
-          cycle: range.cycle, frame: range.start,
-        };
+  // Step 5: Walk movement system override
+  // C64 walk animation is triggered by the movement system, not choreography.
+  // Side walk: all locomotion limbs to gs1 (walk cycle)
+  // Front/back walk: legs_right to gs7 (front/back walk cycle)
+  if (poseName === 'walk') {
+    if (viewName === 'side') {
+      for (const limb of ['legs_right', 'legs_left', 'left_arm', 'right_arm']) {
+        setLimbGS(limb, 1); // gs1 = side walk cycle
       }
+    } else if (viewName === 'front' || viewName === 'back') {
+      setLimbGS('legs_right', 7); // gs7 = front/back walk cycle
+      // legs_left gs1 for back walk (foot overlay)
+      if (viewName === 'back') setLimbGS('legs_left', 1);
     }
   }
 
-  // Bend override: bend_over choreography sets r_arm to gs1 (walk swing),
-  // but the visual bend needs torso transitioning gs0→gs2 and arm gs5
+  // Step 5: Bend visual override
+  // bend_over choreography sets r_arm=gs1 (walk swing), but the visual
+  // needs torso gs2 (bend cycle) and arm gs5 (reach/grab sequence)
   if (poseName === 'bend' && viewName === 'side') {
-    const tse = avatarAnim.start_end['torso'];
-    if (tse && tse.length > 2) {
-      limbAnimState['torso'] = {
-        gs: 2, start: tse[2].start, end: tse[2].end,
-        cycle: false, frame: tse[2].start,
-      };
-    }
-    const rse = avatarAnim.start_end['right_arm'];
-    if (rse && rse.length > 5) {
-      limbAnimState['right_arm'] = {
-        gs: 5, start: rse[5].start, end: rse[5].end,
-        cycle: false, frame: rse[5].start,
-      };
-    }
+    setLimbGS('torso', 2);     // gs2 = bend cycle (frames 2→3, cels 2,3)
+    setLimbGS('right_arm', 5); // gs5 = reach/grab (frames 13→15, cels 9,5,8)
   }
 }
 
