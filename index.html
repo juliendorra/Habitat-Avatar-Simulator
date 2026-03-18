@@ -563,12 +563,12 @@ const POSES = {
     back: { legs_right:16, legs_left:null, left_arm:10, torso:6, right_arm:37, head_state:2 },
   },
   bend: {
-    // head_state stays 0 (side) throughout — the "frown" effect is purely
-    // positional via torsoYAdjust, not a different head cel
+    // Bend over: torso gs2 (frames 2→3 = cels 2,3), right_arm gs5 (frames 13→15 = cels 9,5,8)
+    // Choreography from Avatar.bin: bend_over sets r_arm=gs1, but visual bend uses gs5
     side: [
       { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:0, head_state:0 },
-      { legs_right:0, legs_left:null, left_arm:null, torso:2, right_arm:3, head_state:0 },
-      { legs_right:0, legs_left:null, left_arm:null, torso:3, right_arm:5, head_state:0 },
+      { legs_right:0, legs_left:null, left_arm:null, torso:2, right_arm:14, head_state:0 },
+      { legs_right:0, legs_left:null, left_arm:null, torso:3, right_arm:15, head_state:0 },
     ],
     front: { legs_right:16, legs_left:null, left_arm:10, torso:7, right_arm:37, head_state:1 },
     back: { legs_right:16, legs_left:null, left_arm:10, torso:6, right_arm:37, head_state:2 },
@@ -811,12 +811,11 @@ const ctx = canvas.getContext('2d');
 const CW = 400, CH = 440;
 const SCALE = 4; // Display scale (images are small pixel art)
 
-// Avatar anchor point — rendering uses a large offscreen canvas at a fixed
-// origin, then the result is measured and centered on the visible canvas.
-// This makes positioning independent of canvas size.
-const OFFSCREEN_W = 800, OFFSCREEN_H = 800;
-const BASE_X = 400; // center of offscreen canvas
-const BASE_Y = 600; // generous foot anchor (plenty of room above for big heads)
+// Avatar anchor point on the canvas
+// BASE_X: horizontal center for avatar origin (bytes)
+// BASE_Y: foot level (scanlines from top)
+const BASE_X = Math.round(CW * 0.45); // slightly left of center
+const BASE_Y = CH - 40; // 40px from bottom for feet
 
 // Head container origin offsets per view state
 // From body head_placeholder cels: cel 0=side, 1=front, 2=back, 3=frown
@@ -996,12 +995,7 @@ async function computeLimbPositions(pose, isBack) {
 }
 
 // Offscreen canvas for rendering avatar before centering
-const offCanvas = document.createElement('canvas');
-offCanvas.width = OFFSCREEN_W;
-offCanvas.height = OFFSCREEN_H;
-const offCtx = offCanvas.getContext('2d');
-
-// activeCtx is used by drawBodyLimb/drawHead — points to offscreen during render
+// activeCtx is used by drawBodyLimb/drawHead — always points to ctx
 let activeCtx = ctx;
 
 async function renderAvatar() {
@@ -1011,17 +1005,17 @@ async function renderAvatar() {
     return;
   }
 
-  // Step 1: Render onto offscreen canvas
-  offCtx.clearRect(0, 0, OFFSCREEN_W, OFFSCREEN_H);
-  activeCtx = offCtx;
+  ctx.clearRect(0, 0, CW, CH);
+  ctx.fillStyle = '#A3A3A3';
+  ctx.fillRect(0, 0, CW, CH);
+  ctx.imageSmoothingEnabled = false;
+  activeCtx = ctx;
 
   const pose = getPoseConfig();
   const drawOrder = DRAW_ORDER[currentView] || DRAW_ORDER.side;
   const isBack = currentView === 'back';
 
   const { cx_tab, cy_tab } = await computeLimbPositions(pose, isBack);
-
-  offCtx.imageSmoothingEnabled = false;
 
   for (const limbKey of drawOrder) {
     if (limbKey === 'head') {
@@ -1030,37 +1024,6 @@ async function renderAvatar() {
       const limbIdx = LIMB_ORDER.indexOf(limbKey);
       await drawBodyLimb(limbKey, pose, cx_tab[limbIdx], cy_tab[limbIdx]);
     }
-  }
-
-  activeCtx = ctx;
-
-  // Step 2: Find bounding box of rendered content on offscreen canvas
-  const imgData = offCtx.getImageData(0, 0, OFFSCREEN_W, OFFSCREEN_H);
-  const px = imgData.data;
-  let minX = OFFSCREEN_W, minY = OFFSCREEN_H, maxX = 0, maxY = 0;
-  for (let y = 0; y < OFFSCREEN_H; y++) {
-    for (let x = 0; x < OFFSCREEN_W; x++) {
-      if (px[(y * OFFSCREEN_W + x) * 4 + 3] > 0) {
-        if (x < minX) minX = x;
-        if (x > maxX) maxX = x;
-        if (y < minY) minY = y;
-        if (y > maxY) maxY = y;
-      }
-    }
-  }
-
-  // Step 3: Center the avatar on the visible canvas
-  ctx.clearRect(0, 0, CW, CH);
-  ctx.fillStyle = '#A3A3A3';
-  ctx.fillRect(0, 0, CW, CH);
-  ctx.imageSmoothingEnabled = false;
-
-  if (maxX >= minX && maxY >= minY) {
-    const contentW = maxX - minX + 1;
-    const contentH = maxY - minY + 1;
-    const destX = Math.round((CW - contentW) / 2);
-    const destY = Math.round((CH - contentH) / 2);
-    ctx.drawImage(offCanvas, minX, minY, contentW, contentH, destX, destY, contentW, contentH);
   }
 }
 
