@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "habitat-sim",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["http-server", "-p", "8081", "-c-1"],
+      "runtimeExecutable": "/Users/julien/.nvm/versions/node/v20.16.0/bin/node",
+      "runtimeArgs": ["-e", "require('http').createServer((q,r)=>{const fs=require('fs'),p=require('path'),u=q.url==='/'?'/index.html':q.url,f=p.join('/Users/julien/Documents/GitHub/Habitat Avatar Simulator',decodeURIComponent(u)),m={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml'};fs.readFile(f,(e,d)=>{if(e){r.writeHead(404);r.end('Not found')}else{r.writeHead(200,{'Content-Type':m[p.extname(f)]||'application/octet-stream'});r.end(d)}})}).listen(8081,()=>console.log('Serving on 8081'))"],
       "port": 8081
     }
   ]

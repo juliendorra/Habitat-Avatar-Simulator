@@ -1,107 +1,222 @@
-# Habitat Avatar Simulator - Project Notes
+# Habitat Avatar Simulator - Technical Notes
 
 ## Overview
-A web-based simulator for exploring and combining avatar possibilities from Lucasfilm's Habitat (1986), the first graphical MMO virtual world. The simulator faithfully reconstructs the avatar assembly system using decoded original game assets.
+A web-based simulator for exploring and combining avatar possibilities from Lucasfilm's Habitat (1986), the first graphical MMO virtual world. The simulator reconstructs the avatar assembly system by porting the rendering logic from the original C64 6502 assembly source code.
 
-## Avatar Structure
+## C64 Source Files (Ground Truth)
+All rendering logic is derived from the original source at `Museum-of-Art-and-Digital-Entertainment/habitat`:
 
-### Body Composition (from Avatar.bin)
-The avatar body consists of 6 limbs decoded from `Avatar.bin`:
-- **Limb 0 - legs_right**: Primary legs (22 states, 15 cels) - includes side walk, front stand/walk, sitting
-- **Limb 1 - legs_left**: Secondary leg detail (5 states, 4 cels) - visible in side walk and front views
-- **Limb 2 - left_arm**: Left arm (13 states, 7 cels) - hidden in side view, visible front/back
-- **Limb 3 - torso**: Body torso (8 states, 6 cels) - side, front, and back variants
-- **Limb 4 - head_placeholder**: Anchor for head attachment (4 states, 4 cels)
-- **Limb 5 - right_arm**: Right arm (80 states, 15 cels) - most complex limb with many poses
+| File | Purpose |
+|------|---------|
+| `sources/c64/Main/animate.m` | `display_avatar`, `draw_a_limb`, limb position tables, draw order |
+| `sources/c64/Main/paint.m` | `paint_1` (cel positioning), `paint_2` (pixel rendering), `pick_pattern`, `cel_patterns` table |
+| `sources/c64/Main/mix.m` | `get_cel_xy`, `find_cel_xy` (position chaining), `draw_prop`, `draw_contained_object` |
+| `sources/c64/Images/Avatar.bin` | Binary body cel data (3442 bytes) |
+| `sources/c64/Images/Heads/*.m` | Head cel data as macro assembler source |
 
-### Cel Format
-Each cel has a 6-byte header:
-- Byte 0: type(7-6) | width_bytes(3-0) - width in bytes, multiply by 4 for native pixels
-- Byte 1: height in scanlines
-- Byte 2: x_offset (signed, in byte units = 4 native pixels)
-- Byte 3: y_offset (signed, distance from feet to cel top)
-- Byte 4-5: x_rel, y_rel (displacement to next cel in chain)
+## Avatar Body Structure
 
-Pixel data: 2 bits per pixel, RLE compressed, column-major order (bottom to top)
-- 00 = transparent
-- 01 = outline (black)
-- 10 = foreground color
-- 11 = wild/pattern color
+### 6 Limbs (from Avatar.bin)
+The avatar body is composed of exactly 6 limbs, always processed in index order 0-5:
 
-### Coordinate System
-- Origin at avatar's feet
-- x_offset: 1 unit = 4 native pixels = 8 stretched pixels (after 2x C64 aspect correction)
-- y_offset: distance upward from feet to top of cel
-- Cel bottom position: y_offset - height (should be ~0 for ground-touching cels)
+| Index | Name | Cels | Role |
+|-------|------|------|------|
+| 0 | legs_right | 15 | Primary legs — walk cycle, standing, sitting |
+| 1 | legs_left | 4 | Secondary leg — visible during walk stride |
+| 2 | left_arm | 7 | Left arm — mostly visible in front/back views |
+| 3 | torso | 6 | Body — side, front, back, and bend variants |
+| 4 | head_placeholder | 4 | Neck/collar anchor — bridges head to torso |
+| 5 | right_arm | 15 | Right arm — most complex, holds objects |
 
-## Choreography (State Mappings)
+### Cel Header Format (6 bytes)
+```
+Byte 0: type(7-6) | width_bytes(3-0)
+         width_bytes × 4 = width in multicolor pixels
+Byte 1: height in scanlines
+Byte 2: x_offset (signed byte, in BYTE units)
+Byte 3: y_offset (signed byte, in scanline units, distance from bottom)
+Byte 4: x_rel (signed, displacement for chaining to next cel)
+Byte 5: y_rel (signed, displacement for chaining to next cel)
+```
 
-### Key State Indices for legs_right
-| States | Cels | Usage |
-|--------|------|-------|
-| 0-4 | 4,0,1,2,3 | Side view: standing + 4 walk frames |
-| 5-6 | 7,8 | Special low positions |
-| 7-11 | 5,6,6,6,6 | Sitting/mounted (y_offset=41-45, floating) |
-| 16 | 13 | **Front standing** (symmetric, y_off=24, touches ground) |
-| 17-20 | 9,10,11,12 | **Front/back walking** (y_off=23, touches ground) |
+Pixel data follows: 2 bits per pixel, RLE compressed, column-major (bottom to top).
+- `00` = transparent
+- `01` = blue/clothing color (receives pattern overlay)
+- `10` = black/outline color
+- `11` = pink/wild/skin color
 
-### Torso States
-- States 0-1: Side view (cel 0, cel 1)
-- State 6: Front torso (cel 4, 24x19, narrower)
-- State 7: Back torso (cel 5, 24x19, back details visible)
+## Rendering Pipeline (from C64 source)
+
+### Step 1: Position Chaining (`display_avatar` → `get_cel_xy` → `find_cel_xy`)
+All 6 limbs are processed sequentially (0→5). Each limb's position is computed via `find_cel_xy`:
+
+```
+if (previous cel's x_rel == 0 AND y_rel == 0):
+    use ABSOLUTE position (revert to origin)
+else:
+    RELATIVE: cel_x = origin + x_rel, cel_y = origin - y_rel
+    (x_rel is negated when cel_dx is set, i.e. back view)
+```
+
+Results stored in `cx_tab[0..5]` and `cy_tab[0..5]` (byte/scanline units).
+Height adjustment: `cy_tab[i] += avatar_height` for limbs 2-5 (upper body only).
+
+### Step 2: Draw Order (`draw_a_limb`)
+Drawing uses view-specific order (from animate.m tables):
+
+| View | Draw order (limb indices) | Source |
+|------|--------------------------|--------|
+| Side | 0, 1, 2, 3, 4, 5 | default (no reordering) |
+| Front | 0, 1, 3, 4, 2, 5 | `fv_cels` table |
+| Back | 5, 2, 4, 0, 1, 3 | `bv_cels` table |
+
+### Step 3: Cel Positioning (`paint_1`)
+For each cel, `paint_1` reads the cel header and computes final screen position:
+
+```
+Normal (side/front):
+    screen_x = cx_tab[limb] + x_offset          (bytes)
+    screen_y = cy_tab[limb] - y_offset           (scanlines)
+
+Reversed (back view, cel_dx set):
+    screen_x = cx_tab[limb] + (1 - x_offset - width_bytes)
+    screen_y = cy_tab[limb] - y_offset
+    (cel image is also horizontally flipped)
+```
+
+### Step 4: Head Rendering (`draw_a_limb` for limb 4)
+The head is a separate object ("contained object") drawn in two parts:
+
+1. **Head object** (the actual head): positioned at `cx_tab[4], cy_tab[4] - 63`
+   - The constant `63` comes directly from animate.m
+   - `draw_contained_object` recursively draws the head's own cels
+   - Head cels have their own x_offset/y_offset applied by paint_1
+
+2. **Head placeholder** (neck/collar): drawn at `cx_tab[4], cy_tab[4]` via `paint_limb`
+   - Bridges the visual gap between head and torso
+
+### Step 5: Pattern Application (`pick_pattern`, `cel_patterns`)
+Blue pixels (value `01`) receive a dither pattern from the 16-entry `cel_patterns` table.
+Each pattern is 4 bytes (4 scanlines), repeating. Each byte covers 4 MC pixels (2 bits each):
+- `00` → transparent
+- `01` → clothing color (blue target)
+- `10` → detail color (black target)
+- `11` → wild color (pink target)
+
+Pattern assignment per body zone (from `pattern_for_limb`):
+- Limbs 0,1 → LEG pattern
+- Limbs 2,5 → ARM pattern
+- Limb 3 → TORSO pattern
+- Limb 4 → FACE/HAIR pattern
+
+Customization byte layout:
+- `Custom1`: `LLLLTTTT` — L=leg pattern(0-15), T=torso pattern(0-15)
+- `Custom2`: `AAAA0000` — A=arm pattern(0-15)
+- Head orientation: `xPPPPxxx` — P=hair pattern(0-15)
+
+## Coordinate System
+
+### C64 Units
+- **X**: byte columns (0-39). 1 byte = 4 multicolor pixels = 8 screen pixels.
+- **Y**: scanlines (0-199). 1 unit = 1 pixel. Y increases downward.
+- Avatar origin: bottom-center of feet.
+
+### Simulator Mapping
+```
+display_x = BASE_X + (cx_tab[limb] + x_offset) × BYTE_PX
+display_y = BASE_Y + (cy_tab[limb] - y_offset) × SCALE
+
+where:
+    BYTE_PX = 8 × SCALE = 32    (each byte = 8 PNG pixels × 4 scale)
+    SCALE = 4                    (each PNG pixel = 4 display pixels)
+    BASE_X = 170                 (avatar origin X on 400px canvas)
+    BASE_Y = 280                 (avatar origin Y / foot line)
+```
+
+## Choreography (State Machine)
+
+### State Index → Cel Number
+Each limb has a states array that maps state indices to cel numbers.
+State 255 = not drawn. The choreography system sets state indices per limb.
+
+### Key Pose Assignments
+
+**Side view:**
+- Standing: legs_right=0, torso=0, right_arm=0 (cel 11)
+- Walk cycle: 4 frames alternating leg stride cels
+- Bend: torso states 0→2→3 (standing→half→full), right_arm 0→3→5
+
+**Front/back views:**
+- Use front-specific torso cels (state 7→cel 5 = front, state 6→cel 4 = back)
+- Left arm uses cels 4-6 (x_offset ≥ 0, viewer's right side)
+- Right arm uses cels 12-14 (x_offset < 0, viewer's left side)
+- Back view applies cel_dx reversal (flips all X coordinates)
+
+### Female Torso
+From animate.m: if `avatar_style == 0` and `cel_number == 3` (torso) and orientation bit 7 is set (female), the animation state advances by 1 (using the next cel).
 
 ## Head System
 
 ### Structure
-- 167 head types total (8 player-selectable at character creation)
-- Each head has 1-7 cels (data_a through data_g)
-- gr_state bitmasks control which cels show per view state
-- Some heads have animation (robot0, cyclops0, mbeany0, fbeany0)
+- 167 head types (8 selectable at character creation)
+- Each head: 1-7 cels (data_a through data_g)
+- `gr_state` bitmasks control which cels are visible per view state
+- View states: 0=side, 1=front, 2=back, 3=frown/alternate
 
-### View State Mapping
-- State 0: Side view
-- State 1: Front view
-- State 2: Back view
-- State 3: Frown/alternate expression
+### Head Data Format
+```
+Header:
+  Byte 0: animation_type | num_states
+  Byte 1: cel-to-draw bitmask (which cels exist)
+  Byte 2: offset to start/end table
+  Byte 3: containment flags
+  Bytes 4-6: object-level x/y offsets
+
+Per-state: cel bitmask (which cels visible in this state)
+Then: word-sized offsets to each cel's data
+Each cel: 6-byte header (same format as body) + RLE pixel data
+```
 
 ### Head Positioning
-Head images are positioned relative to head_placeholder anchor cels:
-- Side: x_offset=2, y_offset=58 (placeholder cel 0)
-- Front: x_offset=-1, y_offset=57 (placeholder cel 1)
-- Back: x_offset=-1, y_offset=62 (placeholder cel 2)
+Head origin = `cx_tab[4], cy_tab[4] - 63` (from animate.m).
+Then each head cel's own x_offset/y_offset positions it relative to this origin via paint_1.
+
+The head_placeholder (limb 4) provides the attachment point:
+| State | x_offset | y_offset | View |
+|-------|----------|----------|------|
+| 0 | 2 | 58 | Side |
+| 1 | -1 | 57 | Front |
+| 2 | -1 | 62 | Back |
+| 3 | 2 | 59 | Frown |
 
 ## Source Palettes
 
-### Body PNGs (from decode_avatar_bin.py)
-Decoded using C64 Pepto palette:
-- Outline: #000000 (black)
-- Foreground: #352879 (C64 blue, index 6)
-- Wild: #6C5EB5 (C64 light blue, index 14)
+### Body PNGs (decode_avatar_bin.py)
+Pure emulated colors:
+- `01` pixels → `(0, 0, 255)` blue
+- `10` pixels → `(0, 0, 0)` black
+- `11` pixels → `(255, 85, 255)` pink
 
-### Head PNGs (from habitat_renderer.py)
-Decoded using converter defaults:
-- Outline: #000000 (black)
-- Foreground: #0000FF (pure blue)
-- Wild: #FF55FF (pink)
+### Head PNGs (habitat_renderer.py)
+May use CRT-attenuated colors if rendered with `--palette`:
+- `01` pixels → `(49, 40, 147)` CRT blue
+- `10` pixels → `(0, 0, 0)` black
+- `11` pixels → `(169, 111, 99)` CRT pink
 
-The simulator recolors both at runtime to match the selected C64 palette.
-
-## Known Limitations
-- Head cel offset metadata (x_offset, y_offset from .m file headers) was not preserved during PNG conversion, so heads are centered heuristically on the placeholder anchor
-- Some heads with complex multi-cel compositions may not align perfectly in all views
-- The front/back walk animation uses the same leg cels for both views (legs look similar from front and back)
-- Wave and point poses only have side-view arm variants; front/back use standing arm poses
+The simulator's recolor system matches BOTH palettes (tolerance 40 per channel).
 
 ## File Structure
 ```
-index.html                          - Main simulator (single-file web app)
-Avatar.bin                          - Original avatar binary (3442 bytes)
-decode_avatar_bin.py                - Avatar.bin decoder -> body cel PNGs
-habitat_renderer.py                 - .m source file renderer -> head/prop PNGs
-habitat_images_final/body/          - 51 decoded body cel PNGs + manifest
-habitat_images_final/heads/         - 510 head cel PNGs
+index.html                          Main simulator (single-file web app)
+Avatar.bin                          Original avatar binary (3442 bytes)
+decode_avatar_bin.py                Avatar.bin decoder → body cel PNGs
+habitat_renderer.py                 Head .m file renderer → head cel PNGs
+habitat_images_final/body/          51 body cel PNGs + body_manifest.json
+habitat_images_final/heads/         510 head cel PNGs + heads_manifest.json
+NOTES.md                            This file
 ```
 
 ## References
-- [NeoHabitat](https://github.com/Museum-of-Art-and-Digital-Entertainment/habitat) - Open source Habitat server
-- [Habitat Chronicles](https://web.stanford.edu/class/history34q/readings/Virtual_Worlds/LucasacfilmHabitat.html) - Original design paper by Morningstar & Farmer
+- [Original Habitat source](https://github.com/Museum-of-Art-and-Digital-Entertainment/habitat) — C64 6502 assembly
+- [NeoHabitat](https://github.com/frandallfarmer/neohabitat) — Open source Habitat server revival
+- [Habitat Chronicles](https://web.stanford.edu/class/history34q/readings/Virtual_Worlds/LucasacfilmHabitat.html) — Design paper by Morningstar & Farmer
