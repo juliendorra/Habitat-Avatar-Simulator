@@ -931,29 +931,32 @@ const AVATAR_HEIGHT = 0; // 0=tallest, 15=shortest (scanline adjustment for uppe
 // Bytes-to-display-pixels: 1 byte = 4 MC pixels = 8 PNG pixels (at 2x scale) × SCALE
 const BYTE_PX = 8 * SCALE; // = 32 display pixels per byte
 
-// Compute chained positions for all 6 limbs (from C64 find_cel_xy / mix.m)
+// Compute chained positions for all 6 limbs (from C64 get_cel_xy / find_cel_xy in mix.m)
 // Returns { cx_tab, cy_tab } in byte/scanline units relative to avatar origin
 //
-// C64 logic: cel_x_origin/cel_y_origin are the avatar's FIXED base position.
-// When the previous cel's x_rel AND y_rel are both 0, the position resets to origin.
-// Otherwise, x_rel/y_rel are added to the RUNNING position (cel_x/cel_y).
+// C64 algorithm (per limb):
+//   1. get_cel_xy loads cel_x = cel_x_origin, cel_y = cel_y_origin
+//   2. find_cel_xy checks cel_x_rel/cel_y_rel (from PREVIOUS limb's cel):
+//      - if both 0 → absolute: cel_x = cel_x_origin (already loaded)
+//      - else → relative: cel_x = cel_x_origin + cel_x_rel (added to ORIGIN, not previous cel_x!)
+//   3. get_cel_xy saves: cel_x_origin = cel_x (origin tracks running position)
+//   4. If limb is NULL (not drawn), get_cel_loc_addr is never called,
+//      so cel_x_rel/cel_y_rel RETAIN their values from the previous limb.
 async function computeLimbPositions(pose, isBack) {
-  const cel_x_origin = 0; // FIXED avatar origin (bytes) — never changes
-  const cel_y_origin = 0; // FIXED avatar origin (scanlines) — never changes
-  let cel_x = 0; // running position
+  let cel_x_origin = 0; // running origin (bytes) — updated after each drawn limb
+  let cel_y_origin = 0; // running origin (scanlines)
+  let cel_x = 0;
   let cel_y = 0;
-  let cel_x_rel = 0; // x_rel/y_rel from the previous cel
+  let cel_x_rel = 0; // initialized to 0 by display_avatar
   let cel_y_rel = 0;
 
   const cx_tab = new Array(6).fill(0);
   const cy_tab = new Array(6).fill(0);
 
-  // Process limbs in order 0-5 (matching C64 display_avatar loop)
   for (let i = 0; i < 6; i++) {
     const limbName = LIMB_ORDER[i];
     const stateIdx = pose[limbName] ?? pose[limbName.replace('head_placeholder','')];
 
-    // Skip if limb not drawn, but still need to process chaining
     let celData = null;
     if (limbName === 'head_placeholder') {
       const headState = pose.head_state || 0;
@@ -964,33 +967,39 @@ async function computeLimbPositions(pose, isBack) {
       if (celNum !== null) celData = await getBodyCelImage(limbName, celNum);
     }
 
-    // find_cel_xy (mix.m): if previous cel's x_rel AND y_rel are both 0 → reset to origin
-    // otherwise → add x_rel/y_rel to running position
-    if (cel_x_rel === 0 && cel_y_rel === 0) {
-      // Absolute: reset to fixed origin
-      cel_x = cel_x_origin;
-      cel_y = cel_y_origin;
-    } else {
-      // Relative: add to running position (not origin!)
-      // For back view, x_rel is negated (C64: EOR #0xFF + SEC)
-      const adj_x_rel = isBack ? -cel_x_rel : cel_x_rel;
-      cel_x = cel_x + adj_x_rel;
-      cel_y = cel_y - cel_y_rel;
+    if (!celData) {
+      // NULL limb: get_cel_loc_addr never called, cel_x_rel/cel_y_rel RETAINED
+      // cx_tab/cy_tab get the current origin (won't be used for drawing)
+      cx_tab[i] = cel_x_origin;
+      cy_tab[i] = cel_y_origin;
+      continue;
     }
 
-    // Store position
+    // Step 1: get_cel_xy loads origin into cel_x/cel_y
+    cel_x = cel_x_origin;
+    cel_y = cel_y_origin;
+
+    // Step 2: find_cel_xy applies previous limb's x_rel/y_rel
+    if (cel_x_rel === 0 && cel_y_rel === 0) {
+      // Absolute: cel_x stays as cel_x_origin (already loaded)
+    } else {
+      // Relative: cel_x = cel_x_origin + x_rel (added to ORIGIN)
+      const adj_x_rel = isBack ? -cel_x_rel : cel_x_rel;
+      cel_x = cel_x_origin + adj_x_rel;
+      cel_y = cel_y_origin - cel_y_rel;
+    }
+
+    // Step 3: get_cel_xy saves back to origin
+    cel_x_origin = cel_x;
+    cel_y_origin = cel_y;
+
+    // Store position for drawing
     cx_tab[i] = cel_x;
-    // Height adjustment: only affects upper body cels (limbs 2-5)
     cy_tab[i] = cel_y + (CELS_AFFECTED_BY_HEIGHT[i] ? AVATAR_HEIGHT : 0);
 
-    // Read x_rel, y_rel from this cel for chaining to next limb
-    if (celData) {
-      cel_x_rel = celData.x_rel || 0;
-      cel_y_rel = celData.y_rel || 0;
-    } else {
-      cel_x_rel = 0;
-      cel_y_rel = 0;
-    }
+    // Step 4: read THIS cel's x_rel/y_rel for next limb
+    cel_x_rel = celData.x_rel || 0;
+    cel_y_rel = celData.y_rel || 0;
   }
 
   return { cx_tab, cy_tab };
