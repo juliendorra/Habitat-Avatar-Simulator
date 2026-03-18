@@ -883,7 +883,16 @@ function getHeadCelsForView(head, viewState) {
   if (cfg && cfg.start_end && cfg.start_end.length >= 8) {
     // Use the actual C64 start_end table
     const startIdx = facing * 2;
-    celState = cfg.start_end[startIdx] & 0x7F; // mask off cycle bit
+    const startState = cfg.start_end[startIdx] & 0x7F; // mask off cycle bit
+    const isCycle = !!(cfg.start_end[startIdx] & 0x80);
+    const endState = cfg.start_end[startIdx + 1] & 0x7F;
+    if (isCycle && endState > startState) {
+      // Animated head: cycle through states based on animation frame
+      const range = endState - startState + 1;
+      celState = startState + (animFrame % range);
+    } else {
+      celState = startState;
+    }
   } else {
     // Fallback when no config available
     celState = viewState;
@@ -1113,6 +1122,9 @@ async function drawHead(pose, cx_tab, cy_tab) {
     const headChainX = cx_tab[4]; // bytes
     const headChainY = cy_tab[4] - 63; // scanlines (constant from animate.m)
 
+    // Each head cel uses absolute positioning from the head origin.
+    // x_rel/y_rel in head cels chain to the NEXT limb (head_placeholder),
+    // not between cels within the same head object.
     for (const celIdx of celIndices) {
       const src = headCelPath(currentHead.name, celIdx);
       const img = await loadImg(src);
@@ -1121,7 +1133,6 @@ async function drawHead(pose, cx_tab, cy_tab) {
       const tmp = prepareCel(img, bodyColors, isBack);
       const drawW = img.width * SCALE;
       const drawH = img.height * SCALE;
-
       const celMeta = headManifest ? headManifest[headCelFilename(currentHead.name, celIdx)] : null;
 
       let drawX, drawY;
