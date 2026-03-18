@@ -442,7 +442,6 @@ const HEADS = [
   {name:"smiley0",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
   {name:"lizard0",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
   {name:"cootie0",cels:6,masks:["10111000","01101000","01101110"],cat:"monster"},
-  {name:"fstien0",cels:3,masks:["10000000","01000000","01100000"],cat:"monster"},
   // Occupations
   {name:"sailor0",cels:3,masks:["10000000","01000000","01100000"],cat:"occupation"},
   {name:"doctor0",cels:3,masks:["10000000","01000000","01100000"],cat:"occupation"},
@@ -590,7 +589,7 @@ const DRAW_ORDER = {
 // Two color modes: CRT-attenuated ("as seen on screen") and pure emulated
 const CRT_COLORS = { blue:"#312893", black:"#000000", pink:"#A96F63" };
 const EMU_COLORS = { blue:"#0000ff", black:"#000000", pink:"#ff55ff" };
-let usePureColors = false;
+
 
 const PALETTES = [
   { name:"Default", body:["#312893","#000000","#A96F63"] },
@@ -673,106 +672,87 @@ function loadImg(src) {
   });
 }
 
-// Source palette in body PNGs (pure emulated colors from decode_avatar_bin.py)
+// Source palettes: bodies use pure emulated colors, heads may use CRT-attenuated
 const SRC_COLORS = [[0,0,255],[0,0,0],[255,85,255]];
-// Head PNGs may use CRT-attenuated colors (from habitat_renderer.py with --palette)
-// Map: CRT blue(49,40,147)→idx 0, CRT black(0,0,0)→idx 1, CRT pink(169,111,99)→idx 2
 const SRC_COLORS_CRT = [[49,40,147],[0,0,0],[169,111,99]];
+const COLOR_TOLERANCE = 40;
+const CANVAS_BG = '#A3A3A3';
 
 function hexToRgb(h) {
   return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
 }
 
-function recolorCanvas(srcCanvas, srcColors, targetHexColors) {
-  const target = targetHexColors.map(hexToRgb);
-  const ctx = srcCanvas.getContext('2d');
-  const d = ctx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
-  const px = d.data;
-  // Try both pure and CRT source palettes (heads use CRT, bodies use pure)
-  const palettes = [srcColors, SRC_COLORS_CRT];
-  for (let i = 0; i < px.length; i += 4) {
-    if (px[i+3] < 128) continue;
-    let matched = false;
-    for (const pal of palettes) {
-      for (let c = 0; c < pal.length; c++) {
-        const [sr,sg,sb] = pal[c];
-        if (Math.abs(px[i]-sr)<40 && Math.abs(px[i+1]-sg)<40 && Math.abs(px[i+2]-sb)<40) {
-          px[i]=target[c][0]; px[i+1]=target[c][1]; px[i+2]=target[c][2];
-          matched = true;
-          break;
-        }
+// Match a pixel at offset i in ImageData against a palette, return color index or -1
+function matchPixelColor(px, i, palettes) {
+  for (const pal of palettes) {
+    for (let c = 0; c < pal.length; c++) {
+      const [sr,sg,sb] = pal[c];
+      if (Math.abs(px[i]-sr)<COLOR_TOLERANCE && Math.abs(px[i+1]-sg)<COLOR_TOLERANCE && Math.abs(px[i+2]-sb)<COLOR_TOLERANCE) {
+        return c;
       }
-      if (matched) break;
     }
   }
-  ctx.putImageData(d, 0, 0);
+  return -1;
 }
 
-// Pattern-aware recolor: applies a pattern to blue(01) pixels
-// patternIdx: index into CEL_PATTERNS (0-15), 2=solid (no pattern effect)
-function recolorWithPattern(srcCanvas, srcColors, targetHexColors, patternIdx) {
-  if (patternIdx === 15) {
-    // Pattern 15 (0x55) = all 01 = solid clothing color = same as normal recolor
-    return recolorCanvas(srcCanvas, srcColors, targetHexColors);
+// Head cel path helpers (centralize naming convention)
+function headCelFilename(headName, celIdx) {
+  return `${headName}_${headName}_data_${String.fromCharCode(97 + celIdx)}.png`;
+}
+function headCelPath(headName, celIdx) {
+  return `habitat_images_final/heads/${headCelFilename(headName, celIdx)}`;
+}
+
+// Reusable temp canvas for cel recoloring (avoids per-frame allocation)
+const _tmpCel = document.createElement('canvas');
+const _tmpCelCtx = _tmpCel.getContext('2d');
+
+// Prepare a recolored cel: draws image to reusable temp canvas, optionally flips,
+// applies recoloring (with optional pattern). Returns the temp canvas.
+function prepareCel(img, targetHexColors, flip, patternIdx) {
+  const w = img.width, h = img.height;
+  if (_tmpCel.width !== w || _tmpCel.height !== h) {
+    _tmpCel.width = w; _tmpCel.height = h;
+  } else {
+    _tmpCelCtx.clearRect(0, 0, w, h);
   }
+  if (flip) {
+    _tmpCelCtx.translate(w, 0);
+    _tmpCelCtx.scale(-1, 1);
+  }
+  _tmpCelCtx.drawImage(img, 0, 0);
+  _tmpCelCtx.setTransform(1, 0, 0, 1, 0, 0);
+
+  // Apply recoloring (with or without pattern)
+  const palettes = [SRC_COLORS, SRC_COLORS_CRT];
   const target = targetHexColors.map(hexToRgb);
-  const pattern = CEL_PATTERNS[patternIdx] || CEL_PATTERNS[2];
-  const ctx = srcCanvas.getContext('2d');
-  const d = ctx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
+  const d = _tmpCelCtx.getImageData(0, 0, w, h);
   const px = d.data;
-  const w = srcCanvas.width;
-  // Colors: target[0]=blue/clothing, target[1]=black/detail, target[2]=pink/wild
+
+  const hasPattern = patternIdx !== undefined && patternIdx !== 15;
+  const pattern = hasPattern ? (CEL_PATTERNS[patternIdx] || CEL_PATTERNS[15]) : null;
+
   for (let i = 0; i < px.length; i += 4) {
     if (px[i+3] < 128) continue;
-    const pixIdx = i / 4;
-    const x = pixIdx % w;
-    const y = Math.floor(pixIdx / w);
-    // Check which source color this pixel matches (try both pure and CRT palettes)
-    let matched = -1;
-    const palettes = [srcColors, SRC_COLORS_CRT];
-    for (const pal of palettes) {
-      for (let c = 0; c < pal.length; c++) {
-        const [sr,sg,sb] = pal[c];
-        if (Math.abs(px[i]-sr)<40 && Math.abs(px[i+1]-sg)<40 && Math.abs(px[i+2]-sb)<40) {
-          matched = c;
-          break;
-        }
-      }
-      if (matched >= 0) break;
-    }
+    const matched = matchPixelColor(px, i, palettes);
     if (matched < 0) continue;
-    if (matched === 0) {
-      // Blue/clothing pixel (cel value 01) — apply pattern
-      // Pattern byte for this scanline (repeats every 4 rows)
+
+    if (hasPattern && matched === 0) {
+      // Blue/clothing pixel — apply pattern
+      const pixIdx = i / 4;
+      const x = pixIdx % w, y = Math.floor(pixIdx / w);
       const patByte = pattern[y % 4];
-      // Each MC pixel = 2 PNG pixels (due to 2x stretch)
-      // Each pattern byte covers 4 MC pixels = 8 PNG pixels
-      const mcX = Math.floor(x / 2) % 4; // which MC pixel within the byte (0-3)
-      const shift = 6 - mcX * 2; // bits 7-6, 5-4, 3-2, 1-0
-      const patVal = (patByte >> shift) & 0x03;
-      // Map pattern pixel value to color
-      // C64: the base clothing area is filled with the clothing color first,
-      // then the pattern modifies specific pixels. Pattern value 00 means
-      // "keep the base clothing color" (not transparent, not background).
-      if (patVal === 0) {
-        // Base clothing color — same as pattern value 01
-        px[i]=target[0][0]; px[i+1]=target[0][1]; px[i+2]=target[0][2];
-      } else if (patVal === 1) {
-        // clothing color (blue target)
-        px[i]=target[0][0]; px[i+1]=target[0][1]; px[i+2]=target[0][2];
-      } else if (patVal === 2) {
-        // detail color (black target)
-        px[i]=target[1][0]; px[i+1]=target[1][1]; px[i+2]=target[1][2];
-      } else {
-        // wild color (pink target)
-        px[i]=target[2][0]; px[i+1]=target[2][1]; px[i+2]=target[2][2];
-      }
+      const mcX = Math.floor(x / 2) % 4;
+      const patVal = (patByte >> (6 - mcX * 2)) & 0x03;
+      // patVal: 0,1=clothing, 2=detail/black, 3=wild/pink
+      const ci = patVal <= 1 ? 0 : patVal - 1;
+      px[i]=target[ci][0]; px[i+1]=target[ci][1]; px[i+2]=target[ci][2];
     } else {
-      // Non-blue pixel: just recolor normally
       px[i]=target[matched][0]; px[i+1]=target[matched][1]; px[i+2]=target[matched][2];
     }
   }
-  ctx.putImageData(d, 0, 0);
+  _tmpCelCtx.putImageData(d, 0, 0);
+  return _tmpCel;
 }
 
 // ============================================================
@@ -864,7 +844,6 @@ let seqNewHead = null;
 let seqFlipped = false;
 // "As seen on screen" CRT-attenuated defaults
 let bodyColors = ["#312893","#000000","#A96F63"];
-let headColors = ["#312893","#000000","#A96F63"];
 
 function getCelNum(limbName, stateIdx) {
   if (stateIdx === null || stateIdx === undefined) return null;
@@ -1100,35 +1079,20 @@ async function drawBodyLimb(limbName, pose, chainX, chainY) {
   const drawW = celData.img.width * SCALE;
   const drawH = celData.img.height * SCALE;
 
-  // Recolor to temp canvas
-  const tmp = document.createElement('canvas');
-  tmp.width = celData.img.width;
-  tmp.height = celData.img.height;
-  const tc = tmp.getContext('2d');
-  if (isBack) {
-    // Flip horizontally for back view
-    tc.translate(celData.img.width, 0);
-    tc.scale(-1, 1);
-  }
-  tc.drawImage(celData.img, 0, 0);
-  tc.setTransform(1, 0, 0, 1, 0, 0); // reset
-  // Apply pattern-aware recoloring based on body zone
+  // Recolor cel via shared helper
   const zone = LIMB_TO_ZONE[limbName];
   const patIdx = zone ? (bodyPatterns[zone] ?? 15) : 15;
-  recolorWithPattern(tmp, SRC_COLORS, bodyColors, patIdx);
+  const tmp = prepareCel(celData.img, bodyColors, isBack, patIdx);
 
-  // C64 paint.m: pixel 00 within a cel's data clears screen to background.
-  // For overlay cels (legs_left), transparent pixels must overwrite underlying
-  // content. We make transparent pixels opaque with background color for overlays.
+  // C64 paint.m: pixel 00 within overlay cels clears screen to background.
+  // For legs_left, fill transparent pixels with bg color so they overwrite legs_right.
   if (limbName === 'legs_left') {
-    const td = tc.getImageData(0, 0, tmp.width, tmp.height);
+    const td = _tmpCelCtx.getImageData(0, 0, tmp.width, tmp.height);
     const tpx = td.data;
     for (let j = 0; j < tpx.length; j += 4) {
-      if (tpx[j+3] < 128) {
-        tpx[j] = 0xA3; tpx[j+1] = 0xA3; tpx[j+2] = 0xA3; tpx[j+3] = 255;
-      }
+      if (tpx[j+3] < 128) { tpx[j]=0xA3; tpx[j+1]=0xA3; tpx[j+2]=0xA3; tpx[j+3]=255; }
     }
-    tc.putImageData(td, 0, 0);
+    _tmpCelCtx.putImageData(td, 0, 0);
   }
   activeCtx.drawImage(tmp, drawX, drawY, drawW, drawH);
 }
@@ -1149,28 +1113,15 @@ async function drawHead(pose, cx_tab, cy_tab) {
     const headChainY = cy_tab[4] - 63; // scanlines (constant from animate.m)
 
     for (const celIdx of celIndices) {
-      const letter = "abcdefg"[celIdx];
-      const src = `habitat_images_final/heads/${currentHead.name}_${currentHead.name}_data_${letter}.png`;
+      const src = headCelPath(currentHead.name, celIdx);
       const img = await loadImg(src);
       if (!img) continue;
 
-      const tmp = document.createElement('canvas');
-      tmp.width = img.width;
-      tmp.height = img.height;
-      const tc = tmp.getContext('2d');
-      if (isBack) {
-        tc.translate(img.width, 0);
-        tc.scale(-1, 1);
-      }
-      tc.drawImage(img, 0, 0);
-      tc.setTransform(1, 0, 0, 1, 0, 0);
-      recolorCanvas(tmp, SRC_COLORS, headColors);
-
+      const tmp = prepareCel(img, bodyColors, isBack);
       const drawW = img.width * SCALE;
       const drawH = img.height * SCALE;
 
-      const manifestKey = `${currentHead.name}_${currentHead.name}_data_${letter}.png`;
-      const celMeta = headManifest ? headManifest[manifestKey] : null;
+      const celMeta = headManifest ? headManifest[headCelFilename(currentHead.name, celIdx)] : null;
 
       let drawX, drawY;
       if (celMeta && celMeta.height < 100) {
@@ -1210,6 +1161,15 @@ async function drawHead(pose, cx_tab, cy_tab) {
 // ============================================================
 // ANIMATION
 // ============================================================
+const VIEW_LABELS = { side:'Side View', front:'Front View', back:'Back View' };
+
+function getFrameCount() {
+  const poseData = POSES[currentPose];
+  if (!poseData) return 1;
+  const viewData = poseData[currentView] || poseData.side;
+  return Array.isArray(viewData) ? viewData.length : 1;
+}
+
 function isAnimatedPose(pose) {
   const poseData = POSES[pose];
   if (!poseData) return false;
@@ -1220,11 +1180,8 @@ function isAnimatedPose(pose) {
 function startAnimation() {
   stopAnimation(true);
   if (isAnimatedPose(currentPose)) {
-    // C64 Habitat: ~6 fps avatar animation (PAL 50Hz, ~8 VBlanks per render cycle)
-    const speed = Math.round(1000 / 6); // 167ms = 6fps for all animations
-    const poseData = POSES[currentPose];
-    const viewData = poseData[currentView] || poseData.side;
-    const frameCount = Array.isArray(viewData) ? viewData.length : 4;
+    const speed = Math.round(1000 / 6); // 167ms = 6fps (C64 PAL timing)
+    const frameCount = getFrameCount();
     animInterval = setInterval(() => {
       // Point: play once and hold at last frame
       if (currentPose === 'point' && animFrame >= frameCount - 1) {
@@ -1250,19 +1207,15 @@ function updateFrameLabel() {
     label.textContent = '—';
     return;
   }
-  const poseData = POSES[currentPose];
-  const viewData = poseData[currentView] || poseData.side;
-  const count = Array.isArray(viewData) ? viewData.length : 1;
+  const count = getFrameCount();
   label.textContent = `${animFrame + 1} / ${count}`;
 }
 
 // Frame stepper buttons
 document.getElementById('framePrevBtn').addEventListener('click', async () => {
   if (!isAnimatedPose(currentPose)) return;
-  stopAnimation(); // pause auto-animation
-  const poseData = POSES[currentPose];
-  const viewData = poseData[currentView] || poseData.side;
-  const count = Array.isArray(viewData) ? viewData.length : 1;
+  stopAnimation();
+  const count = getFrameCount();
   animFrame = (animFrame - 1 + count) % count;
   updateFrameLabel();
   await renderAvatar();
@@ -1270,10 +1223,8 @@ document.getElementById('framePrevBtn').addEventListener('click', async () => {
 
 document.getElementById('frameNextBtn').addEventListener('click', async () => {
   if (!isAnimatedPose(currentPose)) return;
-  stopAnimation(); // pause auto-animation
-  const poseData = POSES[currentPose];
-  const viewData = poseData[currentView] || poseData.side;
-  const count = Array.isArray(viewData) ? viewData.length : 1;
+  stopAnimation();
+  const count = getFrameCount();
   animFrame = (animFrame + 1) % count;
   updateFrameLabel();
   await renderAvatar();
@@ -1334,18 +1285,9 @@ async function renderThumb(head, thumbCanvas) {
   tc.imageSmoothingEnabled = false;
 
   for (const ci of celIndices.length > 0 ? celIndices : [0]) {
-    const letter = "abcdefg"[ci];
-    const src = `habitat_images_final/heads/${head.name}_${head.name}_data_${letter}.png`;
-    const img = await loadImg(src);
+    const img = await loadImg(headCelPath(head.name, ci));
     if (!img) continue;
-
-    const tmp = document.createElement('canvas');
-    tmp.width = img.width; tmp.height = img.height;
-    const tmpCtx = tmp.getContext('2d');
-    tmpCtx.drawImage(img, 0, 0);
-    recolorCanvas(tmp, SRC_COLORS, headColors);
-
-    // Fit in thumbnail - no extra stretch
+    const tmp = prepareCel(img, bodyColors, false);
     const scale = Math.min(50/img.width, 50/img.height, 3);
     const dw = img.width * scale, dh = img.height * scale;
     tc.drawImage(tmp, (56-dw)/2, (56-dh)/2, dw, dh);
@@ -1381,8 +1323,7 @@ document.querySelectorAll('[data-view]').forEach(btn => {
     currentView = btn.dataset.view;
     document.querySelectorAll('[data-view]').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    const labels = { side:'Side View', front:'Front View', back:'Back View' };
-    document.getElementById('viewLabel').textContent = labels[currentView] + ' \u2014 ' +
+    document.getElementById('viewLabel').textContent = VIEW_LABELS[currentView] + ' \u2014 ' +
       currentPose.charAt(0).toUpperCase() + currentPose.slice(1);
     if (isAnimatedPose(currentPose)) startAnimation(); else stopAnimation(true);
     renderAvatar();
@@ -1395,8 +1336,7 @@ document.querySelectorAll('[data-pose]').forEach(btn => {
     currentPose = btn.dataset.pose;
     document.querySelectorAll('[data-pose]').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    const labels = { side:'Side View', front:'Front View', back:'Back View' };
-    document.getElementById('viewLabel').textContent = labels[currentView] + ' \u2014 ' +
+    document.getElementById('viewLabel').textContent = VIEW_LABELS[currentView] + ' \u2014 ' +
       currentPose.charAt(0).toUpperCase() + currentPose.slice(1);
     if (isAnimatedPose(currentPose)) startAnimation();
     else { stopAnimation(true); }
@@ -1440,7 +1380,6 @@ function readPalette() {
     document.getElementById('color3').value,
   ];
   bodyColors = colors;
-  headColors = colors;
 }
 
 function onPaletteChange() {
@@ -1454,8 +1393,7 @@ function onPaletteChange() {
 
 // Pure emulated colors toggle
 document.getElementById('pureColors').addEventListener('change', function() {
-  usePureColors = this.checked;
-  const c = usePureColors ? EMU_COLORS : CRT_COLORS;
+  const c = this.checked ? EMU_COLORS : CRT_COLORS;
   document.getElementById('color1').value = c.blue;
   document.getElementById('color2').value = c.black;
   document.getElementById('color3').value = c.pink;
@@ -1709,16 +1647,9 @@ async function drawMiniHead(head, position) {
   if (!head) return;
   const celIndices = getHeadCelsForView(head, 0); // side view
   for (const ci of celIndices.length > 0 ? celIndices : [0]) {
-    const letter = "abcdefg"[ci];
-    const src = `habitat_images_final/heads/${head.name}_${head.name}_data_${letter}.png`;
-    const img = await loadImg(src);
+    const img = await loadImg(headCelPath(head.name, ci));
     if (!img) continue;
-
-    const tmp = document.createElement('canvas');
-    tmp.width = img.width; tmp.height = img.height;
-    const tc = tmp.getContext('2d');
-    tc.drawImage(img, 0, 0);
-    recolorCanvas(tmp, SRC_COLORS, headColors);
+    const tmp = prepareCel(img, bodyColors, false);
 
     const miniScale = SCALE * 0.7;
     const drawW = img.width * miniScale;
