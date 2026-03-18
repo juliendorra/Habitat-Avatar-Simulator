@@ -1111,10 +1111,11 @@ async function drawHead(pose, cx_tab, cy_tab) {
   const isBack = currentView === 'back';
   const headState = pose.head_state || 0;
 
-  // C64 animate.m draw_a_limb for head (cel_number=4):
-  // 1. Draw the contained head object at: cx_tab[4], cy_tab[4] - 63
-  // 2. Draw the head_placeholder cel at: cx_tab[4], cy_tab[4] (via paint_limb)
-  // The head_placeholder is a neck/collar piece that bridges head to torso.
+  // C64 animate.m draw_a_limb (head cel):
+  //   cel_x = cx_tab[head_cel_number]
+  //   cel_y = cy_tab[head_cel_number] - 63    (hardcoded constant)
+  // Then draw_contained_object sets cel_x_origin = cel_x, cel_y_origin = cel_y
+  // Head_placeholder cel drawn at cx_tab[4], cy_tab[4] via paint_limb
 
   // Step 1: Draw the head object (if we have one)
   if (currentHead) {
