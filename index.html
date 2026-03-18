@@ -140,7 +140,7 @@
   .pattern-zone > span { font-size: 0.7em; color: var(--text-dim); display: block; margin-bottom: 2px; }
   .pattern-swatches { display: flex; gap: 2px; flex-wrap: wrap; }
   .pattern-swatch {
-    width: 24px; height: 24px; cursor: pointer;
+    width: 28px; height: 36px; cursor: pointer;
     border: 2px solid transparent; border-radius: 2px;
     image-rendering: pixelated; transition: border-color 0.15s;
   }
@@ -1423,24 +1423,58 @@ document.getElementById('pureColors').addEventListener('change', function() {
   }
 })();
 
-// Clothing pattern selectors
-// Generate a small pattern swatch canvas (8x8 pixels)
+// Spray bottle bitmap from C64 bottle.m (combined nozzle + body)
+// Pixel values: 0=transparent, 1=blue(pattern area), 2=black(outline)
+const SPRAY_BOTTLE = [
+  // Nozzle (12x6, offset at x=0)
+  [0,2,2,2,2,2,2,2,2,0,0,0,0,0],
+  [0,2,0,0,0,0,0,0,2,2,2,2,0,0],
+  [0,2,0,0,0,0,0,0,0,0,2,2,0,0],
+  [0,2,0,0,0,0,0,0,0,0,2,2,0,0],
+  [0,2,0,0,0,0,0,0,2,2,2,2,0,0],
+  [0,2,2,2,2,2,2,2,2,0,0,0,0,0],
+  // Body (8x10, offset at x=2)
+  [0,0,0,2,2,2,2,2,0,0,0,0,0,0],
+  [0,0,0,2,1,1,1,2,0,0,0,0,0,0],
+  [0,0,0,2,1,1,1,2,0,0,0,0,0,0],
+  [0,0,0,2,1,1,1,2,0,0,0,0,0,0],
+  [0,0,0,2,1,1,1,2,0,0,0,0,0,0],
+  [0,0,0,2,1,1,1,2,0,0,0,0,0,0],
+  [0,0,0,2,1,1,1,2,0,0,0,0,0,0],
+  [0,0,0,2,1,1,1,2,0,0,0,0,0,0],
+  [0,0,0,2,1,1,1,2,0,0,0,0,0,0],
+  [0,0,0,2,2,2,2,2,0,0,0,0,0,0],
+];
+
+// Render a spray bottle swatch with the given pattern applied to blue(1) pixels
 function makePatternSwatch(patIdx) {
+  const W = 14, H = 16;
   const c = document.createElement('canvas');
-  c.width = 8; c.height = 8;
+  c.width = W; c.height = H;
   c.className = 'pattern-swatch';
   c.title = `${patIdx}: ${PATTERN_NAMES[patIdx]}`;
   const gc = c.getContext('2d');
   const pattern = CEL_PATTERNS[patIdx];
-  // Color map: 00=bg, 01=blue, 10=black, 11=pink
-  const colors = ['#2a2a3e','#312893','#000000','#A96F63'];
-  for (let y = 0; y < 8; y++) {
-    const patByte = pattern[y % 4];
-    for (let mcX = 0; mcX < 4; mcX++) {
-      const shift = 6 - mcX * 2;
-      const val = (patByte >> shift) & 0x03;
-      gc.fillStyle = colors[val];
-      gc.fillRect(mcX * 2, y, 2, 1);
+  // Colors: outline=black, pattern area uses pattern values
+  const patColors = ['#2a2a3e','#312893','#000000','#A96F63'];
+  for (let y = 0; y < H; y++) {
+    const row = SPRAY_BOTTLE[y];
+    if (!row) continue;
+    for (let x = 0; x < W; x++) {
+      const px = row[x] || 0;
+      if (px === 0) continue; // transparent
+      if (px === 2) {
+        gc.fillStyle = '#000000'; // outline
+        gc.fillRect(x, y, 1, 1);
+      } else if (px === 1) {
+        // Pattern area: apply pattern like C64
+        const patByte = pattern[(y - 6) % 4]; // body starts at row 6
+        const mcX = Math.floor((x - 3) / 2) % 4; // body starts at col 3, 2px per MC pixel
+        const shift = 6 - mcX * 2;
+        const val = (patByte >> shift) & 0x03;
+        gc.fillStyle = patColors[val];
+        gc.fillRect(x, y, 1, 1);
+      }
     }
   }
   return c;
@@ -1466,6 +1500,26 @@ function makePatternSwatch(patIdx) {
       container.appendChild(swatch);
     }
   }
+
+  // Global reset button
+  const resetBtn = document.createElement('button');
+  resetBtn.className = 'btn';
+  resetBtn.style.cssText = 'margin-top:6px;font-size:0.7em;padding:2px 8px';
+  resetBtn.textContent = 'Reset All Patterns';
+  resetBtn.addEventListener('click', () => {
+    bodyPatterns.torso = 15;
+    bodyPatterns.arms = 15;
+    bodyPatterns.legs = 15;
+    // Update all swatch highlights
+    for (const { id, zone } of zones) {
+      const container = document.getElementById(id);
+      container.querySelectorAll('.pattern-swatch').forEach((s, idx) => {
+        s.classList.toggle('active', idx === 15);
+      });
+    }
+    renderAvatar();
+  });
+  document.getElementById('patLegsSwatches').parentElement.after(resetBtn);
 })();
 
 // ============================================================
