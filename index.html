@@ -678,14 +678,10 @@ function initAnimAction(poseName, viewName) {
   }
 
   // Step 3: Apply choreography (C64: init_avatar_chores for each byte)
+  // The choreography data handles EVERYTHING — no manual overrides needed.
+  // Side walk: legs_right=gs1, left_arm=gs1, right_arm=gs1 (legs_left NOT set = invisible)
+  // Back walk: walk_back choreography includes legs_left=gs1 explicitly
   applyAction(actionName);
-
-  // Step 4: For side walk, the walk choreography already sets gs1 for
-  // legs_right, left_arm, right_arm. But legs_left is not set by the
-  // choreography — the C64 walk system handles it. Set it here:
-  if (poseName === 'walk' && viewName === 'side') {
-    setLimbGS('legs_left', 1); // gs1 = side walk overlay
-  }
 }
 
 // Draw order per view (from C64 animate.m fv_cels/bv_cels)
