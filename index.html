@@ -1123,9 +1123,17 @@ async function drawHead(pose, cx_tab, cy_tab) {
     const headChainX = cx_tab[4]; // bytes
     const headChainY = cy_tab[4] - 63; // scanlines (constant from animate.m)
 
-    // Each head cel uses absolute positioning from the head origin.
-    // x_rel/y_rel in head cels chain to the NEXT limb (head_placeholder),
-    // not between cels within the same head object.
+    // C64 draw_prop initializes cel_x_rel/cel_y_rel to 0 before the first cel.
+    // For each cel, find_cel_xy checks the PREVIOUS cel's x_rel/y_rel:
+    //   if both 0 → reset to origin (cel_x_origin)
+    //   else → chain: cel_x += x_rel, cel_y -= y_rel
+    // Then the current cel's own x_offset/y_offset position it from cel_x/cel_y.
+    // After drawing, the current cel's x_rel/y_rel are stored for the next cel.
+    let prev_x_rel = 0; // initialized to 0 by draw_prop
+    let prev_y_rel = 0;
+    let cel_x = headChainX; // will be set by find_cel_xy
+    let cel_y = headChainY;
+
     for (const celIdx of celIndices) {
       const src = headCelPath(currentHead.name, celIdx);
       const img = await loadImg(src);
@@ -1136,18 +1144,32 @@ async function drawHead(pose, cx_tab, cy_tab) {
       const drawH = img.height * SCALE;
       const celMeta = headManifest ? headManifest[headCelFilename(currentHead.name, celIdx)] : null;
 
+      // find_cel_xy: use PREVIOUS cel's x_rel/y_rel
+      if (prev_x_rel === 0 && prev_y_rel === 0) {
+        cel_x = headChainX; // reset to origin
+        cel_y = headChainY;
+      } else {
+        const adj = isBack ? -prev_x_rel : prev_x_rel;
+        cel_x = cel_x + adj;
+        cel_y = cel_y - prev_y_rel;
+      }
+
       let drawX, drawY;
       if (celMeta && celMeta.height < 100) {
         const widthBytes = (celMeta.native_width || img.width) / 4;
         const xOff = isBack ? (1 - celMeta.x_offset - widthBytes) : celMeta.x_offset;
-        drawX = BASE_X + (headChainX + xOff) * BYTE_PX;
-        drawY = BASE_Y + (headChainY - celMeta.y_offset) * SCALE;
+        drawX = BASE_X + (cel_x + xOff) * BYTE_PX;
+        drawY = BASE_Y + (cel_y - celMeta.y_offset) * SCALE;
       } else {
-        drawX = BASE_X + headChainX * BYTE_PX;
-        drawY = BASE_Y + headChainY * SCALE - drawH;
+        drawX = BASE_X + cel_x * BYTE_PX;
+        drawY = BASE_Y + cel_y * SCALE - drawH;
       }
 
       activeCtx.drawImage(tmp, drawX, drawY, drawW, drawH);
+
+      // Store this cel's x_rel/y_rel for the next cel
+      prev_x_rel = celMeta ? (celMeta.x_rel || 0) : 0;
+      prev_y_rel = celMeta ? (celMeta.y_rel || 0) : 0;
     }
   }
 
