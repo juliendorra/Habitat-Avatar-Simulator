@@ -554,8 +554,10 @@ const POSES = {
     back: { legs_right:16, legs_left:null, left_arm:10, torso:6, right_arm:37, head_state:2 },
   },
   point: {
+    // C64 point action: r_arm=gs5, play-once frames 13→15 (cels 9,5,8)
+    // cel 9=arm tucked, cel 5=arm extended, cel 8=fist pointing
     side: [
-      { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:0, head_state:0 },
+      { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:13, head_state:0 },
       { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:14, head_state:0 },
       { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:15, head_state:0 },
     ],
@@ -567,8 +569,8 @@ const POSES = {
     // Choreography from Avatar.bin: bend_over sets r_arm=gs1, but visual bend uses gs5
     side: [
       { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:0, head_state:0 },
-      { legs_right:0, legs_left:null, left_arm:null, torso:2, right_arm:14, head_state:0 },
-      { legs_right:0, legs_left:null, left_arm:null, torso:3, right_arm:15, head_state:0 },
+      { legs_right:0, legs_left:null, left_arm:null, torso:2, right_arm:13, head_state:0 },
+      { legs_right:0, legs_left:null, left_arm:null, torso:3, right_arm:14, head_state:0 },
     ],
     front: { legs_right:16, legs_left:null, left_arm:10, torso:7, right_arm:37, head_state:1 },
     back: { legs_right:16, legs_left:null, left_arm:10, torso:6, right_arm:37, head_state:2 },
