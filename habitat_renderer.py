@@ -49,9 +49,9 @@ import numpy as np
 # at runtime with the ``--palette`` command line argument.
 PALETTE = [
     (0, 0, 0, 0),        # 0: transparent
-    (0, 0, 0, 255),      # 1: darkest colour (outlines)
-    (0, 0, 255, 255),    # 2: mid‑tone colour
-    (255, 85, 255, 255), # 3: highlight colour
+    (0, 0, 255, 255),    # 1: blue (pattern/clothing area, C64 pixel value 01)
+    (0, 0, 0, 255),      # 2: black (outline/detail, C64 pixel value 10)
+    (255, 85, 255, 255), # 3: pink (wild/skin/highlights, C64 pixel value 11)
 ]
 
 
