@@ -493,93 +493,224 @@ const HEADS = [
 ];
 
 // ============================================================
-// BODY CEL POSITIONS - from decoded Avatar.bin
-// Choreography: which cel to use per limb per pose
+// DATA-DRIVEN ANIMATION ENGINE
+// Uses avatar_animations.json extracted from Avatar.bin
 // ============================================================
-// Limb state arrays (state index → cel number)
+let avatarAnim = null; // loaded async from avatar_animations.json
+
+async function loadAvatarAnimations() {
+  try {
+    const r = await fetch('habitat_images_final/body/avatar_animations.json');
+    avatarAnim = await r.json();
+    console.log(`Loaded avatar animations: ${Object.keys(avatarAnim.choreography).length} actions`);
+  } catch(e) {
+    console.error('Failed to load avatar_animations.json:', e);
+  }
+}
+
+// LIMB_STATES: frame→cel mapping (kept as JS constant, matches avatar_animations.json)
 const LIMB_STATES = {
   legs_right: [4,0,1,2,3,7,8,5,6,6,6,6,7,5,5,4,13,9,10,11,12,14],
-  legs_left: [255,0,1,2,3],  // 255=not drawn
+  legs_left: [255,0,1,2,3],
   left_arm: [255,0,1,2,255,3,255,2,1,4,5,6,5],
   torso: [0,1,2,3,2,0,4,5],
-  head_placeholder: [0,1,2,3], // 0=side,1=front,2=back,3=frown
+  head_placeholder: [0,1,2,3],
   right_arm: [11,0,1,9,2,3,2,9,1,9,10,9,11,9,5,8,3,2,9,7,1,1,11,9,5,6,5,6,5,9,11,9,4,4,9,11,13,12,13,14,13,0,1,2,3,3,9,5,6,7,9,0,1,3,1,3,1,11,9,0,6,9,5,6,8,6,8,5,6,8,5,8,1,1,2,1,1,1,9,11],
 };
 
-// Pose definitions: which state index for each limb
-// Derived from the choreography table in the original source
-// Pose definitions: frame-level state indices into LIMB_STATES
-// (Avatar.bin choreography uses graphic_states that map through each limb's
-// start_end table to get these frame indices — the mapping is pre-applied here)
-const POSES = {
-  stand: {
-    side: { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:0, head_state:0 },
-    front: { legs_right:16, legs_left:null, left_arm:10, torso:7, right_arm:37, head_state:1 },
-    back: { legs_right:16, legs_left:null, left_arm:10, torso:6, right_arm:37, head_state:2 },
-  },
-  walk: {
-    // 8-frame walk from Avatar.bin start_end tables:
-    // legs cycle frames 1-4 (4 frames, repeats twice), arms cycle frames 1-8
-    side: [
-      { legs_right:1, legs_left:1, left_arm:1, torso:0, right_arm:1, head_state:0 },
-      { legs_right:2, legs_left:2, left_arm:2, torso:0, right_arm:2, head_state:0 },
-      { legs_right:3, legs_left:3, left_arm:3, torso:0, right_arm:3, head_state:0 },
-      { legs_right:4, legs_left:4, left_arm:null, torso:0, right_arm:4, head_state:0 },
-      { legs_right:1, legs_left:1, left_arm:5, torso:0, right_arm:5, head_state:0 },
-      { legs_right:2, legs_left:2, left_arm:null, torso:0, right_arm:6, head_state:0 },
-      { legs_right:3, legs_left:3, left_arm:7, torso:0, right_arm:7, head_state:0 },
-      { legs_right:4, legs_left:4, left_arm:8, torso:0, right_arm:8, head_state:0 },
-    ],
-    front: [
-      { legs_right:17, legs_left:null, left_arm:10, torso:7, right_arm:37, head_state:1 },
-      { legs_right:18, legs_left:null, left_arm:11, torso:7, right_arm:36, head_state:1 },
-      { legs_right:19, legs_left:null, left_arm:10, torso:7, right_arm:37, head_state:1 },
-      { legs_right:20, legs_left:null, left_arm:11, torso:7, right_arm:36, head_state:1 },
-    ],
-    // Avatar.bin walk_back: legs_r=7, legs_l=1 — both legs animate
-    // legs_left cycles through states 1-4 (foot/shin overlay cels)
-    back: [
-      { legs_right:17, legs_left:1, left_arm:10, torso:6, right_arm:37, head_state:2 },
-      { legs_right:18, legs_left:2, left_arm:11, torso:6, right_arm:36, head_state:2 },
-      { legs_right:19, legs_left:3, left_arm:10, torso:6, right_arm:37, head_state:2 },
-      { legs_right:20, legs_left:4, left_arm:11, torso:6, right_arm:36, head_state:2 },
-    ],
-  },
-  wave: {
-    side: [
-      { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:32, head_state:0 },
-      { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:34, head_state:0 },
-    ],
-    front: { legs_right:16, legs_left:null, left_arm:10, torso:7, right_arm:37, head_state:1 },
-    back: { legs_right:16, legs_left:null, left_arm:10, torso:6, right_arm:37, head_state:2 },
-  },
-  point: {
-    // C64 point action: r_arm=gs5, play-once frames 13→15 (cels 9,5,8)
-    // cel 9=arm tucked, cel 5=arm extended, cel 8=fist pointing
-    side: [
-      { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:13, head_state:0 },
-      { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:14, head_state:0 },
-      { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:15, head_state:0 },
-    ],
-    front: { legs_right:16, legs_left:null, left_arm:10, torso:7, right_arm:37, head_state:1 },
-    back: { legs_right:16, legs_left:null, left_arm:10, torso:6, right_arm:37, head_state:2 },
-  },
-  bend: {
-    // Bend over: r_arm gs5 (frames 13→15 = cels 9,5,8).
-    // State 14 = cel 5 (32x11, arm extending forward).
-    // State 15 = cel 8 (48x11, arm+fist fully extended to grab).
-    // Torso gs2: frames 2→3 = cels 2,3 (mid-bend, fully bent).
-    side: [
-      { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:0, head_state:0 },
-      { legs_right:0, legs_left:null, left_arm:null, torso:2, right_arm:14, head_state:0 },
-      { legs_right:0, legs_left:null, left_arm:null, torso:3, right_arm:15, head_state:0 },
-    ],
-    front: { legs_right:16, legs_left:null, left_arm:10, torso:7, right_arm:37, head_state:1 },
-    back: { legs_right:16, legs_left:null, left_arm:10, torso:6, right_arm:37, head_state:2 },
-  },
+// Map UI pose+view to C64 action names
+// The C64 has separate actions for each facing (stand vs stand_front vs stand_back)
+const ACTION_FOR_POSE_VIEW = {
+  'stand_side': 'stand',
+  'stand_front': 'stand_front',
+  'stand_back': 'stand_back',
+  'walk_side': 'walk',
+  'walk_front': 'walk_front',
+  'walk_back': 'walk_back',
+  'wave_side': 'wave',
+  'wave_front': 'stand_front',
+  'wave_back': 'stand_back',
+  'point_side': 'point',
+  'point_front': 'stand_front',
+  'point_back': 'stand_back',
+  'bend_side': 'bend_over',
+  'bend_front': 'stand_front',
+  'bend_back': 'stand_back',
 };
 
-// Draw order per view
+// Per-limb animation state: current frame within its graphic_state range
+const limbAnimState = {};
+const LIMB_NAMES = ['legs_right','legs_left','left_arm','torso','head_placeholder','right_arm'];
+
+// Apply a choreography action: set each limb's graphic_state and init frame ranges
+function applyAction(actionName) {
+  if (!avatarAnim) return;
+  const chore = avatarAnim.choreography[actionName];
+  if (!chore) return;
+
+  // Set graphic_states from choreography
+  for (const [limbName, gs] of Object.entries(chore)) {
+    const se = avatarAnim.start_end[limbName];
+    if (!se || gs >= se.length) continue;
+    const range = se[gs];
+    limbAnimState[limbName] = {
+      gs: gs,
+      start: range.start,
+      end: range.end,
+      cycle: range.cycle,
+      frame: range.start, // init to start frame
+    };
+  }
+}
+
+// Advance all limb animations by one tick (called at 6fps)
+function tickAnimation() {
+  let anyMoved = false;
+  for (const limbName of LIMB_NAMES) {
+    const state = limbAnimState[limbName];
+    if (!state) continue;
+    if (state.start === state.end) continue; // single-frame, no animation
+
+    if (state.cycle) {
+      // Cycling: advance and wrap
+      state.frame++;
+      if (state.frame > state.end) {
+        state.frame = state.start;
+      }
+      anyMoved = true;
+    } else {
+      // Play-once: advance until end
+      if (state.frame < state.end) {
+        state.frame++;
+        anyMoved = true;
+      }
+    }
+  }
+  return anyMoved;
+}
+
+// Get current frame index for a limb (returns the LIMB_STATES index)
+function getLimbFrame(limbName) {
+  const state = limbAnimState[limbName];
+  if (!state) return null;
+  return state.frame;
+}
+
+// Build a pose config from current limb animation states
+// This replaces the old getPoseConfig() for animated poses
+function buildPoseFromAnimState() {
+  const pose = {};
+  for (const limbName of LIMB_NAMES) {
+    const frame = getLimbFrame(limbName);
+    if (frame === null) {
+      pose[limbName] = limbName === 'head_placeholder' ? 0 : null;
+      continue;
+    }
+    const cel = LIMB_STATES[limbName][frame];
+    if (cel === 255) {
+      pose[limbName] = null; // not drawn
+    } else {
+      pose[limbName] = frame; // frame index into LIMB_STATES
+    }
+  }
+  // Head state: derived from head_placeholder's graphic_state
+  const hpState = limbAnimState['head_placeholder'];
+  pose.head_state = hpState ? hpState.gs : 0;
+  return pose;
+}
+
+// Get the total number of animation frames for the current action
+// (LCM of all limb cycle lengths, or max play-once length)
+function getAnimFrameCount() {
+  let maxLen = 1;
+  for (const limbName of LIMB_NAMES) {
+    const state = limbAnimState[limbName];
+    if (!state || state.start === state.end) continue;
+    const len = state.end - state.start + 1;
+    if (state.cycle) {
+      // For cycling limbs, use LCM
+      maxLen = lcm(maxLen, len);
+    } else {
+      maxLen = Math.max(maxLen, len);
+    }
+  }
+  return maxLen;
+}
+
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+function lcm(a, b) { return (a * b) / gcd(a, b); }
+
+// Initialize the animation engine for a given pose+view
+function initAnimAction(poseName, viewName) {
+  const key = `${poseName}_${viewName}`;
+  const actionName = ACTION_FOR_POSE_VIEW[key] || 'stand';
+
+  // Reset all limb states to defaults for this view
+  const viewDefaults = {
+    'side': { legs_right: 0, legs_left: 0, left_arm: 0, torso: 0, head_placeholder: 0, right_arm: 0 },
+    'front': { legs_right: 6, legs_left: 0, left_arm: 2, torso: 4, head_placeholder: 1, right_arm: 8 },
+    'back': { legs_right: 6, legs_left: 0, left_arm: 2, torso: 4, head_placeholder: 2, right_arm: 9 },
+  };
+  const defaults = viewDefaults[viewName] || viewDefaults.side;
+
+  // Init all limbs to their view defaults
+  for (const limbName of LIMB_NAMES) {
+    const gs = defaults[limbName] || 0;
+    const se = avatarAnim ? avatarAnim.start_end[limbName] : null;
+    if (se && gs < se.length) {
+      const range = se[gs];
+      limbAnimState[limbName] = {
+        gs: gs,
+        start: range.start,
+        end: range.end,
+        cycle: range.cycle,
+        frame: range.start,
+      };
+    } else {
+      limbAnimState[limbName] = { gs: 0, start: 0, end: 0, cycle: false, frame: 0 };
+    }
+  }
+
+  // Apply the action's choreography on top
+  applyAction(actionName);
+
+  // Walk override: C64 walk animation is triggered by the movement system,
+  // not choreography. The chore data for 'walk' is identical to 'stand'.
+  // We manually set all locomotion limbs to gs1 (walk cycle).
+  if (poseName === 'walk' && viewName === 'side') {
+    for (const limb of ['legs_right', 'legs_left', 'left_arm', 'right_arm']) {
+      const se = avatarAnim.start_end[limb];
+      if (se && se.length > 1) {
+        const range = se[1]; // gs1 = walk cycle
+        limbAnimState[limb] = {
+          gs: 1, start: range.start, end: range.end,
+          cycle: range.cycle, frame: range.start,
+        };
+      }
+    }
+  }
+
+  // Bend override: bend_over choreography sets r_arm to gs1 (walk swing),
+  // but the visual bend needs torso transitioning gs0→gs2 and arm gs5
+  if (poseName === 'bend' && viewName === 'side') {
+    const tse = avatarAnim.start_end['torso'];
+    if (tse && tse.length > 2) {
+      limbAnimState['torso'] = {
+        gs: 2, start: tse[2].start, end: tse[2].end,
+        cycle: false, frame: tse[2].start,
+      };
+    }
+    const rse = avatarAnim.start_end['right_arm'];
+    if (rse && rse.length > 5) {
+      limbAnimState['right_arm'] = {
+        gs: 5, start: rse[5].start, end: rse[5].end,
+        cycle: false, frame: rse[5].start,
+      };
+    }
+  }
+}
+
+// Draw order per view (from C64 animate.m fv_cels/bv_cels)
 const DRAW_ORDER = {
   side: ['legs_right','legs_left','left_arm','torso','head','right_arm'],
   front: ['legs_right','legs_left','torso','head','left_arm','right_arm'],
@@ -858,13 +989,8 @@ function getCelNum(limbName, stateIdx) {
 }
 
 function getPoseConfig() {
-  const poseData = POSES[currentPose];
-  if (!poseData) return POSES.stand.side;
-  const viewData = poseData[currentView] || poseData.side;
-  if (Array.isArray(viewData)) {
-    return viewData[animFrame % viewData.length];
-  }
-  return viewData;
+  // Use data-driven animation engine
+  return buildPoseFromAnimState();
 }
 
 function getHeadCelsForView(head, viewState) {
@@ -1174,18 +1300,10 @@ async function drawHead(pose, cx_tab, cy_tab) {
 // ============================================================
 const VIEW_LABELS = { side:'Side View', front:'Front View', back:'Back View' };
 
-function getFrameCount() {
-  const poseData = POSES[currentPose];
-  if (!poseData) return 1;
-  const viewData = poseData[currentView] || poseData.side;
-  return Array.isArray(viewData) ? viewData.length : 1;
-}
-
 function isAnimatedPose(pose) {
-  const poseData = POSES[pose];
-  if (!poseData) return false;
-  const viewData = poseData[currentView] || poseData.side;
-  return Array.isArray(viewData);
+  // Any pose with cycling limbs or multi-frame play-once is animated
+  if (pose === 'stand') return hasAnimatedHead();
+  return true; // walk, wave, point, bend all animate
 }
 
 // Check if the current head has cycling animation in any view
@@ -1193,7 +1311,6 @@ function hasAnimatedHead() {
   if (!currentHead || !headConfig) return false;
   const cfg = headConfig[currentHead.name];
   if (!cfg || !cfg.start_end) return false;
-  // Check all facing directions for cycle flag
   for (let f = 0; f < 4; f++) {
     if (cfg.start_end[f * 2] & 0x80) return true;
   }
@@ -1202,56 +1319,62 @@ function hasAnimatedHead() {
 
 function startAnimation() {
   stopAnimation(true);
-  const bodyAnimated = isAnimatedPose(currentPose);
-  const headAnimated = hasAnimatedHead();
+  // Init the animation engine for current pose+view
+  if (avatarAnim) initAnimAction(currentPose, currentView);
 
-  if (bodyAnimated || headAnimated) {
+  if (isAnimatedPose(currentPose) || hasAnimatedHead()) {
     const speed = Math.round(1000 / 6); // 167ms = 6fps (C64 PAL timing)
-    const frameCount = bodyAnimated ? getFrameCount() : 1;
     animInterval = setInterval(() => {
-      // Point: play once and hold at last frame
-      if (currentPose === 'point' && animFrame >= frameCount - 1) {
+      const moved = tickAnimation();
+      // Point/bend: stop when play-once animations finish
+      if ((currentPose === 'point' || currentPose === 'bend') && !moved) {
         clearInterval(animInterval);
         animInterval = null;
         return;
       }
-      animFrame = (animFrame + 1) % (bodyAnimated ? frameCount : 256);
+      animFrame++;
       renderAvatar();
+      updateFrameLabel();
     }, speed);
   }
 }
 
 function stopAnimation(resetFrame) {
   if (animInterval) { clearInterval(animInterval); animInterval = null; }
-  if (resetFrame) { animFrame = 0; }
+  if (resetFrame) {
+    animFrame = 0;
+    if (avatarAnim) initAnimAction(currentPose, currentView);
+  }
   updateFrameLabel();
 }
 
 function updateFrameLabel() {
   const label = document.getElementById('frameLabel');
-  if (!isAnimatedPose(currentPose)) {
+  if (!isAnimatedPose(currentPose) && !hasAnimatedHead()) {
     label.textContent = '—';
     return;
   }
-  const count = getFrameCount();
-  label.textContent = `${animFrame + 1} / ${count}`;
+  const count = getAnimFrameCount();
+  label.textContent = `${(animFrame % count) + 1} / ${count}`;
 }
 
 // Frame stepper buttons
 document.getElementById('framePrevBtn').addEventListener('click', async () => {
-  if (!isAnimatedPose(currentPose)) return;
   stopAnimation();
-  const count = getFrameCount();
-  animFrame = (animFrame - 1 + count) % count;
+  // Step backward: reset and advance to previous frame
+  if (avatarAnim) initAnimAction(currentPose, currentView);
+  const count = getAnimFrameCount();
+  const targetFrame = (animFrame - 1 + count) % count;
+  for (let i = 0; i < targetFrame; i++) tickAnimation();
+  animFrame = targetFrame;
   updateFrameLabel();
   await renderAvatar();
 });
 
 document.getElementById('frameNextBtn').addEventListener('click', async () => {
-  if (!isAnimatedPose(currentPose)) return;
   stopAnimation();
-  const count = getFrameCount();
-  animFrame = (animFrame + 1) % count;
+  tickAnimation();
+  animFrame++;
   updateFrameLabel();
   await renderAvatar();
 });
@@ -1805,7 +1928,9 @@ document.addEventListener('keydown', e => {
 // ============================================================
 // INIT
 // ============================================================
-Promise.all([loadBodyManifest(), loadHeadManifest(), loadHeadConfig()]).then(() => {
+Promise.all([loadBodyManifest(), loadHeadManifest(), loadHeadConfig(), loadAvatarAnimations()]).then(() => {
+  // Init animation engine to default state
+  if (avatarAnim) initAnimAction('stand', 'side');
   buildGrid();
   selectHead(HEADS[Math.floor(Math.random() * HEADS.length)]);
 });
