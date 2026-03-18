@@ -1,0 +1,7788 @@
+{
+  "afro0": {
+    "name": "afro0",
+    "num_states": 3,
+    "disk_face": 192,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 30,
+        "x_offset": 0,
+        "y_offset": 8
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 30,
+        "x_offset": -2,
+        "y_offset": 7
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 7,
+        "x_offset": -1,
+        "y_offset": -9
+      }
+    }
+  },
+  "airforce0": {
+    "name": "airforce0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 6,
+        "height": 27,
+        "x_offset": -1,
+        "y_offset": 5
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 27,
+        "x_offset": -2,
+        "y_offset": 4
+      },
+      "c": {
+        "width_bytes": 13,
+        "height": 127,
+        "x_offset": -4,
+        "y_offset": 0
+      }
+    }
+  },
+  "angel0": {
+    "name": "angel0",
+    "num_states": 2,
+    "disk_face": 128,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 29,
+        "x_offset": 0,
+        "y_offset": 7
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 29,
+        "x_offset": -1,
+        "y_offset": 6
+      }
+    }
+  },
+  "angel1": {
+    "name": "angel1",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 29,
+        "x_offset": 0,
+        "y_offset": 7
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 29,
+        "x_offset": -2,
+        "y_offset": 6
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 16,
+        "x_offset": -1,
+        "y_offset": -4
+      }
+    }
+  },
+  "army0": {
+    "name": "army0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": -2,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 19,
+        "x_offset": -1,
+        "y_offset": 0
+      }
+    }
+  },
+  "army1": {
+    "name": "army1",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 26,
+        "x_offset": 0,
+        "y_offset": 4
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 26,
+        "x_offset": -2,
+        "y_offset": 3
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 14,
+        "x_offset": -1,
+        "y_offset": -7
+      }
+    }
+  },
+  "arrowgag": {
+    "name": "arrowgag",
+    "num_states": 2,
+    "disk_face": 192,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": 0,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 6,
+        "height": 26,
+        "x_offset": -3,
+        "y_offset": 3
+      }
+    }
+  },
+  "ascot0": {
+    "name": "ascot0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 25,
+        "x_offset": -1,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 25,
+        "x_offset": -1,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 15,
+        "x_offset": -1,
+        "y_offset": -3
+      }
+    }
+  },
+  "baron": {
+    "name": "baron",
+    "num_states": 2,
+    "disk_face": 128,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 24,
+        "x_offset": -2,
+        "y_offset": 1
+      }
+    }
+  },
+  "bean0": {
+    "name": "bean0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": 0,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 26,
+        "x_offset": -1,
+        "y_offset": 3
+      },
+      "c": {
+        "width_bytes": 2,
+        "height": 16,
+        "x_offset": -1,
+        "y_offset": -3
+      }
+    }
+  },
+  "beard0": {
+    "name": "beard0",
+    "num_states": 2,
+    "disk_face": 192,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 24,
+        "x_offset": -1,
+        "y_offset": 1
+      }
+    }
+  },
+  "beaver0": {
+    "name": "beaver0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 27,
+        "x_offset": 0,
+        "y_offset": 5
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 26,
+        "x_offset": -2,
+        "y_offset": 3
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 12,
+        "x_offset": -1,
+        "y_offset": -6
+      }
+    }
+  },
+  "bem1": {
+    "name": "bem1",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 29,
+        "x_offset": -1,
+        "y_offset": 7
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 30,
+        "x_offset": -2,
+        "y_offset": 7
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 15,
+        "x_offset": -1,
+        "y_offset": -2
+      }
+    }
+  },
+  "bem2": {
+    "name": "bem2",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 39,
+        "x_offset": -1,
+        "y_offset": 17
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 40,
+        "x_offset": -2,
+        "y_offset": 17
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 17,
+        "x_offset": -1,
+        "y_offset": -1
+      }
+    }
+  },
+  "bem3": {
+    "name": "bem3",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 35,
+        "x_offset": 0,
+        "y_offset": 12
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 35,
+        "x_offset": -2,
+        "y_offset": 11
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 22,
+        "x_offset": -1,
+        "y_offset": 3
+      }
+    }
+  },
+  "bigmama0": {
+    "name": "bigmama0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": -2,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 16,
+        "x_offset": -1,
+        "y_offset": -3
+      }
+    }
+  },
+  "bimbi": {
+    "name": "bimbi",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": -2,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 19,
+        "x_offset": -1,
+        "y_offset": -4
+      }
+    }
+  },
+  "bizzaro0": {
+    "name": "bizzaro0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 7,
+        "height": 19,
+        "x_offset": -2,
+        "y_offset": -3
+      },
+      "b": {
+        "width_bytes": 7,
+        "height": 19,
+        "x_offset": -3,
+        "y_offset": -3
+      },
+      "c": {
+        "width_bytes": 5,
+        "height": 9,
+        "x_offset": -2,
+        "y_offset": -6
+      }
+    }
+  },
+  "block0": {
+    "name": "block0",
+    "num_states": 2,
+    "disk_face": 64,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": -2,
+        "y_offset": 2
+      }
+    }
+  },
+  "bluegill": {
+    "name": "bluegill",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 6,
+        "height": 24,
+        "x_offset": -1,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 24,
+        "x_offset": -2,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 15,
+        "x_offset": -1,
+        "y_offset": -3
+      }
+    }
+  },
+  "bluehorn": {
+    "name": "bluehorn",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 7,
+        "height": 31,
+        "x_offset": 0,
+        "y_offset": 9
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 32,
+        "x_offset": -2,
+        "y_offset": 9
+      },
+      "c": {
+        "width_bytes": 5,
+        "height": 20,
+        "x_offset": -2,
+        "y_offset": 4
+      }
+    }
+  },
+  "bman0": {
+    "name": "bman0",
+    "num_states": 2,
+    "disk_face": 128,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 27,
+        "x_offset": 0,
+        "y_offset": 5
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 27,
+        "x_offset": -1,
+        "y_offset": 4
+      }
+    }
+  },
+  "bolthead": {
+    "name": "bolthead",
+    "num_states": 2,
+    "disk_face": 192,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 7,
+        "height": 33,
+        "x_offset": -3,
+        "y_offset": 11
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 36,
+        "x_offset": -1,
+        "y_offset": 13
+      }
+    }
+  },
+  "boone0": {
+    "name": "boone0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      144
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": 0,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 25,
+        "x_offset": -1,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 13,
+        "x_offset": 1,
+        "y_offset": -8
+      },
+      "d": {
+        "width_bytes": 3,
+        "height": 12,
+        "x_offset": -2,
+        "y_offset": -3
+      }
+    }
+  },
+  "bozo0": {
+    "name": "bozo0",
+    "num_states": 3,
+    "disk_face": 64,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 6,
+        "height": 24,
+        "x_offset": -1,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 6,
+        "height": 24,
+        "x_offset": -3,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 15,
+        "x_offset": -1,
+        "y_offset": -4
+      }
+    }
+  },
+  "brain": {
+    "name": "brain",
+    "num_states": 3,
+    "disk_face": 64,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 29,
+        "x_offset": 0,
+        "y_offset": 7
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 30,
+        "x_offset": -1,
+        "y_offset": 7
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 2,
+        "x_offset": -1,
+        "y_offset": -7
+      }
+    }
+  },
+  "brain0": {
+    "name": "brain0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 26,
+        "x_offset": 0,
+        "y_offset": 4
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 26,
+        "x_offset": -2,
+        "y_offset": 3
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 15,
+        "x_offset": -1,
+        "y_offset": -4
+      }
+    }
+  },
+  "bride": {
+    "name": "bride",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 29,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 29,
+        "x_offset": -2,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 21,
+        "x_offset": -1,
+        "y_offset": -2
+      }
+    }
+  },
+  "brow": {
+    "name": "brow",
+    "num_states": 2,
+    "disk_face": 64,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 29,
+        "x_offset": 0,
+        "y_offset": 7
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 30,
+        "x_offset": -2,
+        "y_offset": 7
+      }
+    }
+  },
+  "buckw0": {
+    "name": "buckw0",
+    "num_states": 2,
+    "disk_face": 192,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 31,
+        "x_offset": -1,
+        "y_offset": 9
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 34,
+        "x_offset": -2,
+        "y_offset": 11
+      }
+    }
+  },
+  "bum0": {
+    "name": "bum0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 23,
+        "x_offset": 0,
+        "y_offset": 1
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 23,
+        "x_offset": -2,
+        "y_offset": 0
+      },
+      "c": {
+        "width_bytes": 4,
+        "height": 17,
+        "x_offset": -2,
+        "y_offset": -3
+      }
+    }
+  },
+  "cent0": {
+    "name": "cent0",
+    "num_states": 2,
+    "disk_face": 192,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 30,
+        "x_offset": 0,
+        "y_offset": 8
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 31,
+        "x_offset": -2,
+        "y_offset": 8
+      }
+    }
+  },
+  "chaplin0": {
+    "name": "chaplin0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 28,
+        "x_offset": 0,
+        "y_offset": 6
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 28,
+        "x_offset": -2,
+        "y_offset": 5
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 13,
+        "x_offset": -1,
+        "y_offset": -5
+      }
+    }
+  },
+  "chef0": {
+    "name": "chef0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 34,
+        "x_offset": -1,
+        "y_offset": 12
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 34,
+        "x_offset": -2,
+        "y_offset": 11
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 16,
+        "x_offset": -1,
+        "y_offset": -3
+      }
+    }
+  },
+  "cleo": {
+    "name": "cleo",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": -2,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 24,
+        "x_offset": -1,
+        "y_offset": 1
+      }
+    }
+  },
+  "coldlady0": {
+    "name": "coldlady0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 26,
+        "x_offset": -1,
+        "y_offset": 4
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 27,
+        "x_offset": -2,
+        "y_offset": 4
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 127,
+        "x_offset": -2,
+        "y_offset": 0
+      }
+    }
+  },
+  "coolcat0": {
+    "name": "coolcat0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 27,
+        "x_offset": 0,
+        "y_offset": 5
+      },
+      "b": {
+        "width_bytes": 6,
+        "height": 28,
+        "x_offset": -3,
+        "y_offset": 5
+      },
+      "c": {
+        "width_bytes": 4,
+        "height": 14,
+        "x_offset": -2,
+        "y_offset": -3
+      }
+    }
+  },
+  "cootie0": {
+    "name": "cootie0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      184
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 6,
+        "height": 23,
+        "x_offset": 0,
+        "y_offset": 1
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 24,
+        "x_offset": -2,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 2,
+        "height": 15,
+        "x_offset": 1,
+        "y_offset": 14
+      },
+      "d": {
+        "width_bytes": 1,
+        "height": 1,
+        "x_offset": 1,
+        "y_offset": 2
+      },
+      "e": {
+        "width_bytes": 2,
+        "height": 15,
+        "x_offset": -2,
+        "y_offset": 14
+      },
+      "f": {
+        "width_bytes": 6,
+        "height": 127,
+        "x_offset": -4,
+        "y_offset": 0
+      },
+      "g": {
+        "width_bytes": 6,
+        "height": 0,
+        "x_offset": -11,
+        "y_offset": 0
+      }
+    }
+  },
+  "cyclops0": {
+    "name": "cyclops0",
+    "num_states": 4,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      129,
+      2,
+      0,
+      0,
+      3,
+      3
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 21,
+        "x_offset": 0,
+        "y_offset": -1
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 22,
+        "x_offset": -1,
+        "y_offset": -1
+      },
+      "c": {
+        "width_bytes": 2,
+        "height": 7,
+        "x_offset": -1,
+        "y_offset": -6
+      },
+      "d": {
+        "width_bytes": 3,
+        "height": 11,
+        "x_offset": -1,
+        "y_offset": -6
+      }
+    }
+  },
+  "dandy0": {
+    "name": "dandy0",
+    "num_states": 2,
+    "disk_face": 128,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 28,
+        "x_offset": 0,
+        "y_offset": 6
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 28,
+        "x_offset": -2,
+        "y_offset": 5
+      }
+    }
+  },
+  "darth0": {
+    "name": "darth0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 24,
+        "x_offset": -1,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 24,
+        "x_offset": -2,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 5,
+        "height": 11,
+        "x_offset": -2,
+        "y_offset": -5
+      }
+    }
+  },
+  "deer": {
+    "name": "deer",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 6,
+        "height": 30,
+        "x_offset": 0,
+        "y_offset": 8
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 30,
+        "x_offset": -2,
+        "y_offset": 7
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 10,
+        "x_offset": -1,
+        "y_offset": -7
+      }
+    }
+  },
+  "demon1": {
+    "name": "demon1",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 6,
+        "height": 27,
+        "x_offset": -1,
+        "y_offset": 5
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 33,
+        "x_offset": -2,
+        "y_offset": 10
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 15,
+        "x_offset": -1,
+        "y_offset": -4
+      }
+    }
+  },
+  "demon2": {
+    "name": "demon2",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 7,
+        "height": 23,
+        "x_offset": -1,
+        "y_offset": 1
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 24,
+        "x_offset": -2,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 13,
+        "x_offset": -1,
+        "y_offset": -4
+      }
+    }
+  },
+  "deviltail": {
+    "name": "deviltail",
+    "num_states": 4,
+    "disk_face": 160,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": true
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      3,
+      3,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      144
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": 0,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 25,
+        "x_offset": -2,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 4,
+        "height": 127,
+        "x_offset": -10,
+        "y_offset": -1
+      },
+      "d": {
+        "width_bytes": 4,
+        "height": 21,
+        "x_offset": -3,
+        "y_offset": -42
+      }
+    }
+  },
+  "dobbs0": {
+    "name": "dobbs0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": -1,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 17,
+        "x_offset": -1,
+        "y_offset": -3
+      }
+    }
+  },
+  "doctor0": {
+    "name": "doctor0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 24,
+        "x_offset": -1,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 18,
+        "x_offset": -1,
+        "y_offset": -1
+      }
+    }
+  },
+  "dodo0": {
+    "name": "dodo0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 6,
+        "height": 28,
+        "x_offset": -1,
+        "y_offset": 6
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 28,
+        "x_offset": -2,
+        "y_offset": 5
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 15,
+        "x_offset": -1,
+        "y_offset": -4
+      }
+    }
+  },
+  "dragon0": {
+    "name": "dragon0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 6,
+        "height": 29,
+        "x_offset": 0,
+        "y_offset": 8
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 34,
+        "x_offset": -2,
+        "y_offset": 8
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 13,
+        "x_offset": -1,
+        "y_offset": 1
+      }
+    }
+  },
+  "duck0": {
+    "name": "duck0",
+    "num_states": 2,
+    "disk_face": 128,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 26,
+        "x_offset": 0,
+        "y_offset": 4
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 28,
+        "x_offset": -1,
+        "y_offset": 5
+      }
+    }
+  },
+  "elephead": {
+    "name": "elephead",
+    "num_states": 3,
+    "disk_face": 128,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 6,
+        "height": 29,
+        "x_offset": -1,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 9,
+        "height": 21,
+        "x_offset": -4,
+        "y_offset": 0
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 7,
+        "x_offset": -1,
+        "y_offset": -21
+      }
+    }
+  },
+  "equates": {
+    "name": "equates",
+    "num_states": 0,
+    "disk_face": 0,
+    "disk_face_flags": {},
+    "start_end": [],
+    "cel_bitmasks": [],
+    "walk_offsets": [],
+    "cel_headers": {}
+  },
+  "executioner0": {
+    "name": "executioner0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 26,
+        "x_offset": -1,
+        "y_offset": 4
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 26,
+        "x_offset": -2,
+        "y_offset": 3
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 8,
+        "x_offset": -1,
+        "y_offset": -1
+      }
+    }
+  },
+  "fbeany0": {
+    "name": "fbeany0",
+    "num_states": 12,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      128,
+      3,
+      132,
+      7,
+      0,
+      0,
+      136,
+      11
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      136
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": 0,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": -2,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 14,
+        "height": 127,
+        "x_offset": -7,
+        "y_offset": 0
+      },
+      "d": {
+        "width_bytes": 1,
+        "height": 3,
+        "x_offset": 2,
+        "y_offset": -15
+      },
+      "e": {
+        "width_bytes": 4,
+        "height": 4,
+        "x_offset": -2,
+        "y_offset": 6
+      },
+      "f": {
+        "width_bytes": 3,
+        "height": 4,
+        "x_offset": -1,
+        "y_offset": 6
+      },
+      "g": {
+        "width_bytes": 4,
+        "height": 0,
+        "x_offset": 6,
+        "y_offset": 0
+      }
+    }
+  },
+  "fhead": {
+    "name": "fhead",
+    "num_states": 4,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      128,
+      1,
+      130,
+      3,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 3,
+        "height": 22,
+        "x_offset": 1,
+        "y_offset": 0
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 26,
+        "x_offset": 1,
+        "y_offset": 4
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 18,
+        "x_offset": -1,
+        "y_offset": -4
+      },
+      "d": {
+        "width_bytes": 3,
+        "height": 21,
+        "x_offset": -1,
+        "y_offset": -1
+      }
+    }
+  },
+  "fhippie0": {
+    "name": "fhippie0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 25,
+        "x_offset": -2,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 15,
+        "height": 127,
+        "x_offset": -4,
+        "y_offset": 0
+      }
+    }
+  },
+  "fishead0": {
+    "name": "fishead0",
+    "num_states": 2,
+    "disk_face": 128,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 24,
+        "x_offset": 1,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 24,
+        "x_offset": -2,
+        "y_offset": 1
+      }
+    }
+  },
+  "fly0": {
+    "name": "fly0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 7,
+        "height": 28,
+        "x_offset": 0,
+        "y_offset": 5
+      },
+      "b": {
+        "width_bytes": 9,
+        "height": 27,
+        "x_offset": -4,
+        "y_offset": 4
+      },
+      "c": {
+        "width_bytes": 6,
+        "height": 17,
+        "x_offset": -3,
+        "y_offset": -5
+      }
+    }
+  },
+  "fstien0": {
+    "name": "fstien0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 27,
+        "x_offset": 0,
+        "y_offset": 5
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 28,
+        "x_offset": -1,
+        "y_offset": 5
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 20,
+        "x_offset": -1,
+        "y_offset": 1
+      }
+    }
+  },
+  "gabor0": {
+    "name": "gabor0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 27,
+        "x_offset": -1,
+        "y_offset": 5
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 27,
+        "x_offset": -2,
+        "y_offset": 4
+      },
+      "c": {
+        "width_bytes": 5,
+        "height": 127,
+        "x_offset": 1,
+        "y_offset": 0
+      }
+    }
+  },
+  "gamorrean0": {
+    "name": "gamorrean0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 7,
+        "height": 22,
+        "x_offset": -2,
+        "y_offset": 0
+      },
+      "b": {
+        "width_bytes": 7,
+        "height": 22,
+        "x_offset": -3,
+        "y_offset": -1
+      },
+      "c": {
+        "width_bytes": 10,
+        "height": 127,
+        "x_offset": -3,
+        "y_offset": 0
+      }
+    }
+  },
+  "george": {
+    "name": "george",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 29,
+        "x_offset": 0,
+        "y_offset": 7
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 30,
+        "x_offset": -2,
+        "y_offset": 7
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 19,
+        "x_offset": -1,
+        "y_offset": 0
+      }
+    }
+  },
+  "grandma0": {
+    "name": "grandma0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 29,
+        "x_offset": 0,
+        "y_offset": 7
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 30,
+        "x_offset": -2,
+        "y_offset": 7
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 12,
+        "x_offset": -1,
+        "y_offset": -3
+      }
+    }
+  },
+  "grit0": {
+    "name": "grit0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 27,
+        "x_offset": 0,
+        "y_offset": 5
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 27,
+        "x_offset": -2,
+        "y_offset": 4
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 13,
+        "x_offset": -1,
+        "y_offset": -4
+      }
+    }
+  },
+  "groom": {
+    "name": "groom",
+    "num_states": 3,
+    "disk_face": 64,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 34,
+        "x_offset": 0,
+        "y_offset": 10
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 35,
+        "x_offset": -2,
+        "y_offset": 10
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 20,
+        "x_offset": -1,
+        "y_offset": -5
+      }
+    }
+  },
+  "groucho": {
+    "name": "groucho",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 25,
+        "x_offset": -2,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 12,
+        "x_offset": -1,
+        "y_offset": -3
+      }
+    }
+  },
+  "hammer0": {
+    "name": "hammer0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 7,
+        "height": 20,
+        "x_offset": -2,
+        "y_offset": -2
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 20,
+        "x_offset": -2,
+        "y_offset": -3
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 9,
+        "x_offset": -1,
+        "y_offset": -6
+      }
+    }
+  },
+  "hardhat0": {
+    "name": "hardhat0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 26,
+        "x_offset": 0,
+        "y_offset": 4
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 26,
+        "x_offset": -2,
+        "y_offset": 3
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 12,
+        "x_offset": -1,
+        "y_offset": -8
+      }
+    }
+  },
+  "head0": {
+    "name": "head0",
+    "num_states": 2,
+    "disk_face": 192,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": 0,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 26,
+        "x_offset": -1,
+        "y_offset": 3
+      }
+    }
+  },
+  "head1": {
+    "name": "head1",
+    "num_states": 3,
+    "disk_face": 192,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": -2,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 4,
+        "x_offset": -1,
+        "y_offset": -14
+      }
+    }
+  },
+  "head2": {
+    "name": "head2",
+    "num_states": 3,
+    "disk_face": 64,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 28,
+        "x_offset": 0,
+        "y_offset": 6
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 28,
+        "x_offset": -1,
+        "y_offset": 5
+      },
+      "c": {
+        "width_bytes": 1,
+        "height": 10,
+        "x_offset": 0,
+        "y_offset": -3
+      }
+    }
+  },
+  "head3": {
+    "name": "head3",
+    "num_states": 2,
+    "disk_face": 192,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 22,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 24,
+        "x_offset": -1,
+        "y_offset": 1
+      }
+    }
+  },
+  "head4": {
+    "name": "head4",
+    "num_states": 2,
+    "disk_face": 64,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 22,
+        "x_offset": -1,
+        "y_offset": 0
+      }
+    }
+  },
+  "head5": {
+    "name": "head5",
+    "num_states": 2,
+    "disk_face": 128,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      160
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 16,
+        "x_offset": 1,
+        "y_offset": -5
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 34,
+        "x_offset": -2,
+        "y_offset": 8
+      },
+      "c": {
+        "width_bytes": 5,
+        "height": 15,
+        "x_offset": -1,
+        "y_offset": 10
+      }
+    }
+  },
+  "head6": {
+    "name": "head6",
+    "num_states": 2,
+    "disk_face": 192,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 26,
+        "x_offset": 0,
+        "y_offset": 4
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": -2,
+        "y_offset": 2
+      }
+    }
+  },
+  "head7": {
+    "name": "head7",
+    "num_states": 2,
+    "disk_face": 64,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 31,
+        "x_offset": 0,
+        "y_offset": 9
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 30,
+        "x_offset": -1,
+        "y_offset": 7
+      }
+    }
+  },
+  "head8": {
+    "name": "head8",
+    "num_states": 4,
+    "disk_face": 64,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      128,
+      1,
+      130,
+      3,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 27,
+        "x_offset": 0,
+        "y_offset": 5
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 22,
+        "x_offset": -1,
+        "y_offset": 0
+      },
+      "d": {
+        "width_bytes": 3,
+        "height": 25,
+        "x_offset": -1,
+        "y_offset": 3
+      }
+    }
+  },
+  "helmet0": {
+    "name": "helmet0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 28,
+        "x_offset": 0,
+        "y_offset": 6
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 28,
+        "x_offset": -2,
+        "y_offset": 6
+      },
+      "c": {
+        "width_bytes": 4,
+        "height": 13,
+        "x_offset": -2,
+        "y_offset": -3
+      }
+    }
+  },
+  "hiawatha0": {
+    "name": "hiawatha0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      144
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 24,
+        "x_offset": -1,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 19,
+        "x_offset": 0,
+        "y_offset": -5
+      },
+      "d": {
+        "width_bytes": 3,
+        "height": 11,
+        "x_offset": -1,
+        "y_offset": 9
+      }
+    }
+  },
+  "hillbilly0": {
+    "name": "hillbilly0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 29,
+        "x_offset": 0,
+        "y_offset": 7
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 30,
+        "x_offset": -2,
+        "y_offset": 7
+      },
+      "c": {
+        "width_bytes": 14,
+        "height": 127,
+        "x_offset": -4,
+        "y_offset": 0
+      }
+    }
+  },
+  "hunter0": {
+    "name": "hunter0",
+    "num_states": 2,
+    "disk_face": 128,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 6,
+        "height": 27,
+        "x_offset": -1,
+        "y_offset": 5
+      },
+      "b": {
+        "width_bytes": 7,
+        "height": 27,
+        "x_offset": -3,
+        "y_offset": 4
+      }
+    }
+  },
+  "invsman": {
+    "name": "invsman",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 25,
+        "x_offset": -1,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 6,
+        "x_offset": -1,
+        "y_offset": -4
+      }
+    }
+  },
+  "irma0": {
+    "name": "irma0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 26,
+        "x_offset": 0,
+        "y_offset": 4
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 26,
+        "x_offset": -2,
+        "y_offset": 3
+      },
+      "c": {
+        "width_bytes": 1,
+        "height": 127,
+        "x_offset": -2,
+        "y_offset": 0
+      }
+    }
+  },
+  "jaggi": {
+    "name": "jaggi",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 27,
+        "x_offset": 0,
+        "y_offset": 5
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 29,
+        "x_offset": -2,
+        "y_offset": 6
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 12,
+        "x_offset": -1,
+        "y_offset": -5
+      },
+      "d": {
+        "width_bytes": 5,
+        "height": 4,
+        "x_offset": -2,
+        "y_offset": 4
+      }
+    }
+  },
+  "jaws0": {
+    "name": "jaws0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 29,
+        "x_offset": 0,
+        "y_offset": 7
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 29,
+        "x_offset": -2,
+        "y_offset": 6
+      },
+      "c": {
+        "width_bytes": 1,
+        "height": 127,
+        "x_offset": 0,
+        "y_offset": 0
+      },
+      "d": {
+        "width_bytes": 10,
+        "height": 126,
+        "x_offset": -1,
+        "y_offset": 0
+      }
+    }
+  },
+  "jerk0": {
+    "name": "jerk0",
+    "num_states": 3,
+    "disk_face": 128,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 26,
+        "x_offset": 0,
+        "y_offset": 4
+      },
+      "b": {
+        "width_bytes": 6,
+        "height": 26,
+        "x_offset": -3,
+        "y_offset": 3
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 6,
+        "x_offset": -1,
+        "y_offset": -6
+      }
+    }
+  },
+  "juvie0": {
+    "name": "juvie0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 24,
+        "x_offset": -1,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 2,
+        "height": 17,
+        "x_offset": -1,
+        "y_offset": -4
+      }
+    }
+  },
+  "keystone0": {
+    "name": "keystone0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 31,
+        "x_offset": 0,
+        "y_offset": 9
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 31,
+        "x_offset": -2,
+        "y_offset": 8
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 17,
+        "x_offset": -1,
+        "y_offset": 0
+      }
+    }
+  },
+  "king": {
+    "name": "king",
+    "num_states": 3,
+    "disk_face": 64,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 34,
+        "x_offset": 0,
+        "y_offset": 12
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 35,
+        "x_offset": -2,
+        "y_offset": 12
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 15,
+        "x_offset": -1,
+        "y_offset": -4
+      }
+    }
+  },
+  "kitty3": {
+    "name": "kitty3",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": 0,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 24,
+        "x_offset": -2,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 18,
+        "x_offset": -1,
+        "y_offset": -4
+      }
+    }
+  },
+  "knight1": {
+    "name": "knight1",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 34,
+        "x_offset": 0,
+        "y_offset": 12
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 35,
+        "x_offset": -1,
+        "y_offset": 12
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 14,
+        "x_offset": -1,
+        "y_offset": -6
+      }
+    }
+  },
+  "knight2": {
+    "name": "knight2",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 35,
+        "x_offset": 0,
+        "y_offset": 13
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 36,
+        "x_offset": -2,
+        "y_offset": 13
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 11,
+        "x_offset": -1,
+        "y_offset": -6
+      }
+    }
+  },
+  "lioness": {
+    "name": "lioness",
+    "num_states": 2,
+    "disk_face": 128,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 6,
+        "height": 26,
+        "x_offset": 0,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 25,
+        "x_offset": -2,
+        "y_offset": 3
+      }
+    }
+  },
+  "lizard0": {
+    "name": "lizard0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 8,
+        "height": 24,
+        "x_offset": -1,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 25,
+        "x_offset": -2,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 4,
+        "height": 16,
+        "x_offset": -2,
+        "y_offset": 0
+      }
+    }
+  },
+  "madsci0": {
+    "name": "madsci0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 29,
+        "x_offset": 0,
+        "y_offset": 7
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 29,
+        "x_offset": -2,
+        "y_offset": 6
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 17,
+        "x_offset": -1,
+        "y_offset": -3
+      }
+    }
+  },
+  "mask": {
+    "name": "mask",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 25,
+        "x_offset": -1,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 18,
+        "x_offset": -1,
+        "y_offset": -5
+      }
+    }
+  },
+  "mbeany0": {
+    "name": "mbeany0",
+    "num_states": 12,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      128,
+      3,
+      132,
+      7,
+      0,
+      0,
+      136,
+      11
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      144
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 25,
+        "x_offset": 0,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 26,
+        "x_offset": -2,
+        "y_offset": 3
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 12,
+        "x_offset": -1,
+        "y_offset": -7
+      },
+      "d": {
+        "width_bytes": 4,
+        "height": 4,
+        "x_offset": -2,
+        "y_offset": 7
+      },
+      "e": {
+        "width_bytes": 3,
+        "height": 4,
+        "x_offset": -1,
+        "y_offset": 7
+      },
+      "f": {
+        "width_bytes": 4,
+        "height": 0,
+        "x_offset": 7,
+        "y_offset": 0
+      }
+    }
+  },
+  "melvin": {
+    "name": "melvin",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 7,
+        "height": 34,
+        "x_offset": -1,
+        "y_offset": 12
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 37,
+        "x_offset": -2,
+        "y_offset": 14
+      },
+      "c": {
+        "width_bytes": 5,
+        "height": 24,
+        "x_offset": -2,
+        "y_offset": 7
+      }
+    }
+  },
+  "metro0": {
+    "name": "metro0",
+    "num_states": 2,
+    "disk_face": 128,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": 0,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 24,
+        "x_offset": -1,
+        "y_offset": 1
+      }
+    }
+  },
+  "milkman0": {
+    "name": "milkman0",
+    "num_states": 3,
+    "disk_face": 64,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 27,
+        "x_offset": 0,
+        "y_offset": 5
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 27,
+        "x_offset": -2,
+        "y_offset": 4
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 18,
+        "x_offset": -1,
+        "y_offset": -1
+      }
+    }
+  },
+  "ming0": {
+    "name": "ming0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      160
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 6,
+        "height": 10,
+        "x_offset": -2,
+        "y_offset": -12
+      },
+      "b": {
+        "width_bytes": 7,
+        "height": 11,
+        "x_offset": -3,
+        "y_offset": -12
+      },
+      "c": {
+        "width_bytes": 4,
+        "height": 14,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "d": {
+        "width_bytes": 4,
+        "height": 14,
+        "x_offset": -2,
+        "y_offset": 2
+      },
+      "e": {
+        "width_bytes": 3,
+        "height": 21,
+        "x_offset": -1,
+        "y_offset": -2
+      }
+    }
+  },
+  "minister": {
+    "name": "minister",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 24,
+        "x_offset": -1,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 18,
+        "x_offset": -1,
+        "y_offset": -4
+      }
+    }
+  },
+  "monk": {
+    "name": "monk",
+    "num_states": 3,
+    "disk_face": 64,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 27,
+        "x_offset": -1,
+        "y_offset": 5
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 31,
+        "x_offset": -2,
+        "y_offset": 6
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 20,
+        "x_offset": -1,
+        "y_offset": 0
+      }
+    }
+  },
+  "moto0": {
+    "name": "moto0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 25,
+        "x_offset": -1,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 25,
+        "x_offset": -2,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 5,
+        "height": 8,
+        "x_offset": -2,
+        "y_offset": -5
+      }
+    }
+  },
+  "motohead": {
+    "name": "motohead",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 7,
+        "height": 36,
+        "x_offset": -3,
+        "y_offset": 14
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 36,
+        "x_offset": -2,
+        "y_offset": 13
+      },
+      "c": {
+        "width_bytes": 5,
+        "height": 36,
+        "x_offset": -2,
+        "y_offset": 13
+      }
+    }
+  },
+  "mouse0": {
+    "name": "mouse0",
+    "num_states": 3,
+    "disk_face": 128,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 29,
+        "x_offset": 0,
+        "y_offset": 7
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 29,
+        "x_offset": -2,
+        "y_offset": 6
+      },
+      "c": {
+        "width_bytes": 4,
+        "height": 8,
+        "x_offset": -2,
+        "y_offset": 4
+      }
+    }
+  },
+  "mr_mike0": {
+    "name": "mr_mike0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 27,
+        "x_offset": 0,
+        "y_offset": 5
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 27,
+        "x_offset": -2,
+        "y_offset": 4
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 17,
+        "x_offset": -1,
+        "y_offset": -4
+      }
+    }
+  },
+  "nailhead0": {
+    "name": "nailhead0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 6,
+        "height": 25,
+        "x_offset": 0,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 25,
+        "x_offset": -1,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 17,
+        "x_offset": -1,
+        "y_offset": -2
+      }
+    }
+  },
+  "necknod": {
+    "name": "necknod",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 6,
+        "height": 41,
+        "x_offset": 0,
+        "y_offset": 19
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 42,
+        "x_offset": -2,
+        "y_offset": 19
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 14,
+        "x_offset": -1,
+        "y_offset": 9
+      }
+    }
+  },
+  "newhab1": {
+    "name": "newhab1",
+    "num_states": 3,
+    "disk_face": 64,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": 0,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 25,
+        "x_offset": -1,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 16,
+        "x_offset": -1,
+        "y_offset": -3
+      }
+    }
+  },
+  "newsboy0": {
+    "name": "newsboy0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 26,
+        "x_offset": 0,
+        "y_offset": 4
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 26,
+        "x_offset": -2,
+        "y_offset": 3
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 18,
+        "x_offset": -1,
+        "y_offset": 0
+      }
+    }
+  },
+  "ninja0": {
+    "name": "ninja0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": -1,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 9,
+        "x_offset": -1,
+        "y_offset": -5
+      }
+    }
+  },
+  "oink0": {
+    "name": "oink0",
+    "num_states": 3,
+    "disk_face": 128,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 25,
+        "x_offset": 0,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": -2,
+        "y_offset": 1
+      }
+    }
+  },
+  "oldman0": {
+    "name": "oldman0",
+    "num_states": 2,
+    "disk_face": 128,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": -2,
+        "y_offset": 1
+      }
+    }
+  },
+  "ostrich0": {
+    "name": "ostrich0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 29,
+        "x_offset": 0,
+        "y_offset": 8
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 31,
+        "x_offset": -1,
+        "y_offset": 8
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 12,
+        "x_offset": -1,
+        "y_offset": 7
+      }
+    }
+  },
+  "peakhead": {
+    "name": "peakhead",
+    "num_states": 2,
+    "disk_face": 192,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 31,
+        "x_offset": 0,
+        "y_offset": 9
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 30,
+        "x_offset": -1,
+        "y_offset": 7
+      }
+    }
+  },
+  "penguin0": {
+    "name": "penguin0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 6,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": -2,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 15,
+        "x_offset": -1,
+        "y_offset": -4
+      }
+    }
+  },
+  "phair0": {
+    "name": "phair0",
+    "num_states": 2,
+    "disk_face": 192,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 32,
+        "x_offset": 0,
+        "y_offset": 10
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 33,
+        "x_offset": -1,
+        "y_offset": 10
+      }
+    }
+  },
+  "phydeaux0": {
+    "name": "phydeaux0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 29,
+        "x_offset": 0,
+        "y_offset": 7
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 30,
+        "x_offset": -2,
+        "y_offset": 7
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 18,
+        "x_offset": -1,
+        "y_offset": -1
+      }
+    }
+  },
+  "pigtail0": {
+    "name": "pigtail0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      144
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 3,
+        "height": 24,
+        "x_offset": 1,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": -2,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 17,
+        "x_offset": -1,
+        "y_offset": -3
+      },
+      "d": {
+        "width_bytes": 3,
+        "height": 18,
+        "x_offset": -2,
+        "y_offset": -1
+      }
+    }
+  },
+  "pirate1": {
+    "name": "pirate1",
+    "num_states": 2,
+    "disk_face": 192,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 27,
+        "x_offset": 0,
+        "y_offset": 5
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 28,
+        "x_offset": -2,
+        "y_offset": 5
+      }
+    }
+  },
+  "pirate2": {
+    "name": "pirate2",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 32,
+        "x_offset": 0,
+        "y_offset": 5
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 32,
+        "x_offset": -2,
+        "y_offset": 5
+      },
+      "c": {
+        "width_bytes": 13,
+        "height": 127,
+        "x_offset": -6,
+        "y_offset": 0
+      }
+    }
+  },
+  "plughead": {
+    "name": "plughead",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 33,
+        "x_offset": 0,
+        "y_offset": 11
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 34,
+        "x_offset": -2,
+        "y_offset": 11
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 11,
+        "x_offset": -1,
+        "y_offset": -4
+      }
+    }
+  },
+  "pony4": {
+    "name": "pony4",
+    "num_states": 4,
+    "disk_face": 32,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": true
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      3,
+      3,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      144
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 23,
+        "x_offset": 0,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 24,
+        "x_offset": -1,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 17,
+        "x_offset": -1,
+        "y_offset": -5
+      },
+      "d": {
+        "width_bytes": 2,
+        "height": 21,
+        "x_offset": -1,
+        "y_offset": -37
+      }
+    }
+  },
+  "pothead": {
+    "name": "pothead",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 6,
+        "height": 40,
+        "x_offset": -1,
+        "y_offset": 18
+      },
+      "b": {
+        "width_bytes": 6,
+        "height": 42,
+        "x_offset": -3,
+        "y_offset": 19
+      },
+      "c": {
+        "width_bytes": 5,
+        "height": 127,
+        "x_offset": 7,
+        "y_offset": 0
+      }
+    }
+  },
+  "princess0": {
+    "name": "princess0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 31,
+        "x_offset": 0,
+        "y_offset": 9
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 31,
+        "x_offset": -2,
+        "y_offset": 8
+      },
+      "c": {
+        "width_bytes": 0,
+        "height": 127,
+        "x_offset": -4,
+        "y_offset": 0
+      }
+    }
+  },
+  "princess1": {
+    "name": "princess1",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 25,
+        "x_offset": -1,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 25,
+        "x_offset": -2,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 15,
+        "height": 127,
+        "x_offset": -1,
+        "y_offset": 0
+      },
+      "d": {
+        "width_bytes": 3,
+        "height": 5,
+        "x_offset": -1,
+        "y_offset": -16
+      }
+    }
+  },
+  "rabbit0": {
+    "name": "rabbit0",
+    "num_states": 3,
+    "disk_face": 128,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 35,
+        "x_offset": 0,
+        "y_offset": 13
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 35,
+        "x_offset": -2,
+        "y_offset": 12
+      },
+      "c": {
+        "width_bytes": 4,
+        "height": 9,
+        "x_offset": -2,
+        "y_offset": 9
+      }
+    }
+  },
+  "resident": {
+    "name": "resident",
+    "num_states": 4,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      3,
+      3,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      152
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 25,
+        "x_offset": 0,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 26,
+        "x_offset": -2,
+        "y_offset": 3
+      },
+      "c": {
+        "width_bytes": 4,
+        "height": 22,
+        "x_offset": 0,
+        "y_offset": -10
+      },
+      "d": {
+        "width_bytes": 4,
+        "height": 16,
+        "x_offset": 0,
+        "y_offset": 6
+      },
+      "e": {
+        "width_bytes": 2,
+        "height": 16,
+        "x_offset": 0,
+        "y_offset": 6
+      }
+    }
+  },
+  "rhood": {
+    "name": "rhood",
+    "num_states": 3,
+    "disk_face": 64,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 6,
+        "height": 29,
+        "x_offset": -1,
+        "y_offset": 7
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 31,
+        "x_offset": -2,
+        "y_offset": 8
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 15,
+        "x_offset": -1,
+        "y_offset": -4
+      }
+    }
+  },
+  "riotcop": {
+    "name": "riotcop",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": -2,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 15,
+        "x_offset": -1,
+        "y_offset": -2
+      }
+    }
+  },
+  "rivithead": {
+    "name": "rivithead",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 26,
+        "x_offset": 0,
+        "y_offset": 4
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 26,
+        "x_offset": -2,
+        "y_offset": 3
+      },
+      "c": {
+        "width_bytes": 4,
+        "height": 13,
+        "x_offset": -2,
+        "y_offset": -6
+      }
+    }
+  },
+  "robot0": {
+    "name": "robot0",
+    "num_states": 4,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      128,
+      1,
+      130,
+      3,
+      2,
+      2,
+      130,
+      3
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      136
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 2,
+        "height": 12,
+        "x_offset": 1,
+        "y_offset": -10
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 12,
+        "x_offset": -1,
+        "y_offset": -10
+      },
+      "c": {
+        "width_bytes": 5,
+        "height": 2,
+        "x_offset": -2,
+        "y_offset": -1
+      },
+      "d": {
+        "width_bytes": 4,
+        "height": 2,
+        "x_offset": 0,
+        "y_offset": -1
+      },
+      "e": {
+        "width_bytes": 6,
+        "height": 11,
+        "x_offset": -1,
+        "y_offset": 1
+      },
+      "f": {
+        "width_bytes": 7,
+        "height": 11,
+        "x_offset": -3,
+        "y_offset": 1
+      }
+    }
+  },
+  "rotohead": {
+    "name": "rotohead",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 26,
+        "x_offset": -2,
+        "y_offset": 3
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 8,
+        "x_offset": -1,
+        "y_offset": -2
+      }
+    }
+  },
+  "sailor0": {
+    "name": "sailor0",
+    "num_states": 3,
+    "disk_face": 64,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 29,
+        "x_offset": 0,
+        "y_offset": 7
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 28,
+        "x_offset": -2,
+        "y_offset": 5
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 15,
+        "x_offset": -1,
+        "y_offset": -4
+      }
+    }
+  },
+  "santa0": {
+    "name": "santa0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 24,
+        "x_offset": -2,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 4,
+        "height": 17,
+        "x_offset": -2,
+        "y_offset": -6
+      }
+    }
+  },
+  "satan0": {
+    "name": "satan0",
+    "num_states": 3,
+    "disk_face": 128,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": 0,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 25,
+        "x_offset": -2,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 4,
+        "height": 127,
+        "x_offset": -10,
+        "y_offset": 0
+      }
+    }
+  },
+  "scruffy0": {
+    "name": "scruffy0",
+    "num_states": 2,
+    "disk_face": 128,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 26,
+        "x_offset": 0,
+        "y_offset": 4
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 26,
+        "x_offset": -2,
+        "y_offset": 3
+      }
+    }
+  },
+  "shades0": {
+    "name": "shades0",
+    "num_states": 2,
+    "disk_face": 192,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 24,
+        "x_offset": -1,
+        "y_offset": 1
+      }
+    }
+  },
+  "sheriff": {
+    "name": "sheriff",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 6,
+        "height": 32,
+        "x_offset": -1,
+        "y_offset": 10
+      },
+      "b": {
+        "width_bytes": 6,
+        "height": 33,
+        "x_offset": -3,
+        "y_offset": 10
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 23,
+        "x_offset": -1,
+        "y_offset": 7
+      }
+    }
+  },
+  "sherlock0": {
+    "name": "sherlock0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 6,
+        "height": 29,
+        "x_offset": 0,
+        "y_offset": 7
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 30,
+        "x_offset": -2,
+        "y_offset": 7
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 18,
+        "x_offset": -1,
+        "y_offset": -1
+      }
+    }
+  },
+  "skull0": {
+    "name": "skull0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 22,
+        "x_offset": 0,
+        "y_offset": 0
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 23,
+        "x_offset": -1,
+        "y_offset": 0
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 11,
+        "x_offset": -1,
+        "y_offset": -6
+      }
+    }
+  },
+  "smiley0": {
+    "name": "smiley0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 2,
+        "height": 25,
+        "x_offset": 1,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 25,
+        "x_offset": -2,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 9,
+        "height": 127,
+        "x_offset": -6,
+        "y_offset": 0
+      }
+    }
+  },
+  "spacesuit0": {
+    "name": "spacesuit0",
+    "num_states": 2,
+    "disk_face": 128,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      160
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 24,
+        "x_offset": -1,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 5,
+        "height": 32,
+        "x_offset": -2,
+        "y_offset": 10
+      }
+    }
+  },
+  "stalk0": {
+    "name": "stalk0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 28,
+        "x_offset": 1,
+        "y_offset": 6
+      },
+      "b": {
+        "width_bytes": 6,
+        "height": 29,
+        "x_offset": -3,
+        "y_offset": 6
+      },
+      "c": {
+        "width_bytes": 5,
+        "height": 7,
+        "x_offset": -2,
+        "y_offset": 4
+      }
+    }
+  },
+  "statesman0": {
+    "name": "statesman0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 32,
+        "x_offset": 0,
+        "y_offset": 10
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 32,
+        "x_offset": -2,
+        "y_offset": 9
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 12,
+        "x_offset": -1,
+        "y_offset": -7
+      }
+    }
+  },
+  "steve": {
+    "name": "steve",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 28,
+        "x_offset": 0,
+        "y_offset": 6
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 29,
+        "x_offset": -2,
+        "y_offset": 6
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 16,
+        "x_offset": -1,
+        "y_offset": 2
+      }
+    }
+  },
+  "tasha0": {
+    "name": "tasha0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 24,
+        "x_offset": -1,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 24,
+        "x_offset": -2,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 17,
+        "x_offset": -1,
+        "y_offset": -3
+      }
+    }
+  },
+  "test": {
+    "name": "test",
+    "num_states": 3,
+    "disk_face": 160,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": true
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      144
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": -2,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 19,
+        "x_offset": -1,
+        "y_offset": -4
+      },
+      "d": {
+        "width_bytes": 2,
+        "height": 11,
+        "x_offset": 3,
+        "y_offset": -31
+      }
+    }
+  },
+  "test2": {
+    "name": "test2",
+    "num_states": 4,
+    "disk_face": 160,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": true
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      3,
+      3,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      144
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": 0,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 25,
+        "x_offset": -2,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 4,
+        "height": 127,
+        "x_offset": -10,
+        "y_offset": 0
+      },
+      "d": {
+        "width_bytes": 4,
+        "height": 21,
+        "x_offset": -3,
+        "y_offset": -42
+      }
+    }
+  },
+  "tex0": {
+    "name": "tex0",
+    "num_states": 3,
+    "disk_face": 64,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      144
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 17,
+        "x_offset": 0,
+        "y_offset": -5
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 18,
+        "x_offset": -1,
+        "y_offset": -5
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 14,
+        "x_offset": -1,
+        "y_offset": -5
+      },
+      "d": {
+        "width_bytes": 6,
+        "height": 11,
+        "x_offset": -1,
+        "y_offset": 6
+      },
+      "e": {
+        "width_bytes": 5,
+        "height": 11,
+        "x_offset": -2,
+        "y_offset": 6
+      }
+    }
+  },
+  "thug0": {
+    "name": "thug0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 21,
+        "x_offset": 0,
+        "y_offset": -1
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 22,
+        "x_offset": -1,
+        "y_offset": -1
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 15,
+        "x_offset": -1,
+        "y_offset": -3
+      }
+    }
+  },
+  "tiger": {
+    "name": "tiger",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 6,
+        "height": 26,
+        "x_offset": 0,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 25,
+        "x_offset": -2,
+        "y_offset": 3
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 18,
+        "x_offset": -1,
+        "y_offset": -4
+      }
+    }
+  },
+  "tknot1": {
+    "name": "tknot1",
+    "num_states": 3,
+    "disk_face": 64,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 24,
+        "x_offset": -1,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 24,
+        "x_offset": -1,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 16,
+        "x_offset": -1,
+        "y_offset": -4
+      }
+    }
+  },
+  "tknot2": {
+    "name": "tknot2",
+    "num_states": 2,
+    "disk_face": 64,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 35,
+        "x_offset": 0,
+        "y_offset": 13
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 36,
+        "x_offset": -2,
+        "y_offset": 13
+      }
+    }
+  },
+  "tonto0": {
+    "name": "tonto0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 27,
+        "x_offset": 0,
+        "y_offset": 5
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 27,
+        "x_offset": -2,
+        "y_offset": 4
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 14,
+        "x_offset": -1,
+        "y_offset": -5
+      }
+    }
+  },
+  "tonto1": {
+    "name": "tonto1",
+    "num_states": 3,
+    "disk_face": 64,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 34,
+        "x_offset": 0,
+        "y_offset": 12
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 35,
+        "x_offset": -1,
+        "y_offset": 12
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 14,
+        "x_offset": -1,
+        "y_offset": -4
+      }
+    }
+  },
+  "tophat0": {
+    "name": "tophat0",
+    "num_states": 3,
+    "disk_face": 64,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 34,
+        "x_offset": 0,
+        "y_offset": 12
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 35,
+        "x_offset": -2,
+        "y_offset": 12
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 14,
+        "x_offset": -1,
+        "y_offset": -5
+      }
+    }
+  },
+  "turban0": {
+    "name": "turban0",
+    "num_states": 3,
+    "disk_face": 64,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 27,
+        "x_offset": 0,
+        "y_offset": 5
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 28,
+        "x_offset": -2,
+        "y_offset": 5
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 15,
+        "x_offset": -1,
+        "y_offset": -3
+      }
+    }
+  },
+  "turkey0": {
+    "name": "turkey0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 29,
+        "x_offset": 0,
+        "y_offset": 8
+      },
+      "b": {
+        "width_bytes": 3,
+        "height": 31,
+        "x_offset": -1,
+        "y_offset": 8
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 12,
+        "x_offset": -1,
+        "y_offset": 7
+      }
+    }
+  },
+  "unicorn0": {
+    "name": "unicorn0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 7,
+        "height": 30,
+        "x_offset": -1,
+        "y_offset": 8
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 30,
+        "x_offset": -2,
+        "y_offset": 7
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 18,
+        "x_offset": -1,
+        "y_offset": 0
+      }
+    }
+  },
+  "vampire0": {
+    "name": "vampire0",
+    "num_states": 3,
+    "disk_face": 128,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 24,
+        "x_offset": 0,
+        "y_offset": 2
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 24,
+        "x_offset": -2,
+        "y_offset": 1
+      },
+      "c": {
+        "width_bytes": 2,
+        "height": 2,
+        "x_offset": -1,
+        "y_offset": -21
+      }
+    }
+  },
+  "viking0": {
+    "name": "viking0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 30,
+        "x_offset": 0,
+        "y_offset": 8
+      },
+      "b": {
+        "width_bytes": 8,
+        "height": 32,
+        "x_offset": -4,
+        "y_offset": 9
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 11,
+        "x_offset": -1,
+        "y_offset": -1
+      }
+    }
+  },
+  "wimpy0": {
+    "name": "wimpy0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 26,
+        "x_offset": 0,
+        "y_offset": 4
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 26,
+        "x_offset": -2,
+        "y_offset": 3
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 11,
+        "x_offset": -1,
+        "y_offset": -6
+      }
+    }
+  },
+  "witch0": {
+    "name": "witch0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      152
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 3,
+        "height": 32,
+        "x_offset": 1,
+        "y_offset": 10
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 32,
+        "x_offset": -2,
+        "y_offset": 9
+      },
+      "c": {
+        "width_bytes": 3,
+        "height": 12,
+        "x_offset": -1,
+        "y_offset": -9
+      },
+      "d": {
+        "width_bytes": 2,
+        "height": 10,
+        "x_offset": -1,
+        "y_offset": -2
+      },
+      "e": {
+        "width_bytes": 2,
+        "height": 5,
+        "x_offset": 4,
+        "y_offset": -3
+      },
+      "f": {
+        "width_bytes": 2,
+        "height": 5,
+        "x_offset": -4,
+        "y_offset": -7
+      },
+      "g": {
+        "width_bytes": 2,
+        "height": 10,
+        "x_offset": 2,
+        "y_offset": 1
+      }
+    }
+  },
+  "wizard0": {
+    "name": "wizard0",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      144
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 26,
+        "x_offset": 0,
+        "y_offset": 4
+      },
+      "b": {
+        "width_bytes": 6,
+        "height": 26,
+        "x_offset": -3,
+        "y_offset": 3
+      },
+      "c": {
+        "width_bytes": 4,
+        "height": 11,
+        "x_offset": -2,
+        "y_offset": -5
+      },
+      "d": {
+        "width_bytes": 3,
+        "height": 17,
+        "x_offset": -1,
+        "y_offset": 19
+      }
+    }
+  },
+  "woman0": {
+    "name": "woman0",
+    "num_states": 2,
+    "disk_face": 192,
+    "disk_face_flags": {
+      "has_back_cel": true,
+      "has_face_cel": true,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 27,
+        "x_offset": -1,
+        "y_offset": 4
+      },
+      "b": {
+        "width_bytes": 6,
+        "height": 27,
+        "x_offset": -3,
+        "y_offset": 4
+      }
+    }
+  },
+  "woman1": {
+    "name": "woman1",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": 0,
+        "y_offset": 3
+      },
+      "b": {
+        "width_bytes": 4,
+        "height": 25,
+        "x_offset": -2,
+        "y_offset": 2
+      },
+      "c": {
+        "width_bytes": 1,
+        "height": 127,
+        "x_offset": -4,
+        "y_offset": 0
+      }
+    }
+  },
+  "wwolf": {
+    "name": "wwolf",
+    "num_states": 3,
+    "disk_face": 0,
+    "disk_face_flags": {
+      "has_back_cel": false,
+      "has_face_cel": false,
+      "no_bend": false
+    },
+    "start_end": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      2
+    ],
+    "cel_bitmasks": [],
+    "walk_offsets": [
+      28,
+      255,
+      128
+    ],
+    "cel_headers": {
+      "a": {
+        "width_bytes": 5,
+        "height": 27,
+        "x_offset": -1,
+        "y_offset": 5
+      },
+      "b": {
+        "width_bytes": 5,
+        "height": 27,
+        "x_offset": -2,
+        "y_offset": 4
+      },
+      "c": {
+        "width_bytes": 14,
+        "height": 127,
+        "x_offset": -4,
+        "y_offset": 0
+      }
+    }
+  }
+}
