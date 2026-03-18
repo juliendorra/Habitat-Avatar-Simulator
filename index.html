@@ -1199,15 +1199,18 @@ async function drawHead(pose, cx_tab, cy_tab) {
     const headChainX = cx_tab[4]; // bytes
     const headChainY = cy_tab[4] - 63; // scanlines (constant from animate.m)
 
-    // C64 draw_prop initializes cel_x_rel/cel_y_rel to 0 before the first cel.
-    // For each cel, find_cel_xy checks the PREVIOUS cel's x_rel/y_rel:
-    //   if both 0 → reset to origin (cel_x_origin)
-    //   else → chain: cel_x += x_rel, cel_y -= y_rel
-    // Then the current cel's own x_offset/y_offset position it from cel_x/cel_y.
-    // After drawing, the current cel's x_rel/y_rel are stored for the next cel.
+    // C64 draw_prop → get_cel_xy → find_cel_xy for each head cel.
+    // Mirrors the body limb chaining exactly:
+    //   1. Load cel_x = cel_x_origin, cel_y = cel_y_origin
+    //   2. find_cel_xy: if prev x_rel/y_rel both 0 → keep (absolute)
+    //                   else → add x_rel to cel_x (negated if back view)
+    //   3. Update: cel_x_origin = cel_x (origin tracks running position)
+    //   4. Store this cel's x_rel/y_rel for next iteration
     let prev_x_rel = 0; // initialized to 0 by draw_prop
     let prev_y_rel = 0;
-    let cel_x = headChainX; // will be set by find_cel_xy
+    let cel_x_origin = headChainX; // running origin (updated after each cel)
+    let cel_y_origin = headChainY;
+    let cel_x = headChainX;
     let cel_y = headChainY;
 
     for (const celIdx of celIndices) {
@@ -1220,15 +1223,22 @@ async function drawHead(pose, cx_tab, cy_tab) {
       const drawH = img.height * SCALE;
       const celMeta = headManifest ? headManifest[headCelFilename(currentHead.name, celIdx)] : null;
 
-      // find_cel_xy: use PREVIOUS cel's x_rel/y_rel
-      if (prev_x_rel === 0 && prev_y_rel === 0) {
-        cel_x = headChainX; // reset to origin
-        cel_y = headChainY;
-      } else {
+      // Step 1: load from origin (C64: cel_x = cel_x_origin)
+      cel_x = cel_x_origin;
+      cel_y = cel_y_origin;
+
+      // Step 2: find_cel_xy using PREVIOUS cel's x_rel/y_rel
+      if (prev_x_rel !== 0 || prev_y_rel !== 0) {
+        // Relative: add x_rel (negated in back view per cel_dx)
         const adj = isBack ? -prev_x_rel : prev_x_rel;
         cel_x = cel_x + adj;
         cel_y = cel_y - prev_y_rel;
       }
+      // (if both 0: absolute — cel_x stays as cel_x_origin)
+
+      // Step 3: update origin (C64: cel_x_origin = cel_x after get_cel_xy)
+      cel_x_origin = cel_x;
+      cel_y_origin = cel_y;
 
       let drawX, drawY;
       if (celMeta && celMeta.height < 100) {
@@ -1243,7 +1253,7 @@ async function drawHead(pose, cx_tab, cy_tab) {
 
       activeCtx.drawImage(tmp, drawX, drawY, drawW, drawH);
 
-      // Store this cel's x_rel/y_rel for the next cel
+      // Step 4: store this cel's x_rel/y_rel for next iteration
       prev_x_rel = celMeta ? (celMeta.x_rel || 0) : 0;
       prev_y_rel = celMeta ? (celMeta.y_rel || 0) : 0;
     }
