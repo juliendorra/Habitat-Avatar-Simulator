@@ -70,6 +70,19 @@ def eval_token(token: str) -> Optional[int]:
     token = token.strip()
     if not token:
         return None
+    # known constants from C64 equates
+    CONSTANTS = {
+        'cel_box': 0x80,   # filled rectangle cel type flag
+        'swing': 0x00,     # animation type
+        'both': 0x00,
+        'no_cont': 0x00,
+        'right': 0x00,
+        'left': 0x00,
+        'cycle': 0x80,
+        'no_animation': 0x00,
+    }
+    if token.lower() in CONSTANTS:
+        return CONSTANTS[token.lower()]
     # handle expression with '+' first
     if '+' in token:
         total = 0
@@ -190,6 +203,7 @@ def decode_bitmap(data: List[int]) -> Optional[Dict]:
     # validate header
     if len(data) < 6:
         return None
+    is_cel_box = bool(data[0] & 0x80)  # cel_box flag: filled rectangle
     width_bytes = data[0] & 0x0F
     height = data[1]
     x_offset = signed_byte(data[2])
@@ -199,28 +213,34 @@ def decode_bitmap(data: List[int]) -> Optional[Dict]:
     if width_bytes == 0 or height == 0:
         return None
     total_bytes = width_bytes * height
-    # expand run‑length encoded pixel bytes into a flat list of length total_bytes
-    pixel_bytes: List[int] = []
-    i = 6
-    while len(pixel_bytes) < total_bytes and i < len(data):
-        b = data[i]
-        i += 1
-        if b == 0 and i < len(data):
-            count = data[i]
+
+    if is_cel_box:
+        # cel_box: filled rectangle — single byte repeated for entire cel
+        fill_byte = data[6] if len(data) > 6 else 0
+        pixel_bytes = [fill_byte] * total_bytes
+    else:
+        # expand run‑length encoded pixel bytes into a flat list of length total_bytes
+        pixel_bytes: List[int] = []
+        i = 6
+        while len(pixel_bytes) < total_bytes and i < len(data):
+            b = data[i]
             i += 1
-            if (count & 0x80) == 0:
-                # the next byte is repeated count times
-                if i >= len(data):
-                    break
-                val = data[i]
+            if b == 0 and i < len(data):
+                count = data[i]
                 i += 1
-                pixel_bytes.extend([val] * count)
+                if (count & 0x80) == 0:
+                    # the next byte is repeated count times
+                    if i >= len(data):
+                        break
+                    val = data[i]
+                    i += 1
+                    pixel_bytes.extend([val] * count)
+                else:
+                    # transparent run of count&0x7F bytes (zeroes)
+                    run_len = count & 0x7F
+                    pixel_bytes.extend([0] * run_len)
             else:
-                # transparent run of count&0x7F bytes (zeroes)
-                run_len = count & 0x7F
-                pixel_bytes.extend([0] * run_len)
-        else:
-            pixel_bytes.append(b)
+                pixel_bytes.append(b)
     # pad with zeros if truncated
     if len(pixel_bytes) < total_bytes:
         pixel_bytes += [0] * (total_bytes - len(pixel_bytes))
