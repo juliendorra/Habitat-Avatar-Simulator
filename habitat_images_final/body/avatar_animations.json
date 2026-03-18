@@ -413,78 +413,78 @@
     ]
   },
   "choreography": {
+    "init": {
+      "legs_right": 0,
+      "right_arm": 0
+    },
     "stand": {
       "legs_right": 0,
       "right_arm": 0
     },
     "walk": {
-      "legs_right": 0,
-      "right_arm": 0
-    },
-    "bend_over": {
       "legs_right": 1,
       "left_arm": 1,
       "right_arm": 1
     },
-    "bend_back": {
+    "hand_back": {
       "legs_right": 0,
       "right_arm": 0
     },
-    "sit_down": {
+    "sit_floor": {
       "legs_right": 2,
       "right_arm": 4
     },
-    "sit_front": {
+    "sit_chair": {
       "legs_right": 3,
       "right_arm": 4
     },
-    "sit_back": {
+    "bend_over": {
       "torso": 2,
       "right_arm": 2
     },
-    "wave": {
+    "bend_back": {
       "torso": 3,
       "right_arm": 3
     },
     "point": {
       "right_arm": 5
     },
-    "extend": {
+    "throw": {
       "right_arm": 6
     },
-    "arm_get": {
+    "get_shot": {
       "legs_right": 4,
       "torso": 0,
       "right_arm": 4
     },
-    "arm_back": {
+    "jump": {
       "legs_right": 5,
       "right_arm": 7
     },
-    "stand_front": {
+    "punch": {
       "right_arm": 8
     },
-    "stand_back": {
+    "wave": {
       "right_arm": 9
     },
-    "walk_front": {
+    "frown": {
       "head_placeholder": 3
     },
-    "walk_back": {
+    "stand_back": {
       "legs_right": 6,
       "left_arm": 3,
       "torso": 4,
       "head_placeholder": 2,
       "right_arm": 10
     },
-    "arm_get_front": {
+    "walk_front": {
       "legs_right": 7,
       "left_arm": 2,
       "torso": 4,
       "head_placeholder": 1,
       "right_arm": 11
     },
-    "arm_back_front": {
+    "walk_back": {
       "legs_right": 7,
       "legs_left": 1,
       "left_arm": 2,
@@ -492,15 +492,50 @@
       "head_placeholder": 2,
       "right_arm": 11
     },
-    "arm_get_back": {
+    "stand_front": {
       "legs_right": 6,
       "left_arm": 3,
       "torso": 4,
       "head_placeholder": 1,
       "right_arm": 10
     },
-    "arm_back_back": {
+    "unpocket": {
       "right_arm": 12
+    },
+    "gimme": {
+      "right_arm": 13
+    },
+    "knife": {
+      "right_arm": 14
+    },
+    "arm_get": {
+      "right_arm": 2
+    },
+    "hand_out": {
+      "right_arm": 15
+    },
+    "operate": {
+      "right_arm": 16
+    },
+    "arm_back": {
+      "right_arm": 3
+    },
+    "shoot1": {
+      "right_arm": 17
+    },
+    "shoot2": {
+      "right_arm": 18
+    },
+    "nop": {
+      "legs_right": 0,
+      "right_arm": 0
+    },
+    "sit_front": {
+      "legs_right": 8,
+      "left_arm": 3,
+      "torso": 4,
+      "head_placeholder": 1,
+      "right_arm": 10
     }
   },
   "draw_order": {

@@ -71,11 +71,39 @@ def extract(bin_path, out_path):
         start_end_tables[name] = se
 
     # Choreography: action→limb assignments
+    # Action numbering from equates.m: AV_ACT_init=0x80+0, AV_ACT_stand=0x80+1, etc.
+    # The chore_index uses (action & 0x7F) as the table index.
     action_names = [
-        'stand', 'walk', 'bend_over', 'bend_back', 'sit_down', 'sit_front',
-        'sit_back', 'wave', 'point', 'extend', 'arm_get', 'arm_back',
-        'stand_front', 'stand_back', 'walk_front', 'walk_back',
-        'arm_get_front', 'arm_back_front', 'arm_get_back', 'arm_back_back',
+        'init',         #  0: AV_ACT_init (0x80)
+        'stand',        #  1: AV_ACT_stand (0x81)
+        'walk',         #  2: AV_ACT_walk (0x82)
+        'hand_back',    #  3: AV_ACT_hand_back (0x83)
+        'sit_floor',    #  4: AV_ACT_sit_floor (0x84)
+        'sit_chair',    #  5: AV_ACT_sit_chair (0x85)
+        'bend_over',    #  6: AV_ACT_bend_over (0x86)
+        'bend_back',    #  7: AV_ACT_bend_back (0x87)
+        'point',        #  8: AV_ACT_point (0x88)
+        'throw',        #  9: AV_ACT_throw (0x89)
+        'get_shot',     # 10: AV_ACT_get_shot (0x8A)
+        'jump',         # 11: AV_ACT_jump (0x8B)
+        'punch',        # 12: AV_ACT_punch (0x8C)
+        'wave',         # 13: AV_ACT_wave (0x8D)
+        'frown',        # 14: AV_ACT_frown (0x8E)
+        'stand_back',   # 15: AV_ACT_stand_back (0x8F)
+        'walk_front',   # 16: AV_ACT_walk_front (0x90)
+        'walk_back',    # 17: AV_ACT_walk_back (0x91)
+        'stand_front',  # 18: AV_ACT_stand_front (0x92)
+        'unpocket',     # 19: AV_ACT_unpocket (0x93)
+        'gimme',        # 20: AV_ACT_gimme (0x94)
+        'knife',        # 21: AV_ACT_knife (0x95)
+        'arm_get',      # 22: AV_ACT_arm_get (0x96)
+        'hand_out',     # 23: AV_ACT_hand_out (0x97)
+        'operate',      # 24: AV_ACT_operate (0x98)
+        'arm_back',     # 25: AV_ACT_arm_back (0x99)
+        'shoot1',       # 26: AV_ACT_shoot1 (0x9A)
+        'shoot2',       # 27: AV_ACT_shoot2 (0x9B)
+        'nop',          # 28: AV_ACT_nop (0x9C)
+        'sit_front',    # 29: AV_ACT_sit_front (0x9D)
     ]
 
     choreography = {}
@@ -89,9 +117,15 @@ def extract(bin_path, out_path):
         i = abs_offset
         while i < len(data):
             b = data[i]
-            limb_idx = (b >> 4) & 0x07  # bits 6-4
-            gs = b & 0x0F               # bits 3-0
-            is_last = bool(b & 0x80)    # bit 7
+            raw = b & 0x7F              # mask off stop bit
+            limb_idx = (raw >> 4) & 0x07  # bits 6-4
+            gs = raw & 0x0F              # bits 3-0
+            is_last = bool(b & 0x80)     # bit 7
+
+            # C64 special case: limb 6 → right_arm (limb 5) with state + 16
+            if limb_idx == 6:
+                limb_idx = 5
+                gs += 16
 
             limb_name = limb_names[limb_idx] if limb_idx < 6 else f'limb{limb_idx}'
             entries[limb_name] = gs

@@ -647,71 +647,44 @@ function setLimbGS(limbName, gs, startAtEnd) {
   }
 }
 
-// Initialize the animation engine for a given pose+view
-// C64 layered system:
-//   1. All limbs start at gs0 (side standing defaults)
-//   2. Apply base action choreography (stand/walk/wave/point/bend_over)
-//   3. Apply view overlay (stand_front/stand_back/walk_front/walk_back)
-//   4. Walk: movement system sets locomotion limbs to walk cycle
+// Initialize the animation engine for a given pose+view.
+// Matches the C64 new_chore flow from chore.m exactly:
+//   1. Clear all 6 limbs to gs0 (new_chore clears AVATAR_cel_state)
+//   2. Apply the action's choreography bytes (sets specific limb graphic states)
+//   3. For front/back views, apply the view-specific action which sets ALL limbs
+// No manual overrides needed — the choreography data handles everything.
 function initAnimAction(poseName, viewName) {
   if (!avatarAnim) return;
 
-  // Step 1: All limbs to gs0 (standing side defaults)
+  // Step 1: All limbs to gs0 (C64: clear AVATAR_cel_state bytes to 0)
   for (const limbName of LIMB_NAMES) {
     setLimbGS(limbName, 0);
   }
 
-  // Step 2: Apply base action choreography
-  const baseAction = poseName === 'bend' ? 'bend_over' : poseName;
-  const isStatic = (poseName === 'stand' || poseName === 'wave' || poseName === 'point');
-  applyAction(baseAction, isStatic);
-
-  // Step 3: Front/back facing overrides + view-specific choreography
-  // The C64 facing system sets view-specific legs, torso, arms THEN
-  // overlays the view-specific action (stand_front, walk_back, etc.)
-  if (viewName === 'front' || viewName === 'back') {
-    setLimbGS('legs_right', 6, isStatic);
-    setLimbGS('torso', viewName === 'front' ? 5 : 4, isStatic);
-    setLimbGS('left_arm', 2, isStatic);
-    setLimbGS('head_placeholder', viewName === 'front' ? 1 : 2);
-    // View-specific overlay
-    applyAction(viewName === 'front' ? 'stand_front' : 'stand_back', isStatic);
-    if (poseName === 'walk') {
-      applyAction(viewName === 'front' ? 'walk_front' : 'walk_back');
-    }
-    // Front/back standing: force right_arm to front-view cel matching left_arm
-    // left_arm gs2 frame 9 = cel 4 (24x17). Matching right_arm = cel 14 at frame 39.
-    // The choreography gives gs8→cel 11 (side arm) which doesn't match.
-    if (isStatic && poseName === 'stand') {
-      limbAnimState.right_arm.frame = 39; // cel 14 = front standing arm
-    }
+  // Step 2: Determine the C64 action to apply
+  // Map pose+view to the correct AV_ACT action name
+  let actionName;
+  if (viewName === 'front') {
+    actionName = poseName === 'walk' ? 'walk_front' :
+                 poseName === 'bend' ? 'stand_front' : // bend only in side view
+                 'stand_front';
+  } else if (viewName === 'back') {
+    actionName = poseName === 'walk' ? 'walk_back' :
+                 poseName === 'bend' ? 'stand_back' :
+                 'stand_back';
+  } else {
+    // Side view: use the base action directly
+    actionName = poseName === 'bend' ? 'bend_over' : poseName;
   }
 
-  // Step 5: Walk movement system override
-  // C64 walk animation is triggered by the movement system, not choreography.
-  // Side walk: all locomotion limbs to gs1 (walk cycle)
-  // Front/back walk: legs_right to gs7 (front/back walk cycle)
-  if (poseName === 'walk') {
-    if (viewName === 'side') {
-      for (const limb of ['legs_right', 'legs_left', 'left_arm', 'right_arm']) {
-        setLimbGS(limb, 1); // gs1 = side walk cycle
-      }
-    } else if (viewName === 'front' || viewName === 'back') {
-      setLimbGS('legs_right', 7); // gs7 = front/back walk cycle
-      setLimbGS('left_arm', 2);   // gs2 = front/back arm swing cycle
-      setLimbGS('right_arm', 11); // gs11 = front/back arm swing cycle (cels 12,13,14,13)
-      setLimbGS('head_placeholder', viewName === 'front' ? 1 : 2); // restore front/back head
-      // legs_left gs1 for back walk (foot overlay)
-      if (viewName === 'back') setLimbGS('legs_left', 1);
-    }
-  }
+  // Step 3: Apply choreography (C64: init_avatar_chores for each byte)
+  applyAction(actionName);
 
-  // Step 5: Bend visual override
-  // bend_over choreography sets r_arm=gs1 (walk swing), but the visual
-  // needs torso gs2 (bend cycle) and arm gs5 (reach/grab sequence)
-  if (poseName === 'bend' && viewName === 'side') {
-    setLimbGS('torso', 2);     // gs2 = bend cycle (frames 2→3, cels 2,3)
-    setLimbGS('right_arm', 5); // gs5 = reach/grab (frames 13→15, cels 9,5,8)
+  // Step 4: For side walk, the walk choreography already sets gs1 for
+  // legs_right, left_arm, right_arm. But legs_left is not set by the
+  // choreography — the C64 walk system handles it. Set it here:
+  if (poseName === 'walk' && viewName === 'side') {
+    setLimbGS('legs_left', 1); // gs1 = side walk overlay
   }
 }
 
