@@ -565,15 +565,14 @@ const POSES = {
     back: { legs_right:16, legs_left:null, left_arm:10, torso:6, right_arm:37, head_state:2 },
   },
   bend: {
-    // Bend over sequence from Avatar.bin choreography:
-    //   bend_over: legs_r=gs1, l_arm=gs1, r_arm=gs1 (walk states)
-    //   torso transitions gs0→gs2 (frames 2→3: cels 2,3 = bending)
-    //   arm_get fires when bent: r_arm=gs4 (frame 9 = cel 9, tucked)
-    // Frame 0: standing, frame 1: mid-bend with walk arm, frame 2: bent with arm down
+    // Bend over: choreography sets r_arm=gs1 (walk swing cycle).
+    // gs1 frames 1→8 cycle: cels [0,1,9,2,3,2,9,1].
+    // State 5 = cel 3 (24x27, arm hanging down) = lowest point of swing.
+    // Torso gs2: frames 2→3 = cels 2,3 (mid-bend, fully bent).
     side: [
       { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:0, head_state:0 },
-      { legs_right:0, legs_left:null, left_arm:null, torso:2, right_arm:5, head_state:0 },
-      { legs_right:0, legs_left:null, left_arm:null, torso:3, right_arm:4, head_state:0 },
+      { legs_right:0, legs_left:null, left_arm:null, torso:2, right_arm:4, head_state:0 },
+      { legs_right:0, legs_left:null, left_arm:null, torso:3, right_arm:5, head_state:0 },
     ],
     front: { legs_right:16, legs_left:null, left_arm:10, torso:7, right_arm:37, head_state:1 },
     back: { legs_right:16, legs_left:null, left_arm:10, torso:6, right_arm:37, head_state:2 },
