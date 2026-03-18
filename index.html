@@ -679,6 +679,12 @@ function initAnimAction(poseName, viewName) {
     if (poseName === 'walk') {
       applyAction(viewName === 'front' ? 'walk_front' : 'walk_back');
     }
+    // Front/back standing: force right_arm to front-view cel matching left_arm
+    // left_arm gs2 frame 9 = cel 4 (24x17). Matching right_arm = cel 14 at frame 39.
+    // The choreography gives gs8→cel 11 (side arm) which doesn't match.
+    if (isStatic && poseName === 'stand') {
+      limbAnimState.right_arm.frame = 39; // cel 14 = front standing arm
+    }
   }
 
   // Step 5: Walk movement system override
