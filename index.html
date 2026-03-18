@@ -698,6 +698,9 @@ function initAnimAction(poseName, viewName) {
       }
     } else if (viewName === 'front' || viewName === 'back') {
       setLimbGS('legs_right', 7); // gs7 = front/back walk cycle
+      setLimbGS('left_arm', 2);   // gs2 = front/back arm swing cycle
+      setLimbGS('right_arm', 11); // gs11 = front/back arm swing cycle (cels 12,13,14,13)
+      setLimbGS('head_placeholder', viewName === 'front' ? 1 : 2); // restore front/back head
       // legs_left gs1 for back walk (foot overlay)
       if (viewName === 'back') setLimbGS('legs_left', 1);
     }
