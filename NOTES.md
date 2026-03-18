@@ -148,6 +148,31 @@ Customization byte layout:
 
 ## Animation System
 
+### Choreography (chore.m / Avatar.bin)
+The choreography system drives all avatar animation. The flow in `new_chore`:
+
+1. **Clear**: all 6 limbs' `cel_state` set to 0 (= gs0 = side standing)
+2. **Apply action**: read choreography bytes for the requested action. Each byte encodes `(limb << 4) | graphic_state`, with bit 7 marking the last entry. Special case: limb 6 maps to right_arm (limb 5) with state + 16.
+3. **Set facing**: the action determines the view — `stand_front`, `walk_front` → facing=1; `stand_back`, `walk_back` → facing=3; all others → facing=0.
+
+**Critical discovery**: `AV_ACT_init` is action 0 (index 0 in chore_index), which shifts all other actions by 1:
+```
+AV_ACT_init       = 0x80 + 0   → index 0
+AV_ACT_stand      = 0x80 + 1   → index 1
+AV_ACT_walk       = 0x80 + 2   → index 2
+AV_ACT_bend_over  = 0x80 + 6   → index 6
+AV_ACT_wave       = 0x80 + 13  → index 13
+AV_ACT_stand_front= 0x80 + 18  → index 18
+```
+Missing this offset caused every choreography to use the wrong data.
+
+**Front/back view actions are COMPLETE choreographies**, not overlays:
+- `stand_front` sets ALL 5 active limbs: legs_right=gs6, left_arm=gs3, torso=gs4, head_placeholder=gs1, right_arm=gs10
+- `walk_front` sets ALL limbs: legs_right=gs7, left_arm=gs2, torso=gs4, head_placeholder=gs1, right_arm=gs11
+- `walk_back` also sets legs_left=gs1 (back walk overlay)
+
+The simulator's `initAnimAction` mirrors this exactly: clear all to gs0, then apply the single correct action.
+
 ### Start/End Tables (from Avatar.bin)
 Each limb has a `start_end` table mapping graphic states to frame ranges:
 ```
@@ -155,18 +180,35 @@ start_end[graphic_state * 2]     = start_frame (bit 7 = cycle flag)
 start_end[graphic_state * 2 + 1] = end_frame
 ```
 - **Cycle flag (0x80)**: animation loops continuously (walk, beanie propeller)
-- **No cycle**: animation plays once (point, bend)
+- **No cycle**: animation plays once and holds at end frame (point, bend)
+
+### Key Choreography Actions
+| Action | Sets | Notes |
+|--------|------|-------|
+| `stand` | legs_r=gs0, r_arm=gs0 | Side standing (minimal — most limbs already gs0) |
+| `walk` | legs_r=gs1, l_arm=gs1, r_arm=gs1 | Side walk — sets gs1 for all locomotion limbs |
+| `bend_over` | torso=gs2, r_arm=gs2 | Torso bends, arm reaches (gs2 = frames 9→10) |
+| `bend_back` | torso=gs3, r_arm=gs3 | Torso unbends |
+| `wave` | r_arm=gs9 | Wave gesture (gs9 = frames 31→35) |
+| `point` | r_arm=gs5 | Point gesture (gs5 = frames 13→15) |
+| `stand_front` | all 5 limbs | Complete front-facing standing |
+| `walk_front` | all 6 limbs | Complete front-facing walk cycle |
+| `walk_back` | all 6 limbs | Complete back-facing walk cycle (includes legs_left) |
 
 ### Walk Animation
-Walk choreography sets all limbs to graphic state 1. From the start_end tables:
-- **legs_right**: 4-frame cycle (frames 1-4), cels 0,1,2,3
-- **legs_left**: 4-frame cycle (frames 1-4), cels 0,1,2,3
-- **left_arm**: 8-frame cycle (frames 1-8), arm swing with hidden frames
-- **right_arm**: 8-frame cycle (frames 1-8), arm swing
-- **torso**: stays at state 0 (no change)
+The `walk` action sets gs1 for legs_right, left_arm, and right_arm:
+- **legs_right gs1**: 4-frame cycle (frames 1-4), cels 0,1,2,3
+- **left_arm gs1**: 8-frame cycle (frames 1-8), arm swing with hidden frames
+- **right_arm gs1**: 8-frame cycle (frames 1-8), arm swing
+- **torso**: stays at gs0 (not changed by walk choreography)
+- **legs_left**: NOT set by walk choreography — handled separately (gs1 for side walk overlay)
 
-The simulator uses an 8-frame walk (LCM of 4-frame legs and 8-frame arms).
-Back walk adds legs_left overlay cycling through states 1-4.
+Arms cycle at half the leg rate (8 frames vs 4), creating natural-looking asynchronous limb movement. The walk animation is entirely data-driven through the choreography + start_end tables.
+
+For front/back walk, `walk_front`/`walk_back` are separate complete choreographies:
+- **legs_right gs7**: 4-frame cycle with front/back leg cels (9,10,11,12)
+- **left_arm gs2**: 4-frame cycle with front arm cels (4,5,6,5)
+- **right_arm gs11**: 4-frame cycle with front arm cels (12,13,14,13)
 
 ### Animated Heads
 Some heads have cycling start_end entries (bit 7 set):
@@ -270,10 +312,22 @@ This fixes multi-part heads like mbeany0 (head + propeller) where cel A's x_rel=
 
 ### 6. The choreography system sets graphic states, not frame indices
 **Wrong**: pose frames directly set LIMB_STATES indices
-**Right**: the choreography byte encodes `(limb << 4) | graphic_state`, and each graphic_state maps through the limb's start_end table to a frame range. The animation system then cycles through that range. Our POSES pre-apply this mapping for simplicity.
+**Right**: the choreography byte encodes `(limb << 4) | graphic_state`, and each graphic_state maps through the limb's start_end table to a frame range. The animation system then cycles through that range.
 
 ### 7. Avatar.bin contains choreography data (not just cel data)
 The first 4 bytes of Avatar.bin are offsets to `chore_index` and `chore_tables`. These tables define all avatar actions (stand, walk, bend, wave, point, etc.) as sets of `(limb, graphic_state)` pairs. Bit 7 of each byte marks the last entry in the action.
+
+### 8. AV_ACT_init (action 0) shifts all choreography indices
+**Wrong**: assumed action 0 = stand, action 1 = walk
+**Right**: AV_ACT_init (0x80+0) is action 0. AV_ACT_stand is 0x80+1 (index 1), AV_ACT_walk is 0x80+2 (index 2), etc. Missing this offset caused EVERY action to read the wrong choreography bytes — walk used stand's data (gs0 for everything instead of gs1 for locomotion), bend used walk's data, etc. This was the root cause of most animation bugs.
+
+### 9. Front/back actions are complete choreographies, not overlays
+**Wrong**: apply stand_front as a partial overlay on top of stand, then add walk-specific overrides
+**Right**: stand_front, walk_front, walk_back etc. set ALL relevant limbs. They are complete choreographies designed to be applied after clearing all states to gs0. No manual "facing defaults" or "walk movement system overrides" needed.
+
+### 10. Limb 6 in choreography bytes maps to right_arm with state+16
+**Wrong**: limb 6 treated as invalid/ignored
+**Right**: the C64 new_chore code explicitly handles limb 6 → maps to limb 5 (right_arm) with state += 16, allowing right_arm graphic states above 15 (up to gs23 for complex arm sequences like operate, shoot, knife).
 
 ## Source Palettes
 
@@ -302,6 +356,7 @@ habitat_images_final/
 tools/
   Avatar.bin                        Original avatar binary (3442 bytes)
   decode_avatar_bin.py              Avatar.bin decoder → body cel PNGs + manifest
+  extract_avatar_animations.py      Avatar.bin → avatar_animations.json (choreography + start_end)
   habitat_renderer.py               Head .m file renderer → head cel PNGs + manifest
   extract_head_data.py              Head .m files → head_config.json
 NOTES.md                            This file
