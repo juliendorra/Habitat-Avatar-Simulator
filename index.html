@@ -140,9 +140,10 @@
   .pattern-zone > span { font-size: 0.7em; color: var(--text-dim); display: block; margin-bottom: 2px; }
   .pattern-swatches { display: flex; gap: 2px; flex-wrap: wrap; }
   .pattern-swatch {
-    width: 24px; height: 16px; cursor: pointer;
+    width: 48px; height: 32px; cursor: pointer;
     border: 2px solid transparent; border-radius: 2px;
-    image-rendering: pixelated; transition: border-color 0.15s;
+    image-rendering: pixelated; image-rendering: crisp-edges;
+    transition: border-color 0.15s;
   }
   .pattern-swatch:hover { border-color: var(--text-dim); }
   .pattern-swatch.active { border-color: var(--highlight); }
