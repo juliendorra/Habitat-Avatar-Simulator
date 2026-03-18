@@ -1614,8 +1614,9 @@ function makePatternSwatch(patIdx) {
   c.title = `${patIdx}: ${PATTERN_NAMES[patIdx]}`;
   const gc = c.getContext('2d');
   const pattern = CEL_PATTERNS[patIdx];
-  // Pattern value colors: 0,1=clothing(blue), 2=detail(black), 3=wild(pink)
-  const patColors = ['transparent', bodyColors[0], bodyColors[1], bodyColors[2]];
+  // Pattern value colors: 0=preserve(shows clothing blue), 1=clothing, 2=detail, 3=wild
+  // On the spray bottle, 00 preserves the underlying blue body — same as clothing color
+  const patColors = [bodyColors[0], bodyColors[0], bodyColors[1], bodyColors[2]];
   for (let y = 0; y < H; y++) {
     const row = SPRAY_BOTTLE[y];
     if (!row) continue;
