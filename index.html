@@ -147,7 +147,6 @@
   }
   .pattern-swatch:hover { border-color: var(--text-dim); }
   .pattern-swatch.active { border-color: var(--highlight); }
-  .pattern-name { font-size: 0.65em; color: var(--text-dim); margin-top: 2px; }
   /* Right panel */
   .browse-panel {
     flex: 1; min-width: 300px; padding: 16px;
@@ -282,9 +281,9 @@
 
       <div class="control-group">
         <label>Clothing Patterns</label>
-        <div class="pattern-zone"><span>Torso</span><div class="pattern-swatches" id="patTorsoSwatches"></div><div class="pattern-name" id="patTorsoName">Solid</div></div>
-        <div class="pattern-zone"><span>Arms</span><div class="pattern-swatches" id="patArmsSwatches"></div><div class="pattern-name" id="patArmsName">Solid</div></div>
-        <div class="pattern-zone"><span>Legs</span><div class="pattern-swatches" id="patLegsSwatches"></div><div class="pattern-name" id="patLegsName">Solid</div></div>
+        <div class="pattern-zone"><span>Torso — <span id="patTorsoName">Solid</span></span><div class="pattern-swatches" id="patTorsoSwatches"></div></div>
+        <div class="pattern-zone"><span>Arms — <span id="patArmsName">Solid</span></span><div class="pattern-swatches" id="patArmsSwatches"></div></div>
+        <div class="pattern-zone"><span>Legs — <span id="patLegsName">Solid</span></span><div class="pattern-swatches" id="patLegsSwatches"></div></div>
       </div>
 
       <div class="head-info" id="headInfo">
