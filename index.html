@@ -565,14 +565,14 @@ const POSES = {
     back: { legs_right:16, legs_left:null, left_arm:10, torso:6, right_arm:37, head_state:2 },
   },
   bend: {
-    // Bend over: choreography sets r_arm=gs1 (walk swing cycle).
-    // gs1 frames 1→8 cycle: cels [0,1,9,2,3,2,9,1].
-    // State 5 = cel 3 (24x27, arm hanging down) = lowest point of swing.
+    // Bend over: r_arm gs5 (frames 13→15 = cels 9,5,8).
+    // State 14 = cel 5 (32x11, arm extending forward).
+    // State 15 = cel 8 (48x11, arm+fist fully extended to grab).
     // Torso gs2: frames 2→3 = cels 2,3 (mid-bend, fully bent).
     side: [
       { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:0, head_state:0 },
-      { legs_right:0, legs_left:null, left_arm:null, torso:2, right_arm:4, head_state:0 },
-      { legs_right:0, legs_left:null, left_arm:null, torso:3, right_arm:5, head_state:0 },
+      { legs_right:0, legs_left:null, left_arm:null, torso:2, right_arm:14, head_state:0 },
+      { legs_right:0, legs_left:null, left_arm:null, torso:3, right_arm:15, head_state:0 },
     ],
     front: { legs_right:16, legs_left:null, left_arm:10, torso:7, right_arm:37, head_state:1 },
     back: { legs_right:16, legs_left:null, left_arm:10, torso:6, right_arm:37, head_state:2 },
