@@ -64,15 +64,22 @@ Zero bytes in the cel data stream trigger `clear_run` — the position is advanc
 ## Rendering Pipeline (from C64 source)
 
 ### Step 1: Position Chaining (`display_avatar` → `get_cel_xy` → `find_cel_xy`)
-All 6 limbs are processed sequentially (0→5). Each limb's position is computed via `find_cel_xy` using the **previous** cel's `x_rel`/`y_rel`:
+All 6 limbs are processed sequentially (0→5). The algorithm maintains a **running origin** (`cel_x_origin`, `cel_y_origin`) that is updated after each drawn limb.
 
+For each limb, `get_cel_xy` does:
 ```
-if (previous cel's x_rel == 0 AND y_rel == 0):
-    ABSOLUTE: cel_x = cel_x_origin, cel_y = cel_y_origin
-else:
-    RELATIVE: cel_x += x_rel, cel_y -= y_rel
-    (x_rel is negated when cel_dx is set, i.e. back view)
+1. Load: cel_x = cel_x_origin, cel_y = cel_y_origin
+2. Call find_cel_xy (uses PREVIOUS limb's x_rel/y_rel):
+   if (previous x_rel == 0 AND y_rel == 0):
+       ABSOLUTE: cel_x stays as cel_x_origin (no change)
+   else:
+       RELATIVE: cel_x = cel_x_origin + x_rel   ← NOTE: added to ORIGIN, not previous cel_x!
+                 cel_y = cel_y_origin - y_rel
+       (x_rel is negated when cel_dx is set, i.e. back view)
+3. Save: cel_x_origin = cel_x  (origin now tracks the new position)
 ```
+
+**Critical detail for NULL limbs**: when a limb is not drawn (cel 255), `get_cel_loc_addr` is never called, so `cel_x_rel`/`cel_y_rel` **retain their values** from the previous limb. This means x_rel/y_rel propagate through chains of null limbs. For example, in side view standing, legs_right sets x_rel=0/y_rel=-1, and these persist through null legs_left and null left_arm to affect the torso's positioning.
 
 Results stored in `cx_tab[0..5]` and `cy_tab[0..5]` (byte/scanline units).
 Height adjustment: `cy_tab[i] += avatar_height` for limbs 2-5 (upper body only).
@@ -202,14 +209,18 @@ start_end table (8 bytes):
 | 0x20 | 1 | No-bend only |
 
 ### Head Cel Positioning
-Each head cel uses **absolute positioning** from the head origin:
+Heads are drawn as "contained objects" via `draw_prop`. The head origin is:
 ```
 headOrigin = (cx_tab[4], cy_tab[4] - 63)
-celDrawX = BASE_X + (headOrigin.x + cel.x_offset) * BYTE_PX
-celDrawY = BASE_Y + (headOrigin.y - cel.y_offset) * SCALE
 ```
 
-Multi-cel heads (e.g., mbeany0 with head + propeller) draw each cel independently from the same head origin. The `x_rel`/`y_rel` values in head cels are for chaining to the head_placeholder limb, not for intra-head positioning.
+**Multi-cel heads chain via x_rel/y_rel** (like body limbs). The C64 `draw_prop` initializes `cel_x_rel=0, cel_y_rel=0` before the first cel. For each subsequent cel, `find_cel_xy` uses the PREVIOUS cel's x_rel/y_rel:
+```
+Cel A (base head): drawn at headOrigin + x_offset. Sets x_rel=2 for next.
+Cel D (propeller): find_cel_xy sees x_rel=2 → chains: cel_x = headOrigin.x + 2
+                   Then drawn at (headOrigin.x + 2 + cel_D.x_offset)
+```
+This was initially implemented wrong as absolute positioning for all cels, causing propellers and multi-part heads to be misaligned.
 
 ## Coordinate System
 
@@ -228,9 +239,41 @@ where:
     SCALE = 4                    (each PNG pixel = 4 display pixels)
 ```
 
-Canvas uses dynamic centering: avatar is rendered to an offscreen canvas,
-bounding box is computed, then centered in the visible canvas. This eliminates
-hardcoded BASE_X/BASE_Y brittleness for different head sizes.
+Canvas uses fixed BASE_X/BASE_Y positioning with the canvas sized to accommodate
+the tallest heads. BASE_X is placed slightly left of center, BASE_Y near the
+bottom with room for feet.
+
+## Lessons Learned (False Assumptions Corrected)
+
+### 1. x_rel adds to ORIGIN, not to previous cel_x
+**Wrong**: `cel_x = previous_cel_x + x_rel` (running accumulation)
+**Right**: `cel_x = cel_x_origin + x_rel` (origin is loaded first, then rel added)
+The C64 `get_cel_xy` explicitly loads `cel_x = cel_x_origin` before calling `find_cel_xy`. The origin is then updated to the result. This is subtly different from accumulating — the origin tracks the running position, and each step adds rel to the ORIGIN, not to the previous result.
+
+### 2. NULL limbs retain x_rel/y_rel (don't reset to 0)
+**Wrong**: null limbs reset `cel_x_rel = 0, cel_y_rel = 0`
+**Right**: null limbs skip `get_cel_loc_addr`, so x_rel/y_rel from the PREVIOUS drawn limb persist
+This matters for side-view standing: legs_right sets y_rel=-1, which persists through null legs_left and null left_arm, affecting the torso's Y position by 1 scanline.
+
+### 3. Head cels chain via x_rel/y_rel (not absolute)
+**Wrong**: each head cel uses absolute positioning from the head origin
+**Right**: head cels chain like body limbs via `draw_prop`, using `find_cel_xy` with initialized x_rel=0/y_rel=0 for the first cel, then chaining
+This fixes multi-part heads like mbeany0 (head + propeller) where cel A's x_rel=2 shifts cel D's position.
+
+### 4. x_offset units are bytes, not MC pixels
+**Wrong** (early attempt): x_offset multiplied by 2 (treating as MC pixels)
+**Right**: x_offset is in the same byte-column units as cel_x, matching width_bytes. In `paint_1`, x_offset is added directly to `cel_x` to compute `screen_x`, and screen_x indexes 8-pixel-wide character cells.
+
+### 5. Pattern value 00 preserves screen (not background fill)
+**Wrong**: pattern pixel 00 fills with canvas background color
+**Right**: the paint formula `(screen & bluescreen) | ora_table | (pattern & mask_blue)` evaluates to `screen` when pattern=00, meaning existing screen content shows through. This is transparent compositing, not background fill.
+
+### 6. The choreography system sets graphic states, not frame indices
+**Wrong**: pose frames directly set LIMB_STATES indices
+**Right**: the choreography byte encodes `(limb << 4) | graphic_state`, and each graphic_state maps through the limb's start_end table to a frame range. The animation system then cycles through that range. Our POSES pre-apply this mapping for simplicity.
+
+### 7. Avatar.bin contains choreography data (not just cel data)
+The first 4 bytes of Avatar.bin are offsets to `chore_index` and `chore_tables`. These tables define all avatar actions (stand, walk, bend, wave, point, etc.) as sets of `(limb, graphic_state)` pairs. Bit 7 of each byte marks the last entry in the action.
 
 ## Source Palettes
 
