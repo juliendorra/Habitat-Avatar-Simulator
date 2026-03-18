@@ -339,6 +339,76 @@
         "start": 31,
         "end": 35,
         "cycle": false
+      },
+      {
+        "start": 36,
+        "end": 36,
+        "cycle": false
+      },
+      {
+        "start": 37,
+        "end": 40,
+        "cycle": true
+      },
+      {
+        "start": 41,
+        "end": 45,
+        "cycle": false
+      },
+      {
+        "start": 46,
+        "end": 49,
+        "cycle": false
+      },
+      {
+        "start": 50,
+        "end": 57,
+        "cycle": false
+      },
+      {
+        "start": 58,
+        "end": 60,
+        "cycle": false
+      },
+      {
+        "start": 61,
+        "end": 71,
+        "cycle": false
+      },
+      {
+        "start": 72,
+        "end": 74,
+        "cycle": false
+      },
+      {
+        "start": 75,
+        "end": 79,
+        "cycle": false
+      },
+      {
+        "start": 68,
+        "end": 68,
+        "cycle": false
+      },
+      {
+        "start": 39,
+        "end": 39,
+        "cycle": false
+      },
+      {
+        "start": 4,
+        "end": 19,
+        "cycle": false
+      },
+      {
+        "start": 1,
+        "end": 44,
+        "cycle": false
+      },
+      {
+        "start": 3,
+        "end": 39,
+        "cycle": false
       }
     ]
   },

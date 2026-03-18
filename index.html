@@ -543,23 +543,13 @@ const limbAnimState = {};
 const LIMB_NAMES = ['legs_right','legs_left','left_arm','torso','head_placeholder','right_arm'];
 
 // Apply a choreography action: set each limb's graphic_state and init frame ranges
-function applyAction(actionName) {
+function applyAction(actionName, startAtEnd) {
   if (!avatarAnim) return;
   const chore = avatarAnim.choreography[actionName];
   if (!chore) return;
 
-  // Set graphic_states from choreography
   for (const [limbName, gs] of Object.entries(chore)) {
-    const se = avatarAnim.start_end[limbName];
-    if (!se || gs >= se.length) continue;
-    const range = se[gs];
-    limbAnimState[limbName] = {
-      gs: gs,
-      start: range.start,
-      end: range.end,
-      cycle: range.cycle,
-      frame: range.start, // init to start frame
-    };
+    setLimbGS(limbName, gs, startAtEnd);
   }
 }
 
@@ -641,13 +631,16 @@ function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
 function lcm(a, b) { return (a * b) / gcd(a, b); }
 
 // Helper: set a limb to a given graphic state
-function setLimbGS(limbName, gs) {
+// For play-once animations in static poses, start at the END frame
+// (the animation has already completed in the C64's state machine)
+function setLimbGS(limbName, gs, startAtEnd) {
   const se = avatarAnim ? avatarAnim.start_end[limbName] : null;
   if (se && gs < se.length) {
     const range = se[gs];
+    const frame = (startAtEnd && !range.cycle) ? range.end : range.start;
     limbAnimState[limbName] = {
       gs, start: range.start, end: range.end,
-      cycle: range.cycle, frame: range.start,
+      cycle: range.cycle, frame,
     };
   } else {
     limbAnimState[limbName] = { gs: 0, start: 0, end: 0, cycle: false, frame: 0 };
@@ -670,32 +663,21 @@ function initAnimAction(poseName, viewName) {
 
   // Step 2: Apply base action choreography
   const baseAction = poseName === 'bend' ? 'bend_over' : poseName;
-  applyAction(baseAction);
+  const isStatic = (poseName === 'stand' || poseName === 'wave' || poseName === 'point');
+  applyAction(baseAction, isStatic);
 
-  // Step 3: Apply view-specific overlay
-  if (viewName === 'front') {
-    // C64: stand_front overlays on base
-    applyAction('stand_front');
-    if (poseName === 'walk') applyAction('walk_front');
-  } else if (viewName === 'back') {
-    applyAction('stand_back');
-    if (poseName === 'walk') applyAction('walk_back');
-  }
-
-  // Step 4: Front/back facing overrides (applied AFTER choreography)
-  // The C64 facing system sets view-specific defaults for legs, torso, arms
+  // Step 3: Front/back facing overrides + view-specific choreography
+  // The C64 facing system sets view-specific legs, torso, arms THEN
+  // overlays the view-specific action (stand_front, walk_back, etc.)
   if (viewName === 'front' || viewName === 'back') {
-    setLimbGS('legs_right', 6);  // gs6 = front/back standing legs (cel 13)
-    if (viewName === 'front') setLimbGS('torso', 5); // gs5 = front torso
-    else setLimbGS('torso', 4); // gs4 = back torso
-    setLimbGS('left_arm', 2);   // gs2 = front/back arm
+    setLimbGS('legs_right', 6, isStatic);
+    setLimbGS('torso', viewName === 'front' ? 5 : 4, isStatic);
+    setLimbGS('left_arm', 2, isStatic);
     setLimbGS('head_placeholder', viewName === 'front' ? 1 : 2);
-    // Apply view-specific overlay choreography on top
-    if (viewName === 'front') applyAction('stand_front');
-    else applyAction('stand_back');
+    // View-specific overlay
+    applyAction(viewName === 'front' ? 'stand_front' : 'stand_back', isStatic);
     if (poseName === 'walk') {
-      if (viewName === 'front') applyAction('walk_front');
-      else applyAction('walk_back');
+      applyAction(viewName === 'front' ? 'walk_front' : 'walk_back');
     }
   }
 

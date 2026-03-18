@@ -46,8 +46,9 @@ def extract(bin_path, out_path):
         cel_table_end = cel_table_off + num_cels * 2
 
         # Parse start_end pairs until we hit clearly invalid data
+        # Right_arm has up to 20 graphic states, so allow up to 25
         se = []
-        max_gs = 10  # reasonable upper bound
+        max_gs = 25
         for gs in range(max_gs):
             pos = cel_table_end + gs * 2
             if pos + 1 >= len(data):
