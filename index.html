@@ -50,12 +50,15 @@
     padding: 8px;
     margin-bottom: 12px;
     text-align: center;
+    overflow: hidden;
   }
   #avatarCanvas {
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     display: block;
     margin: 0 auto;
+    max-width: 100%;
+    height: auto;
   }
   .view-label {
     text-align: center;
@@ -133,6 +136,16 @@
   }
   .palette-preset:hover, .palette-preset.active { border-color: var(--highlight); }
   .palette-preset .swatch { width: 12px; height: 12px; border-radius: 1px; }
+  .pattern-zone { margin-bottom: 6px; }
+  .pattern-zone > span { font-size: 0.7em; color: var(--text-dim); display: block; margin-bottom: 2px; }
+  .pattern-swatches { display: flex; gap: 2px; flex-wrap: wrap; }
+  .pattern-swatch {
+    width: 24px; height: 24px; cursor: pointer;
+    border: 2px solid transparent; border-radius: 2px;
+    image-rendering: pixelated; transition: border-color 0.15s;
+  }
+  .pattern-swatch:hover { border-color: var(--text-dim); }
+  .pattern-swatch.active { border-color: var(--highlight); }
   /* Right panel */
   .browse-panel {
     flex: 1; min-width: 300px; padding: 16px;
@@ -187,7 +200,7 @@
 <div class="app">
   <div class="preview-panel">
     <div class="canvas-wrap">
-      <canvas id="avatarCanvas" width="400" height="360"></canvas>
+      <canvas id="avatarCanvas" width="400" height="440"></canvas>
       <div class="view-label" id="viewLabel">Side View &mdash; Standing</div>
     </div>
 
@@ -219,6 +232,11 @@
         <div class="btn-row" style="margin-top:4px">
           <button class="btn" id="prevBtn">&larr; Prev</button>
           <button class="btn" id="nextBtn">Next &rarr;</button>
+        </div>
+        <div class="btn-row" style="margin-top:4px">
+          <button class="btn" id="framePrevBtn">&larr; Frame</button>
+          <span id="frameLabel" style="color:var(--text-dim);font-size:0.75em;min-width:60px;text-align:center">—</span>
+          <button class="btn" id="frameNextBtn">Frame &rarr;</button>
         </div>
         <div class="btn-row" style="margin-top:4px">
           <button class="btn full" id="showHeadBtn">Show in Grid</button>
@@ -258,6 +276,13 @@
         </div>
         <label style="margin-top:6px">Presets</label>
         <div class="palette-presets" id="palettePresets"></div>
+      </div>
+
+      <div class="control-group">
+        <label>Clothing Patterns</label>
+        <div class="pattern-zone"><span>Torso</span><div class="pattern-swatches" id="patTorsoSwatches"></div></div>
+        <div class="pattern-zone"><span>Arms</span><div class="pattern-swatches" id="patArmsSwatches"></div></div>
+        <div class="pattern-zone"><span>Legs</span><div class="pattern-swatches" id="patLegsSwatches"></div></div>
       </div>
 
       <div class="head-info" id="headInfo">
@@ -483,46 +508,70 @@ const LIMB_STATES = {
 
 // Pose definitions: which state index for each limb
 // Derived from the choreography table in the original source
+// Pose definitions: frame-level state indices into LIMB_STATES
+// (Avatar.bin choreography uses graphic_states that map through each limb's
+// start_end table to get these frame indices — the mapping is pre-applied here)
 const POSES = {
   stand: {
     side: { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:0, head_state:0 },
-    front: { legs_right:16, legs_left:null, left_arm:3, torso:6, right_arm:10, head_state:1 },
-    back: { legs_right:16, legs_left:null, left_arm:5, torso:7, right_arm:36, head_state:2 },
+    front: { legs_right:16, legs_left:null, left_arm:10, torso:7, right_arm:37, head_state:1 },
+    back: { legs_right:16, legs_left:null, left_arm:10, torso:6, right_arm:37, head_state:2 },
   },
   walk: {
+    // 8-frame walk from Avatar.bin start_end tables:
+    // legs cycle frames 1-4 (4 frames, repeats twice), arms cycle frames 1-8
     side: [
       { legs_right:1, legs_left:1, left_arm:1, torso:0, right_arm:1, head_state:0 },
-      { legs_right:2, legs_left:null, left_arm:null, torso:0, right_arm:2, head_state:0 },
-      { legs_right:3, legs_left:2, left_arm:1, torso:0, right_arm:1, head_state:0 },
-      { legs_right:4, legs_left:null, left_arm:null, torso:0, right_arm:2, head_state:0 },
+      { legs_right:2, legs_left:2, left_arm:2, torso:0, right_arm:2, head_state:0 },
+      { legs_right:3, legs_left:3, left_arm:3, torso:0, right_arm:3, head_state:0 },
+      { legs_right:4, legs_left:4, left_arm:null, torso:0, right_arm:4, head_state:0 },
+      { legs_right:1, legs_left:1, left_arm:5, torso:0, right_arm:5, head_state:0 },
+      { legs_right:2, legs_left:2, left_arm:null, torso:0, right_arm:6, head_state:0 },
+      { legs_right:3, legs_left:3, left_arm:7, torso:0, right_arm:7, head_state:0 },
+      { legs_right:4, legs_left:4, left_arm:8, torso:0, right_arm:8, head_state:0 },
     ],
     front: [
-      { legs_right:17, legs_left:null, left_arm:3, torso:6, right_arm:10, head_state:1 },
-      { legs_right:18, legs_left:null, left_arm:2, torso:6, right_arm:11, head_state:1 },
-      { legs_right:19, legs_left:null, left_arm:3, torso:6, right_arm:10, head_state:1 },
-      { legs_right:20, legs_left:null, left_arm:2, torso:6, right_arm:11, head_state:1 },
+      { legs_right:17, legs_left:null, left_arm:10, torso:7, right_arm:37, head_state:1 },
+      { legs_right:18, legs_left:null, left_arm:11, torso:7, right_arm:36, head_state:1 },
+      { legs_right:19, legs_left:null, left_arm:10, torso:7, right_arm:37, head_state:1 },
+      { legs_right:20, legs_left:null, left_arm:11, torso:7, right_arm:36, head_state:1 },
     ],
+    // Avatar.bin walk_back: legs_r=7, legs_l=1 — both legs animate
+    // legs_left cycles through states 1-4 (foot/shin overlay cels)
     back: [
-      { legs_right:17, legs_left:null, left_arm:5, torso:7, right_arm:36, head_state:2 },
-      { legs_right:18, legs_left:null, left_arm:11, torso:7, right_arm:37, head_state:2 },
-      { legs_right:19, legs_left:null, left_arm:5, torso:7, right_arm:36, head_state:2 },
-      { legs_right:20, legs_left:null, left_arm:11, torso:7, right_arm:37, head_state:2 },
+      { legs_right:17, legs_left:1, left_arm:10, torso:6, right_arm:37, head_state:2 },
+      { legs_right:18, legs_left:2, left_arm:11, torso:6, right_arm:36, head_state:2 },
+      { legs_right:19, legs_left:3, left_arm:10, torso:6, right_arm:37, head_state:2 },
+      { legs_right:20, legs_left:4, left_arm:11, torso:6, right_arm:36, head_state:2 },
     ],
   },
   wave: {
-    side: { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:32, head_state:0 },
-    front: { legs_right:16, legs_left:null, left_arm:3, torso:6, right_arm:10, head_state:1 },
-    back: { legs_right:16, legs_left:null, left_arm:5, torso:7, right_arm:36, head_state:2 },
+    side: [
+      { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:32, head_state:0 },
+      { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:34, head_state:0 },
+    ],
+    front: { legs_right:16, legs_left:null, left_arm:10, torso:7, right_arm:37, head_state:1 },
+    back: { legs_right:16, legs_left:null, left_arm:10, torso:6, right_arm:37, head_state:2 },
   },
   point: {
-    side: { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:15, head_state:0 },
-    front: { legs_right:16, legs_left:null, left_arm:3, torso:6, right_arm:10, head_state:1 },
-    back: { legs_right:16, legs_left:null, left_arm:5, torso:7, right_arm:36, head_state:2 },
+    side: [
+      { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:0, head_state:0 },
+      { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:14, head_state:0 },
+      { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:15, head_state:0 },
+    ],
+    front: { legs_right:16, legs_left:null, left_arm:10, torso:7, right_arm:37, head_state:1 },
+    back: { legs_right:16, legs_left:null, left_arm:10, torso:6, right_arm:37, head_state:2 },
   },
   bend: {
-    side: { legs_right:0, legs_left:null, left_arm:null, torso:2, right_arm:4, head_state:0 },
-    front: { legs_right:16, legs_left:null, left_arm:3, torso:6, right_arm:10, head_state:1 },
-    back: { legs_right:16, legs_left:null, left_arm:5, torso:7, right_arm:36, head_state:2 },
+    // head_state stays 0 (side) throughout — the "frown" effect is purely
+    // positional via torsoYAdjust, not a different head cel
+    side: [
+      { legs_right:0, legs_left:null, left_arm:null, torso:0, right_arm:0, head_state:0 },
+      { legs_right:0, legs_left:null, left_arm:null, torso:2, right_arm:3, head_state:0 },
+      { legs_right:0, legs_left:null, left_arm:null, torso:3, right_arm:5, head_state:0 },
+    ],
+    front: { legs_right:16, legs_left:null, left_arm:10, torso:7, right_arm:37, head_state:1 },
+    back: { legs_right:16, legs_left:null, left_arm:10, torso:6, right_arm:37, head_state:2 },
   },
 };
 
@@ -553,6 +602,64 @@ const PALETTES = [
 ];
 
 // ============================================================
+// CLOTHING PATTERNS (from C64 paint.m cel_patterns table)
+// ============================================================
+// 16 patterns, each 4 bytes defining a 4-scanline repeating tile.
+// Each byte = 4 multicolor pixels (2 bits each).
+// Pixel values: 00=transparent, 01=clothing color, 10=detail color, 11=wild color.
+// In the C64, blue(01) pixels in the cel data get replaced by the pattern.
+const CEL_PATTERNS = [
+  [0x00,0x00,0x00,0x00], //  0: transparent/glass
+  [0xAA,0xAA,0xAA,0xAA], //  1: 50% dither
+  [0xFF,0xFF,0xFF,0xFF], //  2: solid (default)
+  [0xE2,0xE2,0xE2,0xE2], //  3: partial fill
+  [0x8B,0xBE,0x0F,0xCC], //  4: complex plaid
+  [0xEE,0x00,0xEE,0x00], //  5: horizontal stripes
+  [0xF0,0xF0,0x0F,0x0F], //  6: vertical stripes
+  [0x22,0x88,0x22,0x88], //  7: pinstripe
+  [0x32,0x88,0x23,0x88], //  8: offset dots
+  [0x00,0x28,0x3B,0x0C], //  9: sparse diagonal
+  [0x33,0xCC,0x33,0xCC], // 10: diagonal stripes
+  [0x08,0x80,0x0C,0x80], // 11: very sparse dots
+  [0x3F,0x3F,0xF3,0xF3], // 12: wide vertical
+  [0xAA,0x3F,0xAA,0xF3], // 13: mixed checker/stripe
+  [0xAA,0x00,0xAA,0x00], // 14: dotted stripes
+  [0x55,0x55,0x55,0x55], // 15: 50% checker (offset)
+];
+
+// Pattern names reflecting actual pixel content:
+// BG=transparent, CLR=clothing, BLK=detail/black, WLD=wild/pink
+const PATTERN_NAMES = [
+  'Transparent',   //  0: all BG
+  'Solid Black',   //  1: all BLK (detail color)
+  'Solid Wild',    //  2: all WLD (wild/pink color)
+  'WLD/BLK/BG',    //  3: mixed vertical bars
+  'Plaid',         //  4: complex mixed
+  'H-Stripe',      //  5: WLD+BLK rows / BG rows
+  'V-Stripe',      //  6: WLD columns / BG columns
+  'BG/BLK Check',  //  7: BG and BLK checkerboard
+  'Mixed Dots',    //  8: scattered BLK/WLD dots
+  'Sparse',        //  9: few BLK/WLD dots on BG
+  'BG/WLD Check',  // 10: BG and WLD checkerboard
+  'Very Sparse',   // 11: very few dots
+  'Wide V-Stripe', // 12: wide WLD/BG vertical
+  'BLK+WLD Band',  // 13: alternating BLK and WLD rows
+  'BLK/BG Stripe', // 14: BLK rows / BG rows
+  'Solid',         // 15: all CLR (clothing color) - C64 DEFAULT
+];
+
+// Per-body-zone pattern indices (default: 15 = solid clothing, the C64 default)
+// In C64: d_wild with bit7 set → pick_pattern selects index 15 (0x55 = all 01 = clothing)
+let bodyPatterns = { legs: 15, torso: 15, arms: 15 };
+
+// Maps limb names to body zones (from C64 pattern_for_limb table)
+const LIMB_TO_ZONE = {
+  legs_right: 'legs', legs_left: 'legs',
+  left_arm: 'arms', right_arm: 'arms',
+  torso: 'torso',
+};
+
+// ============================================================
 // IMAGE LOADING
 // ============================================================
 const imgCache = {};
@@ -566,9 +673,11 @@ function loadImg(src) {
   });
 }
 
-// Source palette in both head and body PNGs: blue, black, pink
-// (same palette for heads and bodies)
+// Source palette in body PNGs (pure emulated colors from decode_avatar_bin.py)
 const SRC_COLORS = [[0,0,255],[0,0,0],[255,85,255]];
+// Head PNGs may use CRT-attenuated colors (from habitat_renderer.py with --palette)
+// Map: CRT blue(49,40,147)→idx 0, CRT black(0,0,0)→idx 1, CRT pink(169,111,99)→idx 2
+const SRC_COLORS_CRT = [[49,40,147],[0,0,0],[169,111,99]];
 
 function hexToRgb(h) {
   return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
@@ -579,14 +688,88 @@ function recolorCanvas(srcCanvas, srcColors, targetHexColors) {
   const ctx = srcCanvas.getContext('2d');
   const d = ctx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
   const px = d.data;
+  // Try both pure and CRT source palettes (heads use CRT, bodies use pure)
+  const palettes = [srcColors, SRC_COLORS_CRT];
   for (let i = 0; i < px.length; i += 4) {
     if (px[i+3] < 128) continue;
-    for (let c = 0; c < srcColors.length; c++) {
-      const [sr,sg,sb] = srcColors[c];
-      if (Math.abs(px[i]-sr)<40 && Math.abs(px[i+1]-sg)<40 && Math.abs(px[i+2]-sb)<40) {
-        px[i]=target[c][0]; px[i+1]=target[c][1]; px[i+2]=target[c][2];
-        break;
+    let matched = false;
+    for (const pal of palettes) {
+      for (let c = 0; c < pal.length; c++) {
+        const [sr,sg,sb] = pal[c];
+        if (Math.abs(px[i]-sr)<40 && Math.abs(px[i+1]-sg)<40 && Math.abs(px[i+2]-sb)<40) {
+          px[i]=target[c][0]; px[i+1]=target[c][1]; px[i+2]=target[c][2];
+          matched = true;
+          break;
+        }
       }
+      if (matched) break;
+    }
+  }
+  ctx.putImageData(d, 0, 0);
+}
+
+// Pattern-aware recolor: applies a pattern to blue(01) pixels
+// patternIdx: index into CEL_PATTERNS (0-15), 2=solid (no pattern effect)
+function recolorWithPattern(srcCanvas, srcColors, targetHexColors, patternIdx) {
+  if (patternIdx === 15) {
+    // Pattern 15 (0x55) = all 01 = solid clothing color = same as normal recolor
+    return recolorCanvas(srcCanvas, srcColors, targetHexColors);
+  }
+  const target = targetHexColors.map(hexToRgb);
+  const pattern = CEL_PATTERNS[patternIdx] || CEL_PATTERNS[2];
+  const ctx = srcCanvas.getContext('2d');
+  const d = ctx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
+  const px = d.data;
+  const w = srcCanvas.width;
+  // Colors: target[0]=blue/clothing, target[1]=black/detail, target[2]=pink/wild
+  for (let i = 0; i < px.length; i += 4) {
+    if (px[i+3] < 128) continue;
+    const pixIdx = i / 4;
+    const x = pixIdx % w;
+    const y = Math.floor(pixIdx / w);
+    // Check which source color this pixel matches (try both pure and CRT palettes)
+    let matched = -1;
+    const palettes = [srcColors, SRC_COLORS_CRT];
+    for (const pal of palettes) {
+      for (let c = 0; c < pal.length; c++) {
+        const [sr,sg,sb] = pal[c];
+        if (Math.abs(px[i]-sr)<40 && Math.abs(px[i+1]-sg)<40 && Math.abs(px[i+2]-sb)<40) {
+          matched = c;
+          break;
+        }
+      }
+      if (matched >= 0) break;
+    }
+    if (matched < 0) continue;
+    if (matched === 0) {
+      // Blue/clothing pixel (cel value 01) — apply pattern
+      // Pattern byte for this scanline (repeats every 4 rows)
+      const patByte = pattern[y % 4];
+      // Each MC pixel = 2 PNG pixels (due to 2x stretch)
+      // Each pattern byte covers 4 MC pixels = 8 PNG pixels
+      const mcX = Math.floor(x / 2) % 4; // which MC pixel within the byte (0-3)
+      const shift = 6 - mcX * 2; // bits 7-6, 5-4, 3-2, 1-0
+      const patVal = (patByte >> shift) & 0x03;
+      // Map pattern pixel value to color
+      // C64: the base clothing area is filled with the clothing color first,
+      // then the pattern modifies specific pixels. Pattern value 00 means
+      // "keep the base clothing color" (not transparent, not background).
+      if (patVal === 0) {
+        // Base clothing color — same as pattern value 01
+        px[i]=target[0][0]; px[i+1]=target[0][1]; px[i+2]=target[0][2];
+      } else if (patVal === 1) {
+        // clothing color (blue target)
+        px[i]=target[0][0]; px[i+1]=target[0][1]; px[i+2]=target[0][2];
+      } else if (patVal === 2) {
+        // detail color (black target)
+        px[i]=target[1][0]; px[i+1]=target[1][1]; px[i+2]=target[1][2];
+      } else {
+        // wild color (pink target)
+        px[i]=target[2][0]; px[i+1]=target[2][1]; px[i+2]=target[2][2];
+      }
+    } else {
+      // Non-blue pixel: just recolor normally
+      px[i]=target[matched][0]; px[i+1]=target[matched][1]; px[i+2]=target[matched][2];
     }
   }
   ctx.putImageData(d, 0, 0);
@@ -597,6 +780,18 @@ function recolorCanvas(srcCanvas, srcColors, targetHexColors) {
 // ============================================================
 let bodyManifest = null;
 let headManifest = null;
+let headConfig = null; // Per-head config from C64 source: disk_face, start_end, etc.
+
+async function loadHeadConfig() {
+  try {
+    const r = await fetch('habitat_images_final/heads/head_config.json');
+    headConfig = await r.json();
+    console.log(`Loaded head config for ${Object.keys(headConfig).length} heads`);
+  } catch(e) {
+    console.log('Head config not found, using heuristic view mapping');
+    headConfig = null;
+  }
+}
 
 async function loadBodyManifest() {
   try {
@@ -632,12 +827,15 @@ async function getBodyCelImage(limbName, celIdx) {
 // ============================================================
 const canvas = document.getElementById('avatarCanvas');
 const ctx = canvas.getContext('2d');
-const CW = 400, CH = 360;
+const CW = 400, CH = 440;
 const SCALE = 4; // Display scale (images are small pixel art)
 
-// Avatar anchor point (feet position) in canvas space
-const BASE_X = 110;
-const BASE_Y = CH - 40;
+// Avatar anchor point — rendering uses a large offscreen canvas at a fixed
+// origin, then the result is measured and centered on the visible canvas.
+// This makes positioning independent of canvas size.
+const OFFSCREEN_W = 800, OFFSCREEN_H = 800;
+const BASE_X = 400; // center of offscreen canvas
+const BASE_Y = 600; // generous foot anchor (plenty of room above for big heads)
 
 // Head container origin offsets per view state
 // From body head_placeholder cels: cel 0=side, 1=front, 2=back, 3=frown
@@ -653,7 +851,7 @@ const HEAD_PLACEHOLDER = [
 let currentHead = null;
 let currentView = 'side';
 let currentPose = 'stand';
-let walkFrame = 0;
+let animFrame = 0;
 let animInterval = null;
 
 // Head change sequence state (initialized here, logic defined later)
@@ -681,15 +879,44 @@ function getPoseConfig() {
   if (!poseData) return POSES.stand.side;
   const viewData = poseData[currentView] || poseData.side;
   if (Array.isArray(viewData)) {
-    return viewData[walkFrame % viewData.length];
+    return viewData[animFrame % viewData.length];
   }
   return viewData;
 }
 
 function getHeadCelsForView(head, viewState) {
-  // viewState: 0=side, 1=front, 2=back
-  if (viewState >= head.masks.length) viewState = Math.min(viewState, head.masks.length - 1);
-  const mask = head.masks[viewState];
+  // viewState: 0=side, 1=front, 2=back, 3=frown
+  //
+  // C64 facing values: 0=side, 1=front, 3=back
+  // The start_end table has 4 pairs (8 bytes) indexed by facing*2:
+  //   [side_start, side_end, front_start, front_end,
+  //    unused_start, unused_end, back_start, back_end]
+  //
+  // Map our viewState to C64 facing:
+  const facingMap = [0, 1, 3, 0]; // view 0→facing 0, view 1→facing 1, view 2→facing 3, view 3→facing 0
+  const facing = facingMap[viewState] || 0;
+
+  // Look up the correct state from the start_end table
+  const cfg = headConfig ? headConfig[head.name] : null;
+  let celState;
+
+  if (cfg && cfg.start_end && cfg.start_end.length >= 8) {
+    // Use the actual C64 start_end table
+    const startIdx = facing * 2;
+    celState = cfg.start_end[startIdx] & 0x7F; // mask off cycle bit
+  } else {
+    // Fallback when no config available
+    celState = viewState;
+    const numStates = head.masks.length;
+    if (celState >= numStates) {
+      celState = (viewState === 2) ? numStates - 1 : 0;
+    }
+  }
+
+  // Clamp to available masks
+  if (celState >= head.masks.length) celState = 0;
+
+  const mask = head.masks[celState];
   const cels = [];
   for (let i = 0; i < mask.length; i++) {
     if (mask[i] === '1') cels.push(i);
@@ -697,31 +924,158 @@ function getHeadCelsForView(head, viewState) {
   return cels;
 }
 
+// Reference torso y_offset for standing side pose (torso cel 0)
+// ============================================================
+// C64 AVATAR POSITIONING ENGINE
+// Ported from animate.m (display_avatar, draw_a_limb, get_cel_loc_addr)
+// mix.m (get_cel_xy, find_cel_xy) and paint.m (paint_1)
+// ============================================================
+// The C64 processes all 6 limbs in order 0-5 to compute chained positions
+// using x_rel/y_rel, then draws them in view-specific draw order.
+// Limb indices: 0=legs_right, 1=legs_left, 2=left_arm, 3=torso, 4=head_placeholder, 5=right_arm
+const LIMB_ORDER = ['legs_right','legs_left','left_arm','torso','head_placeholder','right_arm'];
+// cels_affected_by_height: legs(0,1) unaffected, upper body(2-5) shifts
+const CELS_AFFECTED_BY_HEIGHT = [0, 0, 1, 1, 1, 1];
+const AVATAR_HEIGHT = 0; // 0=tallest, 15=shortest (scanline adjustment for upper body)
+
+// Bytes-to-display-pixels: 1 byte = 4 MC pixels = 8 PNG pixels (at 2x scale) × SCALE
+const BYTE_PX = 8 * SCALE; // = 32 display pixels per byte
+
+// Compute chained positions for all 6 limbs (from C64 find_cel_xy / mix.m)
+// Returns { cx_tab, cy_tab } in byte/scanline units relative to avatar origin
+//
+// C64 logic: cel_x_origin/cel_y_origin are the avatar's FIXED base position.
+// When the previous cel's x_rel AND y_rel are both 0, the position resets to origin.
+// Otherwise, x_rel/y_rel are added to the RUNNING position (cel_x/cel_y).
+async function computeLimbPositions(pose, isBack) {
+  const cel_x_origin = 0; // FIXED avatar origin (bytes) — never changes
+  const cel_y_origin = 0; // FIXED avatar origin (scanlines) — never changes
+  let cel_x = 0; // running position
+  let cel_y = 0;
+  let cel_x_rel = 0; // x_rel/y_rel from the previous cel
+  let cel_y_rel = 0;
+
+  const cx_tab = new Array(6).fill(0);
+  const cy_tab = new Array(6).fill(0);
+
+  // Process limbs in order 0-5 (matching C64 display_avatar loop)
+  for (let i = 0; i < 6; i++) {
+    const limbName = LIMB_ORDER[i];
+    const stateIdx = pose[limbName] ?? pose[limbName.replace('head_placeholder','')];
+
+    // Skip if limb not drawn, but still need to process chaining
+    let celData = null;
+    if (limbName === 'head_placeholder') {
+      const headState = pose.head_state || 0;
+      const hpCelNum = getCelNum('head_placeholder', headState);
+      if (hpCelNum !== null) celData = await getBodyCelImage('head_placeholder', hpCelNum);
+    } else if (stateIdx !== null && stateIdx !== undefined) {
+      const celNum = getCelNum(limbName, stateIdx);
+      if (celNum !== null) celData = await getBodyCelImage(limbName, celNum);
+    }
+
+    // find_cel_xy (mix.m): if previous cel's x_rel AND y_rel are both 0 → reset to origin
+    // otherwise → add x_rel/y_rel to running position
+    if (cel_x_rel === 0 && cel_y_rel === 0) {
+      // Absolute: reset to fixed origin
+      cel_x = cel_x_origin;
+      cel_y = cel_y_origin;
+    } else {
+      // Relative: add to running position (not origin!)
+      // For back view, x_rel is negated (C64: EOR #0xFF + SEC)
+      const adj_x_rel = isBack ? -cel_x_rel : cel_x_rel;
+      cel_x = cel_x + adj_x_rel;
+      cel_y = cel_y - cel_y_rel;
+    }
+
+    // Store position
+    cx_tab[i] = cel_x;
+    // Height adjustment: only affects upper body cels (limbs 2-5)
+    cy_tab[i] = cel_y + (CELS_AFFECTED_BY_HEIGHT[i] ? AVATAR_HEIGHT : 0);
+
+    // Read x_rel, y_rel from this cel for chaining to next limb
+    if (celData) {
+      cel_x_rel = celData.x_rel || 0;
+      cel_y_rel = celData.y_rel || 0;
+    } else {
+      cel_x_rel = 0;
+      cel_y_rel = 0;
+    }
+  }
+
+  return { cx_tab, cy_tab };
+}
+
+// Offscreen canvas for rendering avatar before centering
+const offCanvas = document.createElement('canvas');
+offCanvas.width = OFFSCREEN_W;
+offCanvas.height = OFFSCREEN_H;
+const offCtx = offCanvas.getContext('2d');
+
+// activeCtx is used by drawBodyLimb/drawHead — points to offscreen during render
+let activeCtx = ctx;
+
 async function renderAvatar() {
   // If sequence is active, delegate to sequence renderer
   if (seqActive) {
     renderSequenceFrame(HEAD_CHANGE_STEPS[seqStep]);
     return;
   }
-  ctx.clearRect(0, 0, CW, CH);
-  ctx.fillStyle = '#A3A3A3';
-  ctx.fillRect(0, 0, CW, CH);
+
+  // Step 1: Render onto offscreen canvas
+  offCtx.clearRect(0, 0, OFFSCREEN_W, OFFSCREEN_H);
+  activeCtx = offCtx;
 
   const pose = getPoseConfig();
   const drawOrder = DRAW_ORDER[currentView] || DRAW_ORDER.side;
+  const isBack = currentView === 'back';
 
-  ctx.imageSmoothingEnabled = false;
+  const { cx_tab, cy_tab } = await computeLimbPositions(pose, isBack);
+
+  offCtx.imageSmoothingEnabled = false;
 
   for (const limbKey of drawOrder) {
     if (limbKey === 'head') {
-      await drawHead(pose);
+      await drawHead(pose, cx_tab, cy_tab);
     } else {
-      await drawBodyLimb(limbKey, pose);
+      const limbIdx = LIMB_ORDER.indexOf(limbKey);
+      await drawBodyLimb(limbKey, pose, cx_tab[limbIdx], cy_tab[limbIdx]);
     }
+  }
+
+  activeCtx = ctx;
+
+  // Step 2: Find bounding box of rendered content on offscreen canvas
+  const imgData = offCtx.getImageData(0, 0, OFFSCREEN_W, OFFSCREEN_H);
+  const px = imgData.data;
+  let minX = OFFSCREEN_W, minY = OFFSCREEN_H, maxX = 0, maxY = 0;
+  for (let y = 0; y < OFFSCREEN_H; y++) {
+    for (let x = 0; x < OFFSCREEN_W; x++) {
+      if (px[(y * OFFSCREEN_W + x) * 4 + 3] > 0) {
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+
+  // Step 3: Center the avatar on the visible canvas
+  ctx.clearRect(0, 0, CW, CH);
+  ctx.fillStyle = '#A3A3A3';
+  ctx.fillRect(0, 0, CW, CH);
+  ctx.imageSmoothingEnabled = false;
+
+  if (maxX >= minX && maxY >= minY) {
+    const contentW = maxX - minX + 1;
+    const contentH = maxY - minY + 1;
+    const destX = Math.round((CW - contentW) / 2);
+    const destY = Math.round((CH - contentH) / 2);
+    ctx.drawImage(offCanvas, minX, minY, contentW, contentH, destX, destY, contentW, contentH);
   }
 }
 
-async function drawBodyLimb(limbName, pose) {
+async function drawBodyLimb(limbName, pose, chainX, chainY) {
   const stateIdx = pose[limbName];
   if (stateIdx === null || stateIdx === undefined) return;
 
@@ -731,10 +1085,18 @@ async function drawBodyLimb(limbName, pose) {
   const celData = await getBodyCelImage(limbName, celNum);
   if (!celData || !celData.img) return;
 
-  // Position: x_offset is in byte units (1 byte = 4 native px = 8 stretched px)
-  // Each byte unit = 8 PNG pixels * SCALE display pixels
-  const drawX = BASE_X + (celData.x_offset * 8 * SCALE);
-  const drawY = BASE_Y - (celData.y_offset * SCALE);
+  // C64 paint_1 positioning:
+  //   Normal:   screen_x = cel_x + x_offset  (bytes)
+  //   Reversed: screen_x = cel_x + (1 - x_offset - width_bytes)
+  //   screen_y = cel_y - y_offset  (scanlines)
+  //   In the simulator, BASE_Y = foot level. y_offset positions the cel top
+  //   relative to BASE_Y. A cel with y_offset=height has its bottom at BASE_Y.
+  const isBack = currentView === 'back';
+  const widthBytes = (celData.native_width || celData.img.width) / 4;
+  const xOff = isBack ? (1 - celData.x_offset - widthBytes) : celData.x_offset;
+
+  const drawX = BASE_X + (chainX + xOff) * BYTE_PX;
+  const drawY = BASE_Y + (chainY - celData.y_offset) * SCALE;
   const drawW = celData.img.width * SCALE;
   const drawH = celData.img.height * SCALE;
 
@@ -743,79 +1105,179 @@ async function drawBodyLimb(limbName, pose) {
   tmp.width = celData.img.width;
   tmp.height = celData.img.height;
   const tc = tmp.getContext('2d');
+  if (isBack) {
+    // Flip horizontally for back view
+    tc.translate(celData.img.width, 0);
+    tc.scale(-1, 1);
+  }
   tc.drawImage(celData.img, 0, 0);
-  recolorCanvas(tmp, SRC_COLORS, bodyColors);
+  tc.setTransform(1, 0, 0, 1, 0, 0); // reset
+  // Apply pattern-aware recoloring based on body zone
+  const zone = LIMB_TO_ZONE[limbName];
+  const patIdx = zone ? (bodyPatterns[zone] ?? 15) : 15;
+  recolorWithPattern(tmp, SRC_COLORS, bodyColors, patIdx);
 
-  ctx.drawImage(tmp, drawX, drawY, drawW, drawH);
+  // C64 paint.m: pixel 00 within a cel's data clears screen to background.
+  // For overlay cels (legs_left), transparent pixels must overwrite underlying
+  // content. We make transparent pixels opaque with background color for overlays.
+  if (limbName === 'legs_left') {
+    const td = tc.getImageData(0, 0, tmp.width, tmp.height);
+    const tpx = td.data;
+    for (let j = 0; j < tpx.length; j += 4) {
+      if (tpx[j+3] < 128) {
+        tpx[j] = 0xA3; tpx[j+1] = 0xA3; tpx[j+2] = 0xA3; tpx[j+3] = 255;
+      }
+    }
+    tc.putImageData(td, 0, 0);
+  }
+  activeCtx.drawImage(tmp, drawX, drawY, drawW, drawH);
 }
 
-async function drawHead(pose) {
-  if (!currentHead) return;
-
+async function drawHead(pose, cx_tab, cy_tab) {
+  const isBack = currentView === 'back';
   const headState = pose.head_state || 0;
-  const celIndices = getHeadCelsForView(currentHead, headState);
 
-  // Head container origin: shares body's X, Y height from head_placeholder
-  // In the original game, the head noid shares the body's X position.
-  // The placeholder's y_offset determines the vertical attachment point.
-  // Head cel offsets are then relative to this origin.
-  const ph = HEAD_PLACEHOLDER[headState] || HEAD_PLACEHOLDER[0];
-  const headOriginX = BASE_X;
-  const headOriginY = BASE_Y - (ph.y_off * SCALE);
+  // C64 animate.m draw_a_limb for head (cel_number=4):
+  // 1. Draw the contained head object at: cx_tab[4], cy_tab[4] - 63
+  // 2. Draw the head_placeholder cel at: cx_tab[4], cy_tab[4] (via paint_limb)
+  // The head_placeholder is a neck/collar piece that bridges head to torso.
 
-  for (const celIdx of celIndices) {
-    const letter = "abcdefg"[celIdx];
-    const src = `habitat_images_final/heads/${currentHead.name}_${currentHead.name}_data_${letter}.png`;
-    const img = await loadImg(src);
-    if (!img) continue;
+  // Step 1: Draw the head object (if we have one)
+  if (currentHead) {
+    const celIndices = getHeadCelsForView(currentHead, headState);
+    const headChainX = cx_tab[4]; // bytes
+    const headChainY = cy_tab[4] - 63; // scanlines (constant from animate.m)
 
-    const tmp = document.createElement('canvas');
-    tmp.width = img.width;
-    tmp.height = img.height;
-    const tc = tmp.getContext('2d');
-    tc.drawImage(img, 0, 0);
-    recolorCanvas(tmp, SRC_COLORS, headColors);
+    for (const celIdx of celIndices) {
+      const letter = "abcdefg"[celIdx];
+      const src = `habitat_images_final/heads/${currentHead.name}_${currentHead.name}_data_${letter}.png`;
+      const img = await loadImg(src);
+      if (!img) continue;
 
-    const drawW = img.width * SCALE;
-    const drawH = img.height * SCALE;
+      const tmp = document.createElement('canvas');
+      tmp.width = img.width;
+      tmp.height = img.height;
+      const tc = tmp.getContext('2d');
+      if (isBack) {
+        tc.translate(img.width, 0);
+        tc.scale(-1, 1);
+      }
+      tc.drawImage(img, 0, 0);
+      tc.setTransform(1, 0, 0, 1, 0, 0);
+      recolorCanvas(tmp, SRC_COLORS, headColors);
 
-    // Check if we have per-head offset metadata from manifest
-    const manifestKey = `${currentHead.name}_${currentHead.name}_data_${letter}.png`;
-    const celMeta = headManifest ? headManifest[manifestKey] : null;
+      const drawW = img.width * SCALE;
+      const drawH = img.height * SCALE;
 
-    let drawX, drawY;
-    if (celMeta && celMeta.height < 100) {
-      // Use actual offsets: head cel offset is relative to head container origin
-      // x_offset in byte units (1 byte = 8 PNG px), y_offset in native pixels
-      drawX = headOriginX + (celMeta.x_offset * 8 * SCALE);
-      drawY = headOriginY - (celMeta.y_offset * SCALE);
-    } else {
-      // Heuristic fallback: center head image above body
-      drawX = headOriginX - drawW / 2 + 4 * SCALE;
-      drawY = headOriginY - drawH / 2;
+      const manifestKey = `${currentHead.name}_${currentHead.name}_data_${letter}.png`;
+      const celMeta = headManifest ? headManifest[manifestKey] : null;
+
+      let drawX, drawY;
+      if (celMeta && celMeta.height < 100) {
+        const widthBytes = (celMeta.native_width || img.width) / 4;
+        const xOff = isBack ? (1 - celMeta.x_offset - widthBytes) : celMeta.x_offset;
+        drawX = BASE_X + (headChainX + xOff) * BYTE_PX;
+        drawY = BASE_Y + (headChainY - celMeta.y_offset) * SCALE;
+      } else {
+        drawX = BASE_X + headChainX * BYTE_PX;
+        drawY = BASE_Y + headChainY * SCALE - drawH;
+      }
+
+      activeCtx.drawImage(tmp, drawX, drawY, drawW, drawH);
     }
+  }
 
-    ctx.drawImage(tmp, drawX, drawY, drawW, drawH);
+  // Step 2: Draw the head_placeholder (face/back overlay) on top
+  // C64 animate.m draw_a_limb checks disk_face flags:
+  //   Side view: draw if bit 6 (0x40) is set (face overlay)
+  //   Front view: draw if bit 6 (0x40) is set (face overlay)
+  //   Back view: draw if bit 7 (0x80) is set (back overlay)
+  const cfg = headConfig && currentHead ? headConfig[currentHead.name] : null;
+  const diskFace = cfg ? cfg.disk_face : 0;
+  let drawPlaceholder = true;
+  if (cfg) {
+    if (currentView === 'back') {
+      drawPlaceholder = !!(diskFace & 0x80); // bit 7: has back overlay
+    } else {
+      drawPlaceholder = !!(diskFace & 0x40); // bit 6: has face overlay
+    }
+  }
+  if (drawPlaceholder) {
+    await drawBodyLimb('head_placeholder', { head_placeholder: headState }, cx_tab[4], cy_tab[4]);
   }
 }
 
 // ============================================================
 // ANIMATION
 // ============================================================
+function isAnimatedPose(pose) {
+  const poseData = POSES[pose];
+  if (!poseData) return false;
+  const viewData = poseData[currentView] || poseData.side;
+  return Array.isArray(viewData);
+}
+
 function startAnimation() {
-  stopAnimation();
-  if (currentPose === 'walk') {
+  stopAnimation(true);
+  if (isAnimatedPose(currentPose)) {
+    // C64 Habitat: ~6 fps avatar animation (PAL 50Hz, ~8 VBlanks per render cycle)
+    const speed = Math.round(1000 / 6); // 167ms = 6fps for all animations
+    const poseData = POSES[currentPose];
+    const viewData = poseData[currentView] || poseData.side;
+    const frameCount = Array.isArray(viewData) ? viewData.length : 4;
     animInterval = setInterval(() => {
-      walkFrame = (walkFrame + 1) % 4;
+      // Point: play once and hold at last frame
+      if (currentPose === 'point' && animFrame >= frameCount - 1) {
+        clearInterval(animInterval);
+        animInterval = null;
+        return;
+      }
+      animFrame = (animFrame + 1) % frameCount;
       renderAvatar();
-    }, 250);
+    }, speed);
   }
 }
 
-function stopAnimation() {
+function stopAnimation(resetFrame) {
   if (animInterval) { clearInterval(animInterval); animInterval = null; }
-  walkFrame = 0;
+  if (resetFrame) { animFrame = 0; }
+  updateFrameLabel();
 }
+
+function updateFrameLabel() {
+  const label = document.getElementById('frameLabel');
+  if (!isAnimatedPose(currentPose)) {
+    label.textContent = '—';
+    return;
+  }
+  const poseData = POSES[currentPose];
+  const viewData = poseData[currentView] || poseData.side;
+  const count = Array.isArray(viewData) ? viewData.length : 1;
+  label.textContent = `${animFrame + 1} / ${count}`;
+}
+
+// Frame stepper buttons
+document.getElementById('framePrevBtn').addEventListener('click', async () => {
+  if (!isAnimatedPose(currentPose)) return;
+  stopAnimation(); // pause auto-animation
+  const poseData = POSES[currentPose];
+  const viewData = poseData[currentView] || poseData.side;
+  const count = Array.isArray(viewData) ? viewData.length : 1;
+  animFrame = (animFrame - 1 + count) % count;
+  updateFrameLabel();
+  await renderAvatar();
+});
+
+document.getElementById('frameNextBtn').addEventListener('click', async () => {
+  if (!isAnimatedPose(currentPose)) return;
+  stopAnimation(); // pause auto-animation
+  const poseData = POSES[currentPose];
+  const viewData = poseData[currentView] || poseData.side;
+  const count = Array.isArray(viewData) ? viewData.length : 1;
+  animFrame = (animFrame + 1) % count;
+  updateFrameLabel();
+  await renderAvatar();
+});
 
 // ============================================================
 // HEAD GRID
@@ -922,7 +1384,8 @@ document.querySelectorAll('[data-view]').forEach(btn => {
     const labels = { side:'Side View', front:'Front View', back:'Back View' };
     document.getElementById('viewLabel').textContent = labels[currentView] + ' \u2014 ' +
       currentPose.charAt(0).toUpperCase() + currentPose.slice(1);
-    if (currentPose === 'walk') startAnimation(); else renderAvatar();
+    if (isAnimatedPose(currentPose)) startAnimation(); else stopAnimation(true);
+    renderAvatar();
   });
 });
 
@@ -935,8 +1398,9 @@ document.querySelectorAll('[data-pose]').forEach(btn => {
     const labels = { side:'Side View', front:'Front View', back:'Back View' };
     document.getElementById('viewLabel').textContent = labels[currentView] + ' \u2014 ' +
       currentPose.charAt(0).toUpperCase() + currentPose.slice(1);
-    if (currentPose === 'walk') startAnimation();
-    else { stopAnimation(); renderAvatar(); }
+    if (isAnimatedPose(currentPose)) startAnimation();
+    else { stopAnimation(true); }
+    renderAvatar();
   });
 });
 
@@ -1021,28 +1485,68 @@ document.getElementById('pureColors').addEventListener('change', function() {
   }
 })();
 
+// Clothing pattern selectors
+// Generate a small pattern swatch canvas (8x8 pixels)
+function makePatternSwatch(patIdx) {
+  const c = document.createElement('canvas');
+  c.width = 8; c.height = 8;
+  c.className = 'pattern-swatch';
+  c.title = `${patIdx}: ${PATTERN_NAMES[patIdx]}`;
+  const gc = c.getContext('2d');
+  const pattern = CEL_PATTERNS[patIdx];
+  // Color map: 00=bg, 01=blue, 10=black, 11=pink
+  const colors = ['#2a2a3e','#312893','#000000','#A96F63'];
+  for (let y = 0; y < 8; y++) {
+    const patByte = pattern[y % 4];
+    for (let mcX = 0; mcX < 4; mcX++) {
+      const shift = 6 - mcX * 2;
+      const val = (patByte >> shift) & 0x03;
+      gc.fillStyle = colors[val];
+      gc.fillRect(mcX * 2, y, 2, 1);
+    }
+  }
+  return c;
+}
+
+(function buildPatternSelectors() {
+  const zones = [
+    { id: 'patTorsoSwatches', zone: 'torso' },
+    { id: 'patArmsSwatches', zone: 'arms' },
+    { id: 'patLegsSwatches', zone: 'legs' },
+  ];
+  for (const { id, zone } of zones) {
+    const container = document.getElementById(id);
+    for (let i = 0; i < CEL_PATTERNS.length; i++) {
+      const swatch = makePatternSwatch(i);
+      if (i === bodyPatterns[zone]) swatch.classList.add('active');
+      swatch.addEventListener('click', function() {
+        bodyPatterns[zone] = i;
+        container.querySelectorAll('.pattern-swatch').forEach(s => s.classList.remove('active'));
+        this.classList.add('active');
+        renderAvatar();
+      });
+      container.appendChild(swatch);
+    }
+  }
+})();
+
 // ============================================================
 // HEAD CHANGE SEQUENCE
 // Simulates the in-game flow: GET head, PUT on ground, turn,
 // GET new head, PUT head on — as described in the Avatar Handbook
 // ============================================================
 const HEAD_CHANGE_STEPS = [
-  { action:"Standing",           desc:"Avatar with current head",     pose:"stand", view:"side", showHead:true,  holdHead:false, groundHead:false, headType:"old" },
-  { action:"Point at head",      desc:"Cursor points at own head",    pose:"point", view:"side", showHead:true,  holdHead:false, groundHead:false, headType:"old" },
-  { action:'Choose "GET"',       desc:"Select GET from menu",         pose:"point", view:"side", showHead:true,  holdHead:false, groundHead:false, headType:"old", showMenu:"GET" },
-  { action:"GET head",           desc:"Head comes off into hands",    pose:"bend",  view:"side", showHead:false, holdHead:true,  groundHead:false, headType:"old" },
-  { action:"Holding head",       desc:"Standing headless, holding head", pose:"stand", view:"side", showHead:false, holdHead:true,  groundHead:false, headType:"old" },
-  { action:'Choose "PUT"',       desc:"Select PUT to place head",     pose:"stand", view:"side", showHead:false, holdHead:true,  groundHead:false, headType:"old", showMenu:"PUT" },
-  { action:"PUT head down",      desc:"Bending to place head",        pose:"bend",  view:"side", showHead:false, holdHead:false, groundHead:true,  headType:"old" },
+  { action:"Standing",           desc:"Avatar with current head",          pose:"stand", view:"side", showHead:true,  holdHead:false, groundHead:false, headType:"old" },
+  { action:"GET head",           desc:"Head comes off into hands",         pose:"bend",  view:"side", showHead:false, holdHead:true,  groundHead:false, headType:"old" },
+  { action:"Holding head",       desc:"Standing headless, holding head",   pose:"stand", view:"side", showHead:false, holdHead:true,  groundHead:false, headType:"old" },
+  { action:"PUT head down",      desc:"Bending to place head on ground",   pose:"bend",  view:"side", showHead:false, holdHead:false, groundHead:true,  headType:"old" },
   { action:"Head on ground",     desc:"Standing headless, head on ground", pose:"stand", view:"side", showHead:false, holdHead:false, groundHead:true,  headType:"old" },
-  { action:"Turn around",        desc:"Turning to face the new head", pose:"stand", view:"front", showHead:false, holdHead:false, groundHead:false, headType:null },
-  { action:"Facing other side",  desc:"New head is on this side",     pose:"stand", view:"side", showHead:false, holdHead:false, groundHead:true,  headType:"new", flipped:true },
-  { action:"GET new head",       desc:"Bending to pick up new head",  pose:"bend",  view:"side", showHead:false, holdHead:false, groundHead:true,  headType:"new", flipped:true },
-  { action:"Holding new head",   desc:"Standing with new head in hand", pose:"stand", view:"side", showHead:false, holdHead:true,  groundHead:false, headType:"new", flipped:true },
-  { action:'Point at self',      desc:"Cursor points at own body",    pose:"point", view:"side", showHead:false, holdHead:true,  groundHead:false, headType:"new", flipped:true },
-  { action:'Choose "PUT"',       desc:"Select PUT to wear head",      pose:"point", view:"side", showHead:false, holdHead:true,  groundHead:false, headType:"new", flipped:true, showMenu:"PUT" },
-  { action:"PUT head on",        desc:"New head goes on shoulders!",  pose:"stand", view:"side", showHead:true,  holdHead:false, groundHead:false, headType:"new", flipped:true },
-  { action:"Done!",              desc:"Avatar with new head",         pose:"stand", view:"side", showHead:true,  holdHead:false, groundHead:false, headType:"new" },
+  { action:"Turn around",        desc:"Turning to face the new head",      pose:"stand", view:"front", showHead:false, holdHead:false, groundHead:false, headType:null },
+  { action:"Facing other side",  desc:"New head is on this side",          pose:"stand", view:"side", showHead:false, holdHead:false, groundHead:true,  headType:"new", flipped:true },
+  { action:"GET new head",       desc:"Bending to pick up new head",       pose:"bend",  view:"side", showHead:false, holdHead:false, groundHead:true,  headType:"new", flipped:true },
+  { action:"Holding new head",   desc:"Standing with new head in hand",    pose:"stand", view:"side", showHead:false, holdHead:true,  groundHead:false, headType:"new", flipped:true },
+  { action:"PUT head on",        desc:"New head goes on shoulders!",        pose:"stand", view:"side", showHead:true,  holdHead:false, groundHead:false, headType:"new", flipped:true },
+  { action:"Done!",              desc:"Avatar with new head",              pose:"stand", view:"side", showHead:true,  holdHead:false, groundHead:false, headType:"new" },
 ];
 
 function startSequence() {
@@ -1056,7 +1560,7 @@ function startSequence() {
   seqActive = true;
   seqAutoplay = false;
   seqFlipped = false;
-  stopAnimation();
+  stopAnimation(true);
   document.getElementById('sequencePanel').classList.add('active');
   document.getElementById('headChangeBtn').classList.add('active');
   buildSequenceProgress();
@@ -1138,7 +1642,7 @@ function applySequenceStep() {
 
   // Auto-advance
   if (seqAutoplay && seqStep < HEAD_CHANGE_STEPS.length - 1) {
-    const delay = step.showMenu ? 1500 : 1000;
+    const delay = 1000;
     seqAutoTimer = setTimeout(() => { advanceSequence(); }, delay);
   }
 }
@@ -1158,6 +1662,11 @@ async function renderSequenceFrame(step) {
   ctx.fillRect(0, 0, CW, CH);
   ctx.imageSmoothingEnabled = false;
 
+  // For sequence: show the key pose frame (e.g. fully bent, not standing)
+  if (step.pose === 'bend') animFrame = 2;  // fully bent frame
+  else if (step.pose === 'point') animFrame = 2;  // full point frame
+  else animFrame = 0;
+
   const pose = getPoseConfig();
   const drawOrder = DRAW_ORDER[currentView] || DRAW_ORDER.side;
 
@@ -1168,11 +1677,14 @@ async function renderSequenceFrame(step) {
     ctx.scale(-1, 1);
   }
 
+  const isBack = currentView === 'back';
+  const { cx_tab, cy_tab } = await computeLimbPositions(pose, isBack);
   for (const limbKey of drawOrder) {
     if (limbKey === 'head') {
-      if (step.showHead) await drawHead(pose);
+      if (step.showHead) await drawHead(pose, cx_tab, cy_tab);
     } else {
-      await drawBodyLimb(limbKey, pose);
+      const limbIdx = LIMB_ORDER.indexOf(limbKey);
+      await drawBodyLimb(limbKey, pose, cx_tab[limbIdx], cy_tab[limbIdx]);
     }
   }
 
@@ -1190,11 +1702,6 @@ async function renderSequenceFrame(step) {
 
   if (seqFlipped) {
     ctx.restore();
-  }
-
-  // Draw menu overlay
-  if (step.showMenu) {
-    drawMenuOverlay(step.showMenu);
   }
 }
 
@@ -1236,31 +1743,6 @@ async function drawMiniHead(head, position) {
   }
 }
 
-function drawMenuOverlay(menuAction) {
-  // Draw a simple C64-style menu popup
-  const menuX = CW - 90, menuY = 40;
-  ctx.fillStyle = 'rgba(0,0,0,0.85)';
-  ctx.fillRect(menuX, menuY, 80, 60);
-  ctx.strokeStyle = '#6c5eb5';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(menuX, menuY, 80, 60);
-
-  ctx.font = '10px "Courier New", monospace';
-  ctx.fillStyle = '#6c5eb5';
-  ctx.fillText('DO:', menuX + 8, menuY + 16);
-
-  const items = ['GET', 'PUT', 'GO'];
-  for (let i = 0; i < items.length; i++) {
-    if (items[i] === menuAction) {
-      ctx.fillStyle = '#e94560';
-      ctx.fillRect(menuX + 4, menuY + 21 + i * 13, 72, 12);
-      ctx.fillStyle = '#fff';
-    } else {
-      ctx.fillStyle = '#999';
-    }
-    ctx.fillText(items[i], menuX + 8, menuY + 31 + i * 13);
-  }
-}
 
 // Sequence UI events
 document.getElementById('headChangeBtn').addEventListener('click', () => {
@@ -1303,7 +1785,7 @@ document.addEventListener('keydown', e => {
 // ============================================================
 // INIT
 // ============================================================
-Promise.all([loadBodyManifest(), loadHeadManifest()]).then(() => {
+Promise.all([loadBodyManifest(), loadHeadManifest(), loadHeadConfig()]).then(() => {
   buildGrid();
   selectHead(HEADS[Math.floor(Math.random() * HEADS.length)]);
 });
