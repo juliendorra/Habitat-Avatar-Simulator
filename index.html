@@ -282,6 +282,13 @@
         <div class="pattern-zone"><span>Legs — <span id="patLegsName">Solid</span></span><div class="pattern-swatches" id="patLegsSwatches"></div></div>
       </div>
 
+      <div class="control-group">
+        <div class="btn-row">
+          <button class="btn full" id="shareLinkBtn" style="background:#0f3460;border-color:#4caf50;color:#4caf50">Copy Share Link</button>
+        </div>
+        <div id="shareStatus" style="font-size:0.75em;color:var(--text-dim);text-align:center;margin-top:2px;min-height:1.2em"></div>
+      </div>
+
       <div class="head-info" id="headInfo">
         <h3>Select a head</h3>
         <div class="detail">Click any head or press Shuffle</div>
@@ -1100,11 +1107,11 @@ async function computeLimbPositions(pose, isBack) {
 let activeCtx = ctx;
 
 async function renderAvatar() {
-  // If sequence is active, delegate to sequence renderer
-  if (seqActive) {
-    renderSequenceFrame(HEAD_CHANGE_STEPS[seqStep]);
-    return;
-  }
+  // If sequence is active, ignore — only applySequenceStep triggers renders
+  if (seqActive) return;
+
+  // Keep URL fragment in sync with current state
+  if (typeof updateHash === 'function') updateHash();
 
   ctx.clearRect(0, 0, CW, CH);
   ctx.fillStyle = '#A3A3A3';
@@ -1910,6 +1917,181 @@ document.addEventListener('keydown', e => {
 });
 
 // ============================================================
+// URL FRAGMENT SHARE LINK SYSTEM
+// ============================================================
+// Format: #head=monk&h=5&c=312893.000000.A96F63&pat=4.15.10
+// Only non-default values are included to keep URLs compact.
+// Keys: head, h (height), c (colors), pat (patterns torso.arms.legs)
+// View and pose are display settings, not part of the avatar design.
+
+const DEFAULTS = {
+  height: 0,
+  colors: [CRT_COLORS.blue, CRT_COLORS.black, CRT_COLORS.pink],
+  patterns: { torso: 15, arms: 15, legs: 15 },
+};
+
+function encodeAvatarState() {
+  const params = [];
+  if (currentHead) params.push('head=' + currentHead.name);
+  if (avatarHeight !== DEFAULTS.height) params.push('h=' + avatarHeight);
+  // Colors: strip '#' and join with dots
+  const colorsChanged = bodyColors.some((c, i) => c.toLowerCase() !== DEFAULTS.colors[i].toLowerCase());
+  if (colorsChanged) {
+    params.push('c=' + bodyColors.map(c => c.replace('#','')).join('.'));
+  }
+  // Patterns: torso.arms.legs
+  const patsChanged = bodyPatterns.torso !== DEFAULTS.patterns.torso ||
+                      bodyPatterns.arms !== DEFAULTS.patterns.arms ||
+                      bodyPatterns.legs !== DEFAULTS.patterns.legs;
+  if (patsChanged) {
+    params.push('pat=' + bodyPatterns.torso + '.' + bodyPatterns.arms + '.' + bodyPatterns.legs);
+  }
+  return params.join('&');
+}
+
+function decodeAvatarState(hash) {
+  if (!hash || hash.length < 2) return null;
+  const str = hash.startsWith('#') ? hash.slice(1) : hash;
+  const state = {};
+  for (const part of str.split('&')) {
+    const eq = part.indexOf('=');
+    if (eq < 0) continue;
+    const key = part.slice(0, eq);
+    const val = part.slice(eq + 1);
+    switch (key) {
+      case 'head': state.head = val; break;
+      case 'h': { const n = parseInt(val); if (n >= 0 && n <= 15) state.height = n; break; }
+      case 'c': {
+        const parts = val.split('.');
+        if (parts.length === 3 && parts.every(p => /^[0-9a-fA-F]{6}$/.test(p))) {
+          state.colors = parts.map(p => '#' + p);
+        }
+        break;
+      }
+      case 'pat': {
+        const parts = val.split('.').map(Number);
+        if (parts.length === 3 && parts.every(n => n >= 0 && n <= 15)) {
+          state.patterns = { torso: parts[0], arms: parts[1], legs: parts[2] };
+        }
+        break;
+      }
+    }
+  }
+  return state;
+}
+
+function applyStateFromHash() {
+  const state = decodeAvatarState(location.hash);
+  if (!state || !state.head) return false;
+
+  // Find head by name
+  const head = HEADS.find(h => h.name === state.head);
+  if (!head) return false;
+
+  // Apply height
+  if (state.height !== undefined) {
+    avatarHeight = state.height;
+    const slider = document.getElementById('heightSlider');
+    slider.value = avatarHeight;
+    slider.dispatchEvent(new Event('input'));
+  }
+  // Apply colors
+  if (state.colors) {
+    document.getElementById('color1').value = state.colors[0];
+    document.getElementById('color2').value = state.colors[1];
+    document.getElementById('color3').value = state.colors[2];
+    // Check if colors match EMU preset for pure toggle
+    const isEmu = state.colors[0].toLowerCase() === EMU_COLORS.blue &&
+                  state.colors[1].toLowerCase() === EMU_COLORS.black &&
+                  state.colors[2].toLowerCase() === EMU_COLORS.pink;
+    document.getElementById('pureColors').checked = isEmu;
+    onPaletteChange();
+  }
+  // Apply patterns
+  if (state.patterns) {
+    bodyPatterns.torso = state.patterns.torso;
+    bodyPatterns.arms = state.patterns.arms;
+    bodyPatterns.legs = state.patterns.legs;
+    rebuildPatternSwatches();
+  }
+
+  selectHead(head);
+  return true;
+}
+
+let hashUpdatePending = false;
+let lastPushedHash = '';
+let pushTimer = null;
+function updateHash() {
+  if (hashUpdatePending) return;
+  hashUpdatePending = true;
+  requestAnimationFrame(() => {
+    hashUpdatePending = false;
+    const encoded = encodeAvatarState();
+    if (!encoded) return;
+    const newHash = '#' + encoded;
+    const newUrl = location.pathname + location.search + newHash;
+    if (newHash === lastPushedHash) return;
+    // Replace rapidly during continuous changes (slider drag, color picker),
+    // then push a history entry once changes settle (500ms idle).
+    history.replaceState(null, '', newUrl);
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(() => {
+      if (newHash !== lastPushedHash) {
+        history.pushState(null, '', newUrl);
+        lastPushedHash = newHash;
+      }
+    }, 500);
+  });
+}
+
+// Share button
+document.getElementById('shareLinkBtn').addEventListener('click', () => {
+  // Force synchronous hash update before copying
+  const encoded = encodeAvatarState();
+  if (encoded) {
+    const newUrl = location.pathname + location.search + '#' + encoded;
+    history.replaceState(null, '', newUrl);
+  }
+  const url = location.href;
+  navigator.clipboard.writeText(url).then(() => {
+    const el = document.getElementById('shareStatus');
+    el.textContent = 'Link copied to clipboard!';
+    setTimeout(() => { el.textContent = ''; }, 2000);
+  }).catch(() => {
+    // Fallback: select from a temp input
+    const tmp = document.createElement('input');
+    tmp.value = location.href;
+    document.body.appendChild(tmp);
+    tmp.select();
+    document.execCommand('copy');
+    document.body.removeChild(tmp);
+    const el = document.getElementById('shareStatus');
+    el.textContent = 'Link copied!';
+    setTimeout(() => { el.textContent = ''; }, 2000);
+  });
+});
+
+// ============================================================
+// INIT
+// ============================================================
+Promise.all([loadBodyManifest(), loadHeadManifest(), loadHeadConfig(), loadAvatarAnimations()]).then(() => {
+  // Init animation engine to default state
+  if (avatarAnim) initAnimAction('stand', 'side');
+  buildGrid();
+
+  // Try loading state from URL fragment, otherwise random
+  if (!applyStateFromHash()) {
+    selectHead(HEADS[Math.floor(Math.random() * HEADS.length)]);
+  }
+
+  // Update hash on popstate (browser back/forward)
+  window.addEventListener('popstate', () => applyStateFromHash());
+});
+</script>
+</body>
+</html>
+=====
 // INIT
 // ============================================================
 Promise.all([loadBodyManifest(), loadHeadManifest(), loadHeadConfig(), loadAvatarAnimations()]).then(() => {
