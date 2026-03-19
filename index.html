@@ -1684,9 +1684,17 @@ function rebuildPatternSwatches() {
 // Choreography uses exact C64 actions: unpocket, throw, bend_over/bend_back.
 const HEAD_CHANGE_STEPS = [
   { action:"Standing",       desc:"Avatar with current head, new head nearby",  view:"side",  choreography:"stand",     headOnBody:"old", headInHand:null,  newOnGround:true },
-  { action:"GET head",       desc:"Head removed, now in hand",                  view:"side",  choreography:"unpocket",  headOnBody:null,  headInHand:"old", newOnGround:true,  endFrame:true },
-  { action:"PUT head down",  desc:"Old head thrown to the ground",              view:"side",  choreography:"throw",     headOnBody:null,  headInHand:null,  oldOnGround:true, newOnGround:true, endFrame:true },
-  { action:"GET new head",   desc:"Turned, walked, picked up new head",         view:"side",  choreography:"stand",     headOnBody:null,  headInHand:"new", oldOnGround:true,  flipped:true },
+  // --- Action 1: GET head (unpocket from body → standing with head in hand)
+  { action:"GET head",       desc:"Taking head off",                            view:"side",  choreography:"unpocket",  headOnBody:null,  headInHand:"old", newOnGround:true,  endFrame:true },
+  { action:"GET head",       desc:"Head in hand",                               view:"side",  choreography:"stand",     headOnBody:null,  headInHand:"old", newOnGround:true,  auto:true },
+  // --- Action 2: PUT head down (throw → recover to standing)
+  { action:"PUT head down",  desc:"Throwing old head",                          view:"side",  choreography:"throw",     headOnBody:null,  headInHand:null,  oldOnGround:true, newOnGround:true, endFrame:true },
+  { action:"PUT head down",  desc:"Both heads on ground",                       view:"side",  choreography:"stand",     headOnBody:null,  headInHand:null,  oldOnGround:true, newOnGround:true, auto:true },
+  // --- Action 3: GET new head (turn → face new head → bend to grab → stand with head)
+  { action:"GET new head",   desc:"Turning around",                             view:"front", choreography:"stand_front", headOnBody:null, headInHand:null, oldOnGround:true, newOnGround:true, auto:true },
+  { action:"GET new head",   desc:"Bending to pick up",                         view:"side",  choreography:"bend_over",   headOnBody:null, headInHand:null, oldOnGround:true, newOnGround:true, flipped:true, endFrame:true, auto:true },
+  { action:"GET new head",   desc:"New head in hand",                           view:"side",  choreography:"stand",       headOnBody:null, headInHand:"new", oldOnGround:true, flipped:true, auto:true },
+  // --- Action 4: PUT new head (head on shoulders)
   { action:"PUT new head",   desc:"New head on shoulders!",                     view:"side",  choreography:"stand",     headOnBody:"new", headInHand:null,  flipped:true },
 ];
 
@@ -1761,14 +1769,19 @@ function applySequenceStep() {
   // Update step display
   document.querySelector('#sequenceStep .step-num').textContent = `${seqStep + 1}/${HEAD_CHANGE_STEPS.length}`;
   document.querySelector('#sequenceStep .step-desc').textContent = `${step.action} — ${step.desc}`;
-  // Update next button text
+  // Update next button — show next user action (skip auto sub-steps)
   const nextBtn = document.getElementById('seqNextBtn');
   if (seqStep >= HEAD_CHANGE_STEPS.length - 1) {
     nextBtn.textContent = 'Done!';
     nextBtn.disabled = true;
   } else {
-    nextBtn.textContent = HEAD_CHANGE_STEPS[seqStep + 1].action;
-    nextBtn.disabled = false;
+    // Find next non-auto step (the next user action)
+    let nextAction = null;
+    for (let i = seqStep + 1; i < HEAD_CHANGE_STEPS.length; i++) {
+      if (!HEAD_CHANGE_STEPS[i].auto) { nextAction = HEAD_CHANGE_STEPS[i]; break; }
+    }
+    nextBtn.textContent = nextAction ? nextAction.action : 'Done!';
+    nextBtn.disabled = !!HEAD_CHANGE_STEPS[seqStep + 1]?.auto; // disable during auto sub-steps
   }
   updateSequenceProgress();
 
@@ -1791,9 +1804,14 @@ function applySequenceStep() {
   if (seqStep >= HEAD_CHANGE_STEPS.length - 1) {
     seqAutoTimer = setTimeout(() => { stopSequence(); }, 1200);
   }
-  // Auto-advance (for autoplay mode)
-  else if (seqAutoplay) {
-    seqAutoTimer = setTimeout(() => { advanceSequence(); }, 1000);
+  // Check if next step is auto — if so, auto-advance after a pause
+  else {
+    const nextStep = HEAD_CHANGE_STEPS[seqStep + 1];
+    if (nextStep && nextStep.auto) {
+      seqAutoTimer = setTimeout(() => { advanceSequence(); }, 800);
+    } else if (seqAutoplay) {
+      seqAutoTimer = setTimeout(() => { advanceSequence(); }, 1000);
+    }
   }
 }
 
@@ -2111,18 +2129,6 @@ Promise.all([loadBodyManifest(), loadHeadManifest(), loadHeadConfig(), loadAvata
 
   // Update hash on popstate (browser back/forward)
   window.addEventListener('popstate', () => applyStateFromHash());
-});
-</script>
-</body>
-</html>
-=====
-// INIT
-// ============================================================
-Promise.all([loadBodyManifest(), loadHeadManifest(), loadHeadConfig(), loadAvatarAnimations()]).then(() => {
-  // Init animation engine to default state
-  if (avatarAnim) initAnimAction('stand', 'side');
-  buildGrid();
-  selectHead(HEADS[Math.floor(Math.random() * HEADS.length)]);
 });
 </script>
 </body>
