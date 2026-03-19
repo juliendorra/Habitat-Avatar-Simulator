@@ -1583,7 +1583,8 @@ const SPRAY_BOTTLE = [
 ];
 
 // Render a spray bottle swatch with the given pattern applied to blue(1) pixels.
-// Each native MC pixel is rendered as 2px wide (C64 aspect ratio).
+// Decoded directly from bottle.m: cel A (nozzle) + cel B (body) composited.
+// Each native MC pixel = 2px wide (C64 multicolor aspect ratio).
 function makePatternSwatch(patIdx) {
   const NATIVE_W = 12, H = 16, STRETCH = 2;
   const W = NATIVE_W * STRETCH; // 24 pixels wide
@@ -1592,29 +1593,33 @@ function makePatternSwatch(patIdx) {
   c.className = 'pattern-swatch';
   c.title = `${patIdx}: ${PATTERN_NAMES[patIdx]}`;
   const gc = c.getContext('2d');
+
+  // Fill background (C64 background color = blue in-game, light gray for our UI)
+  gc.fillStyle = '#A3A3A3';
+  gc.fillRect(0, 0, W, H);
+
   const pattern = CEL_PATTERNS[patIdx];
-  // Pattern value colors: 0=preserve(shows clothing blue), 1=clothing, 2=detail, 3=wild
-  // On the spray bottle, 00 preserves the underlying blue body — same as clothing color
+  // Pattern pixel values map to: 0=clothing(blue), 1=clothing, 2=detail(black), 3=wild(pink)
+  // Value 0 preserves underlying blue = shows as clothing color
   const patColors = [bodyColors[0], bodyColors[0], bodyColors[1], bodyColors[2]];
+
   for (let y = 0; y < H; y++) {
     const row = SPRAY_BOTTLE[y];
     if (!row) continue;
     for (let mcX = 0; mcX < NATIVE_W; mcX++) {
       const px = row[mcX] || 0;
-      if (px === 0) continue;
+      if (px === 0) continue; // transparent = show background
       if (px === 2) {
-        gc.fillStyle = bodyColors[1]; // outline uses detail/black color
-        gc.fillRect(mcX * STRETCH, y, STRETCH, 1);
+        gc.fillStyle = bodyColors[1]; // outline = detail/black color
       } else if (px === 1) {
-        // Pattern area: apply pattern. Body pattern starts at row 7.
-        const patByte = pattern[(y - 7) % 4];
-        // mcX within pattern body starts at column 3
-        const patMcX = (mcX - 3) % 4;
+        // Pattern area: apply pattern tile
+        const patByte = pattern[y % 4];
+        const patMcX = mcX % 4;
         const shift = 6 - patMcX * 2;
         const val = (patByte >> shift) & 0x03;
         gc.fillStyle = patColors[val];
-        gc.fillRect(mcX * STRETCH, y, STRETCH, 1);
       }
+      gc.fillRect(mcX * STRETCH, y, STRETCH, 1);
     }
   }
   return c;
