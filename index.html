@@ -1028,7 +1028,7 @@ function getHeadCelsForView(head, viewState) {
 const LIMB_ORDER = ['legs_right','legs_left','left_arm','torso','head_placeholder','right_arm'];
 // cels_affected_by_height: legs(0,1) unaffected, upper body(2-5) shifts
 const CELS_AFFECTED_BY_HEIGHT = [0, 0, 1, 1, 1, 1];
-const AVATAR_HEIGHT = 0; // 0=tallest, 15=shortest (scanline adjustment for upper body)
+let avatarHeight = 0; // 0=tallest, 15=shortest (scanline adjustment for upper body)
 
 // Bytes-to-display-pixels: 1 byte = 4 MC pixels = 8 PNG pixels (at 2x scale) × SCALE
 const BYTE_PX = 8 * SCALE; // = 32 display pixels per byte
@@ -1097,7 +1097,7 @@ async function computeLimbPositions(pose, isBack) {
 
     // Store position for drawing
     cx_tab[i] = cel_x;
-    cy_tab[i] = cel_y + (CELS_AFFECTED_BY_HEIGHT[i] ? AVATAR_HEIGHT : 0);
+    cy_tab[i] = cel_y + (CELS_AFFECTED_BY_HEIGHT[i] ? avatarHeight : 0);
 
     // Step 4: read THIS cel's x_rel/y_rel for next limb
     cel_x_rel = celData.x_rel || 0;
