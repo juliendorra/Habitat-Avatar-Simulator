@@ -951,6 +951,7 @@ let currentView = 'side';
 let currentPose = 'stand';
 let animFrame = 0;
 let animInterval = null;
+let bendPhase = null; // tracks bend_over → bend_back chaining
 
 // Head change sequence state (initialized here, logic defined later)
 let seqActive = false;
@@ -1312,6 +1313,7 @@ function hasAnimatedHead() {
 
 function startAnimation() {
   stopAnimation(true);
+  bendPhase = currentPose === 'bend' ? 'over' : null;
   // Init the animation engine for current pose+view
   if (avatarAnim) initAnimAction(currentPose, currentView);
 
@@ -1319,10 +1321,24 @@ function startAnimation() {
     const speed = Math.round(1000 / 6); // 167ms = 6fps (C64 PAL timing)
     animInterval = setInterval(() => {
       const moved = tickAnimation();
-      // Point/bend: stop when play-once animations finish
-      if ((currentPose === 'point' || currentPose === 'bend') && !moved) {
+      // Point: stop when play-once animation finishes
+      if (currentPose === 'point' && !moved) {
         clearInterval(animInterval);
         animInterval = null;
+        return;
+      }
+      // Bend: chain bend_over → bend_back (matching C64 two-action sequence)
+      if (currentPose === 'bend' && !moved) {
+        if (!bendPhase || bendPhase === 'over') {
+          // bend_over finished → apply bend_back to stand back up
+          bendPhase = 'back';
+          applyAction('bend_back');
+        } else {
+          // bend_back finished → avatar is visually standing, stop
+          bendPhase = null;
+          clearInterval(animInterval);
+          animInterval = null;
+        }
         return;
       }
       animFrame++;
