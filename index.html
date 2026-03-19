@@ -129,13 +129,6 @@
     width: 36px; height: 24px; border: 1px solid var(--border);
     border-radius: 3px; cursor: pointer; background: none; padding: 0;
   }
-  .palette-presets { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 4px; }
-  .palette-preset {
-    display: flex; gap: 1px; cursor: pointer; border: 2px solid transparent;
-    border-radius: 3px; padding: 1px; transition: border-color 0.15s;
-  }
-  .palette-preset:hover, .palette-preset.active { border-color: var(--highlight); }
-  .palette-preset .swatch { width: 12px; height: 12px; border-radius: 1px; }
   .pattern-zone { margin-bottom: 6px; }
   .pattern-zone > span { font-size: 0.7em; color: var(--text-dim); display: block; margin-bottom: 2px; }
   .pattern-swatches { display: flex; gap: 2px; flex-wrap: wrap; }
@@ -272,20 +265,14 @@
         <div class="palette-row">
           <label><input type="checkbox" id="pureColors"> Pure emulated colors</label>
         </div>
-        <div class="palette-row">
-          <span>Blue</span>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <span style="font-size:0.7em; color:var(--text-dim);">Blue</span>
           <input type="color" id="color1" value="#312893">
-        </div>
-        <div class="palette-row">
-          <span>Black</span>
+          <span style="font-size:0.7em; color:var(--text-dim);">Black</span>
           <input type="color" id="color2" value="#000000">
-        </div>
-        <div class="palette-row">
-          <span>Pink</span>
+          <span style="font-size:0.7em; color:var(--text-dim);">Pink</span>
           <input type="color" id="color3" value="#A96F63">
         </div>
-        <label style="margin-top:6px">Presets</label>
-        <div class="palette-presets" id="palettePresets"></div>
       </div>
 
       <div class="control-group">
@@ -709,15 +696,6 @@ const DRAW_ORDER = {
 const CRT_COLORS = { blue:"#312893", black:"#000000", pink:"#A96F63" };
 const EMU_COLORS = { blue:"#0000ff", black:"#000000", pink:"#ff55ff" };
 
-
-const PALETTES = [
-  { name:"Default", body:["#312893","#000000","#A96F63"] },
-  { name:"C64 Blue", body:["#352879","#000000","#6c5eb5"] },
-  { name:"C64 Green", body:["#588d43","#000000","#9ad284"] },
-  { name:"C64 Purple", body:["#6f3d86","#000000","#6c5eb5"] },
-  { name:"C64 Red", body:["#68372b","#000000","#9a6759"] },
-  { name:"C64 Gray", body:["#444444","#000000","#6c6c6c"] },
-];
 
 // ============================================================
 // CLOTHING PATTERNS (from C64 paint.m cel_patterns table)
@@ -1575,28 +1553,6 @@ document.getElementById('pureColors').addEventListener('change', function() {
   onPaletteChange();
 });
 
-// Palette presets
-(function buildPresets() {
-  const container = document.getElementById('palettePresets');
-  for (const p of PALETTES) {
-    const el = document.createElement('div');
-    el.className = 'palette-preset';
-    el.title = p.name;
-    for (const c of p.body) {
-      const sw = document.createElement('div');
-      sw.className = 'swatch';
-      sw.style.background = c;
-      el.appendChild(sw);
-    }
-    el.addEventListener('click', () => {
-      document.getElementById('color1').value = p.body[0];
-      document.getElementById('color2').value = p.body[1];
-      document.getElementById('color3').value = p.body[2];
-      onPaletteChange();
-    });
-    container.appendChild(el);
-  }
-})();
 
 // Spray bottle bitmap from C64 bottle.m: nozzle (cel A) composited over body (cel B)
 // at correct y_offset positions. 12 native MC pixels wide, 16 scanlines tall.
