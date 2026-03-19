@@ -1676,26 +1676,18 @@ function rebuildPatternSwatches() {
 // Simulates the in-game flow: GET head, PUT on ground, turn,
 // GET new head, PUT head on — as described in the Avatar Handbook
 // ============================================================
-// Head change sequence using exact C64 choreography actions.
-// Each step specifies the choreography action to apply (after clearing all limbs to gs0).
-// endFrame: true = show the end frame of play-once animations (e.g. fully bent/thrown).
-// Sequence follows the Avatar Handbook: GET head → throw to ground → turn → bend to GET
-// new head → PUT on body. PUT on ground uses AV_ACT_throw (not bend); GET from ground
-// uses AV_ACT_bend_over/bend_back. All heads have walk_offset [245, 28, 255].
-// Old head thrown to the RIGHT side, new head sits on the LEFT side.
-// oldOnGround/newOnGround are drawn at fixed room positions (outside the flip transform).
+// Head change sequence — 4 user actions matching the Avatar Handbook:
+//   GET head → PUT head down → GET new head → PUT new head
+// Each step shows the END STATE after the action completes.
+// The intermediate animations (unpocket, throw arc, turn, walk, bend)
+// are implied between steps — the user sees the result of each action.
+// Choreography uses exact C64 actions: unpocket, throw, bend_over/bend_back.
 const HEAD_CHANGE_STEPS = [
-  { action:"Standing",           desc:"Avatar with current head",           view:"side",  choreography:"stand",       headOnBody:"old", headInHand:null,  newOnGround:true },
-  { action:"GET head",           desc:"Taking head off (unpocket)",         view:"side",  choreography:"unpocket",    headOnBody:null,  headInHand:"old", newOnGround:true,  endFrame:true },
-  { action:"Holding head",       desc:"Standing headless, holding head",    view:"side",  choreography:"stand",       headOnBody:null,  headInHand:"old", newOnGround:true },
-  { action:"THROW head",         desc:"Throwing old head to the ground",    view:"side",  choreography:"throw",       headOnBody:null,  headInHand:null,  oldOnGround:true, newOnGround:true, endFrame:true },
-  { action:"Heads on ground",    desc:"Both heads on ground, each side",    view:"side",  choreography:"stand",       headOnBody:null,  headInHand:null,  oldOnGround:true, newOnGround:true },
-  { action:"Turn around",        desc:"Turning to face the new head",       view:"front", choreography:"stand_front", headOnBody:null,  headInHand:null,  oldOnGround:true, newOnGround:true },
-  { action:"Facing new head",    desc:"New head is on this side",           view:"side",  choreography:"stand",       headOnBody:null,  headInHand:null,  oldOnGround:true, newOnGround:true, flipped:true },
-  { action:"GET new head",       desc:"Bending to pick up new head",        view:"side",  choreography:"bend_over",   headOnBody:null,  headInHand:null,  oldOnGround:true, newOnGround:true, flipped:true, endFrame:true },
-  { action:"Holding new head",   desc:"New head in hand, standing up",      view:"side",  choreography:"bend_back",   headOnBody:null,  headInHand:"new", oldOnGround:true,  flipped:true, endFrame:true },
-  { action:"PUT head on",        desc:"New head goes on shoulders!",        view:"side",  choreography:"stand",       headOnBody:"new", headInHand:null,  oldOnGround:true,  flipped:true },
-  { action:"Done!",              desc:"Avatar with new head",               view:"side",  choreography:"stand",       headOnBody:"new", headInHand:null },
+  { action:"Standing",       desc:"Avatar with current head, new head nearby",  view:"side",  choreography:"stand",     headOnBody:"old", headInHand:null,  newOnGround:true },
+  { action:"GET head",       desc:"Head removed, now in hand",                  view:"side",  choreography:"unpocket",  headOnBody:null,  headInHand:"old", newOnGround:true,  endFrame:true },
+  { action:"PUT head down",  desc:"Old head thrown to the ground",              view:"side",  choreography:"throw",     headOnBody:null,  headInHand:null,  oldOnGround:true, newOnGround:true, endFrame:true },
+  { action:"GET new head",   desc:"Turned, walked, picked up new head",         view:"side",  choreography:"stand",     headOnBody:null,  headInHand:"new", oldOnGround:true,  flipped:true },
+  { action:"PUT new head",   desc:"New head on shoulders!",                     view:"side",  choreography:"stand",     headOnBody:"new", headInHand:null,  flipped:true },
 ];
 
 function startSequence() {
