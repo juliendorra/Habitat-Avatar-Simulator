@@ -227,6 +227,15 @@
       </div>
 
       <div class="control-group">
+        <label>Height <span id="heightLabel" style="color:var(--text-dim);font-size:0.85em">(tallest)</span></label>
+        <div class="palette-row">
+          <span style="font-size:0.75em">Tall</span>
+          <input type="range" id="heightSlider" min="0" max="15" value="0" style="flex:1">
+          <span style="font-size:0.75em">Short</span>
+        </div>
+      </div>
+
+      <div class="control-group">
         <div class="btn-row">
           <button class="btn primary full" id="randomBtn">Shuffle Random Avatar</button>
         </div>
@@ -1482,6 +1491,10 @@ document.querySelectorAll('[data-pose]').forEach(btn => {
 
 // Random
 document.getElementById('randomBtn').addEventListener('click', () => {
+  // Randomize height along with head
+  const slider = document.getElementById('heightSlider');
+  slider.value = Math.floor(Math.random() * 16);
+  slider.dispatchEvent(new Event('input'));
   selectHead(HEADS[Math.floor(Math.random() * HEADS.length)]);
 });
 
@@ -1527,6 +1540,15 @@ function onPaletteChange() {
 
 ['color1','color2','color3'].forEach(id =>
   document.getElementById(id).addEventListener('input', onPaletteChange));
+
+// Height slider
+document.getElementById('heightSlider').addEventListener('input', function() {
+  avatarHeight = parseInt(this.value);
+  const labels = ['tallest','tall','tall','above avg','above avg','avg','avg','avg',
+                  'avg','below avg','below avg','short','short','shorter','shorter','shortest'];
+  document.getElementById('heightLabel').textContent = '(' + labels[avatarHeight] + ')';
+  renderAvatar();
+});
 
 // Pure emulated colors toggle
 document.getElementById('pureColors').addEventListener('change', function() {
