@@ -255,7 +255,6 @@
           <div class="sequence-controls">
             <button class="btn sequence" id="seqAutoBtn">Autoplay</button>
             <button class="btn sequence" id="seqNextBtn">Start</button>
-            <button class="btn" id="seqStopBtn">Exit</button>
           </div>
         </div>
       </div>
@@ -946,6 +945,7 @@ let seqAutoTimer = null;
 let seqOldHead = null;
 let seqNewHead = null;
 let seqFlipped = false;
+let seqBentArmX = null; // cached bent-arm reach position (computed once per sequence)
 // "As seen on screen" CRT-attenuated defaults
 let bodyColors = ["#312893","#000000","#A96F63"];
 
@@ -1676,18 +1676,26 @@ function rebuildPatternSwatches() {
 // Simulates the in-game flow: GET head, PUT on ground, turn,
 // GET new head, PUT head on — as described in the Avatar Handbook
 // ============================================================
+// Head change sequence using exact C64 choreography actions.
+// Each step specifies the choreography action to apply (after clearing all limbs to gs0).
+// endFrame: true = show the end frame of play-once animations (e.g. fully bent/thrown).
+// Sequence follows the Avatar Handbook: GET head → throw to ground → turn → bend to GET
+// new head → PUT on body. PUT on ground uses AV_ACT_throw (not bend); GET from ground
+// uses AV_ACT_bend_over/bend_back. All heads have walk_offset [245, 28, 255].
+// Old head thrown to the RIGHT side, new head sits on the LEFT side.
+// oldOnGround/newOnGround are drawn at fixed room positions (outside the flip transform).
 const HEAD_CHANGE_STEPS = [
-  { action:"Standing",           desc:"Avatar with current head",          pose:"stand", view:"side", showHead:true,  holdHead:false, groundHead:false, headType:"old" },
-  { action:"GET head",           desc:"Head comes off into hands",         pose:"bend",  view:"side", showHead:false, holdHead:true,  groundHead:false, headType:"old" },
-  { action:"Holding head",       desc:"Standing headless, holding head",   pose:"stand", view:"side", showHead:false, holdHead:true,  groundHead:false, headType:"old" },
-  { action:"PUT head down",      desc:"Bending to place head on ground",   pose:"bend",  view:"side", showHead:false, holdHead:false, groundHead:true,  headType:"old" },
-  { action:"Head on ground",     desc:"Standing headless, head on ground", pose:"stand", view:"side", showHead:false, holdHead:false, groundHead:true,  headType:"old" },
-  { action:"Turn around",        desc:"Turning to face the new head",      pose:"stand", view:"front", showHead:false, holdHead:false, groundHead:false, headType:null },
-  { action:"Facing other side",  desc:"New head is on this side",          pose:"stand", view:"side", showHead:false, holdHead:false, groundHead:true,  headType:"new", flipped:true },
-  { action:"GET new head",       desc:"Bending to pick up new head",       pose:"bend",  view:"side", showHead:false, holdHead:false, groundHead:true,  headType:"new", flipped:true },
-  { action:"Holding new head",   desc:"Standing with new head in hand",    pose:"stand", view:"side", showHead:false, holdHead:true,  groundHead:false, headType:"new", flipped:true },
-  { action:"PUT head on",        desc:"New head goes on shoulders!",        pose:"stand", view:"side", showHead:true,  holdHead:false, groundHead:false, headType:"new", flipped:true },
-  { action:"Done!",              desc:"Avatar with new head",              pose:"stand", view:"side", showHead:true,  holdHead:false, groundHead:false, headType:"new" },
+  { action:"Standing",           desc:"Avatar with current head",           view:"side",  choreography:"stand",       headOnBody:"old", headInHand:null,  newOnGround:true },
+  { action:"GET head",           desc:"Taking head off (unpocket)",         view:"side",  choreography:"unpocket",    headOnBody:null,  headInHand:"old", newOnGround:true,  endFrame:true },
+  { action:"Holding head",       desc:"Standing headless, holding head",    view:"side",  choreography:"stand",       headOnBody:null,  headInHand:"old", newOnGround:true },
+  { action:"THROW head",         desc:"Throwing old head to the ground",    view:"side",  choreography:"throw",       headOnBody:null,  headInHand:null,  oldOnGround:true, newOnGround:true, endFrame:true },
+  { action:"Heads on ground",    desc:"Both heads on ground, each side",    view:"side",  choreography:"stand",       headOnBody:null,  headInHand:null,  oldOnGround:true, newOnGround:true },
+  { action:"Turn around",        desc:"Turning to face the new head",       view:"front", choreography:"stand_front", headOnBody:null,  headInHand:null,  oldOnGround:true, newOnGround:true },
+  { action:"Facing new head",    desc:"New head is on this side",           view:"side",  choreography:"stand",       headOnBody:null,  headInHand:null,  oldOnGround:true, newOnGround:true, flipped:true },
+  { action:"GET new head",       desc:"Bending to pick up new head",        view:"side",  choreography:"bend_over",   headOnBody:null,  headInHand:null,  oldOnGround:true, newOnGround:true, flipped:true, endFrame:true },
+  { action:"Holding new head",   desc:"New head in hand, standing up",      view:"side",  choreography:"bend_back",   headOnBody:null,  headInHand:"new", oldOnGround:true,  flipped:true, endFrame:true },
+  { action:"PUT head on",        desc:"New head goes on shoulders!",        view:"side",  choreography:"stand",       headOnBody:"new", headInHand:null,  oldOnGround:true,  flipped:true },
+  { action:"Done!",              desc:"Avatar with new head",               view:"side",  choreography:"stand",       headOnBody:"new", headInHand:null },
 ];
 
 function startSequence() {
@@ -1701,6 +1709,7 @@ function startSequence() {
   seqActive = true;
   seqAutoplay = false;
   seqFlipped = false;
+  seqBentArmX = null; // recompute for this sequence
   stopAnimation(true);
   document.getElementById('sequencePanel').classList.add('active');
   document.getElementById('headChangeBtn').classList.add('active');
@@ -1712,6 +1721,7 @@ function stopSequence() {
   seqActive = false;
   seqAutoplay = false;
   if (seqAutoTimer) { clearTimeout(seqAutoTimer); seqAutoTimer = null; }
+  document.getElementById('seqAutoBtn').textContent = 'Autoplay';
   document.getElementById('sequencePanel').classList.remove('active');
   document.getElementById('headChangeBtn').classList.remove('active');
   // Restore to final head if completed, else restore old
@@ -1730,6 +1740,9 @@ function stopSequence() {
     b.classList.toggle('active', b.dataset.pose === 'stand');
   });
   document.getElementById('viewLabel').textContent = 'Side View \u2014 Standing';
+  // Reinitialize animation engine to clean standing state
+  // (sequence renderer modifies limbAnimState directly)
+  initAnimAction('stand', 'side');
   renderAvatar();
 }
 
@@ -1759,21 +1772,22 @@ function applySequenceStep() {
   // Update next button text
   const nextBtn = document.getElementById('seqNextBtn');
   if (seqStep >= HEAD_CHANGE_STEPS.length - 1) {
-    nextBtn.textContent = 'Finish';
+    nextBtn.textContent = 'Done!';
+    nextBtn.disabled = true;
   } else {
-    const next = HEAD_CHANGE_STEPS[seqStep + 1];
-    nextBtn.textContent = next.action;
+    nextBtn.textContent = HEAD_CHANGE_STEPS[seqStep + 1].action;
+    nextBtn.disabled = false;
   }
   updateSequenceProgress();
 
-  // Apply pose/view
-  currentPose = step.pose;
+  // Apply view
   currentView = step.view;
+  currentPose = step.choreography === 'bend_over' || step.choreography === 'bend_back' ? 'bend' : 'stand';
   seqFlipped = !!step.flipped;
 
-  // Set head for rendering
-  if (step.headType === 'old') currentHead = seqOldHead;
-  else if (step.headType === 'new') currentHead = seqNewHead;
+  // Set head for body rendering based on which head is on body
+  if (step.headOnBody === 'old') currentHead = seqOldHead;
+  else if (step.headOnBody === 'new') currentHead = seqNewHead;
 
   // Update view label
   const labels = { side:'Side View', front:'Front View', back:'Back View' };
@@ -1781,10 +1795,13 @@ function applySequenceStep() {
 
   renderSequenceFrame(step);
 
-  // Auto-advance
-  if (seqAutoplay && seqStep < HEAD_CHANGE_STEPS.length - 1) {
-    const delay = 1000;
-    seqAutoTimer = setTimeout(() => { advanceSequence(); }, delay);
+  // Auto-finish: when reaching the last step, exit after a brief pause
+  if (seqStep >= HEAD_CHANGE_STEPS.length - 1) {
+    seqAutoTimer = setTimeout(() => { stopSequence(); }, 1200);
+  }
+  // Auto-advance (for autoplay mode)
+  else if (seqAutoplay) {
+    seqAutoTimer = setTimeout(() => { advanceSequence(); }, 1000);
   }
 }
 
@@ -1797,18 +1814,24 @@ function advanceSequence() {
   applySequenceStep();
 }
 
+let seqRenderID = 0; // guard against overlapping async renders
 async function renderSequenceFrame(step) {
+  const myID = ++seqRenderID;
   ctx.clearRect(0, 0, CW, CH);
   ctx.fillStyle = '#A3A3A3';
   ctx.fillRect(0, 0, CW, CH);
   ctx.imageSmoothingEnabled = false;
 
-  // For sequence: show the key pose frame (e.g. fully bent, not standing)
-  if (step.pose === 'bend') animFrame = 2;  // fully bent frame
-  else if (step.pose === 'point') animFrame = 2;  // full point frame
-  else animFrame = 0;
+  // Set up animation engine using exact C64 choreography (no hardcoded frames).
+  // Mirrors the C64 new_chore flow: clear all to gs0, then apply action.
+  for (const limbName of LIMB_NAMES) {
+    setLimbGS(limbName, 0);
+  }
+  if (step.choreography) {
+    applyAction(step.choreography, !!step.endFrame);
+  }
 
-  const pose = getPoseConfig();
+  const pose = buildPoseFromAnimState();
   const drawOrder = DRAW_ORDER[currentView] || DRAW_ORDER.side;
 
   // If flipped, mirror the canvas
@@ -1822,58 +1845,69 @@ async function renderSequenceFrame(step) {
   const { cx_tab, cy_tab } = await computeLimbPositions(pose, isBack);
   for (const limbKey of drawOrder) {
     if (limbKey === 'head') {
-      if (step.showHead) await drawHead(pose, cx_tab, cy_tab);
+      if (step.headOnBody) await drawHead(pose, cx_tab, cy_tab);
+    } else if (limbKey === 'head_placeholder' && !step.headOnBody) {
+      // Skip neck/collar overlay when head is removed from body
+      continue;
     } else {
       const limbIdx = LIMB_ORDER.indexOf(limbKey);
       await drawBodyLimb(limbKey, pose, cx_tab[limbIdx], cy_tab[limbIdx]);
     }
   }
 
-  // Draw held head (near hand/arm position)
-  if (step.holdHead && currentHead) {
-    const headForHold = step.headType === 'new' ? seqNewHead : seqOldHead;
-    await drawMiniHead(headForHold, step.pose === 'bend' ? 'low' : 'mid');
-  }
+  // Ground head positions use two different distances:
+  // - THROW target: where the player clicked to throw the head (arbitrary, further away).
+  //   C64 throw.m sends the object in a parabolic arc to the cursor position.
+  //   We simulate a throw ~8 byte columns away (a reasonable room distance).
+  // - GRAB point: where the avatar stands to pick up (the bent arm's reach).
+  //   The avatar walks to the object, stops at walk_offset distance, then bends.
+  //   In the sequence, we show the avatar already at the grab point.
+  const THROW_DISTANCE = 4; // byte columns — player's chosen throw target
+  const avatarCenterX = BASE_X + cx_tab[3] * BYTE_PX;
+  const groundRightX = avatarCenterX + THROW_DISTANCE * BYTE_PX; // thrown to the right
+  const groundLeftX  = avatarCenterX - THROW_DISTANCE * BYTE_PX; // new head on the left
 
-  // Draw head on ground
-  if (step.groundHead) {
-    const headForGround = step.headType === 'new' ? seqNewHead : seqOldHead;
-    await drawMiniHead(headForGround, 'ground');
+  // Draw held head — inside flip so it follows the avatar's arm
+  if (step.headInHand) {
+    const headForHold = step.headInHand === 'new' ? seqNewHead : seqOldHead;
+    const isBent = step.choreography === 'bend_over' || step.choreography === 'bend_back';
+    const armScreenX = BASE_X + cx_tab[5] * BYTE_PX;
+    const armScreenY = BASE_Y + cy_tab[5] * SCALE;
+    // Always position relative to the arm, not the throw target
+    const holdX = armScreenX;
+    const holdY = isBent ? (BASE_Y - 20) : (armScreenY - 80);
+    await drawMiniHeadAt(headForHold, holdX, holdY);
   }
 
   if (seqFlipped) {
     ctx.restore();
   }
+
+  if (myID !== seqRenderID) return;
+
+  // Draw ground heads OUTSIDE the flip — fixed room positions.
+  const groundY = BASE_Y;
+  if (step.oldOnGround) {
+    await drawMiniHeadAt(seqOldHead, groundRightX, groundY);
+  }
+  if (step.newOnGround) {
+    await drawMiniHeadAt(seqNewHead, groundLeftX, groundY);
+  }
 }
 
-async function drawMiniHead(head, position) {
+// Draw a head at an absolute screen position (x, y is the bottom-center anchor).
+async function drawMiniHeadAt(head, x, y) {
   if (!head) return;
   const celIndices = getHeadCelsForView(head, 0); // side view
   for (const ci of celIndices.length > 0 ? celIndices : [0]) {
     const img = await loadImg(headCelPath(head.name, ci));
     if (!img) continue;
     const tmp = prepareCel(img, bodyColors, false);
-
-    const miniScale = SCALE * 0.7;
-    const drawW = img.width * miniScale;
-    const drawH = img.height * miniScale;
-
-    let drawX, drawY;
-    if (position === 'ground') {
-      // On the ground, slightly to the side
-      drawX = BASE_X + 60;
-      drawY = BASE_Y - drawH - 4;
-    } else if (position === 'low') {
-      // In hands while bending (low position)
-      drawX = BASE_X + 40;
-      drawY = BASE_Y - drawH - 20;
-    } else {
-      // Mid position (held while standing)
-      drawX = BASE_X + 35;
-      drawY = BASE_Y - 120;
-    }
-
-    ctx.drawImage(tmp, drawX, drawY, drawW, drawH);
+    // C64 renders objects at full scale
+    const drawW = img.width * SCALE;
+    const drawH = img.height * SCALE;
+    // x,y is bottom-center: place image so bottom-center aligns
+    ctx.drawImage(tmp, x - drawW / 2, y - drawH, drawW, drawH);
   }
 }
 
@@ -1902,8 +1936,6 @@ document.getElementById('seqAutoBtn').addEventListener('click', () => {
     if (seqAutoTimer) { clearTimeout(seqAutoTimer); seqAutoTimer = null; }
   }
 });
-
-document.getElementById('seqStopBtn').addEventListener('click', stopSequence);
 
 // Keyboard
 document.addEventListener('keydown', e => {

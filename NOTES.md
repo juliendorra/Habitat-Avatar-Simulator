@@ -82,7 +82,7 @@ For each limb, `get_cel_xy` does:
 **Critical detail for NULL limbs**: when a limb is not drawn (cel 255), `get_cel_loc_addr` is never called, so `cel_x_rel`/`cel_y_rel` **retain their values** from the previous limb. This means x_rel/y_rel propagate through chains of null limbs. For example, in side view standing, legs_right sets x_rel=0/y_rel=-1, and these persist through null legs_left and null left_arm to affect the torso's positioning.
 
 Results stored in `cx_tab[0..5]` and `cy_tab[0..5]` (byte/scanline units).
-Height adjustment: `cy_tab[i] += avatar_height` for limbs 2-5 (upper body only).
+Height adjustment: `cy_tab[i] += avatar_height` for limbs 2-5 (upper body only). See **Avatar Height System** section for details.
 
 ### Step 2: Draw Order (`draw_a_limb`)
 Drawing uses view-specific order (from animate.m tables):
@@ -219,6 +219,60 @@ Some heads have cycling start_end entries (bit 7 set):
 
 ### Timing
 All animations run at ~6 fps (167ms per frame), matching the C64's PAL 50Hz VBlank timing with ~8 VBlanks per render cycle.
+
+## Avatar Height System
+
+### C64 Implementation (animate.m)
+Height is a 4-bit value (0–15) packed into the orientation byte alongside facing direction:
+
+```
+Orientation byte layout:
+Bit:  7    6    5    4    3    2    1    0
+      ?   [H3   H2   H1   H0] [facing bits]
+           └──── height ────┘   └─ direction ─┘
+```
+
+Extraction in `display_avatar`:
+```
+lda orientation
+and #0x7F        ; clear bit 7
+lsr a            ; shift right ×3
+lsr a
+lsr a
+sta avatar_height  ; bits 6-3 → 4-bit value (0-15)
+```
+
+### How It Works
+During limb positioning in `get_cel_loc_addr`, the height offset is added to upper-body limbs only:
+
+```
+cels_affected_by_height: byte 0,0,1,1,1,1
+```
+
+| Index | Limb | Affected? |
+|-------|------|-----------|
+| 0 | legs_right | No (0) — stays at ground level |
+| 1 | legs_left | No (0) — stays at ground level |
+| 2 | left_arm | Yes (1) — shifts vertically |
+| 3 | torso | Yes (1) — shifts vertically |
+| 4 | head_placeholder | Yes (1) — shifts vertically |
+| 5 | right_arm | Yes (1) — shifts vertically |
+
+The legs stay fixed while the entire upper body (torso, arms, head) shifts downward:
+- **Height 0** = tallest (no offset — maximum separation between legs and torso)
+- **Height 15** = shortest (upper body pushed down 15 scanlines toward legs)
+
+The legs are ~28 scanlines tall. A height of 15 pushes the torso 15 scanlines into the legs, compressing the avatar. This 15-scanline range on a ~50-60 scanline avatar body gives roughly 25-30% height variation.
+
+### Design Significance
+Height was an independent customization axis alongside head selection (which provided gender). Players could create tall female avatars, short male avatars, etc. The value was stored server-side in the `OBJECT_orientation` field, persisting across sessions and visible to other players.
+
+### Simulator Implementation
+The simulator exposes height via a slider (0=tallest, 15=shortest). The offset is applied during limb positioning:
+```javascript
+const CELS_AFFECTED_BY_HEIGHT = [0, 0, 1, 1, 1, 1];
+cy_tab[i] = cel_y + (CELS_AFFECTED_BY_HEIGHT[i] ? avatarHeight : 0);
+```
 
 ## Head System
 
