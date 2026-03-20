@@ -1853,6 +1853,27 @@ async function renderSequenceFrame(step) {
 
   const isBack = currentView === 'back';
   const { cx_tab, cy_tab } = await computeLimbPositions(pose, isBack);
+
+  // Compute held object position using C64 method:
+  // animate.m: find_cel_xy on arm's x_rel/y_rel gives the hand/hold point.
+  // draw_contained_object: object drawn at (hand_x, hand_y) BEFORE the arm.
+  let heldHeadInfo = null;
+  if (step.headInHand) {
+    const headForHold = step.headInHand === 'new' ? seqNewHead : seqOldHead;
+    // Get current arm cel's x_rel/y_rel from body manifest (C64 cel bytes 4-5)
+    const armFrame = getLimbFrame('right_arm');
+    const armCelIdx = armFrame !== null ? LIMB_STATES.right_arm[armFrame] : 11;
+    const armCelData = bodyManifest?.right_arm?.cels?.[String(armCelIdx)];
+    const armXRel = armCelData?.x_rel ?? 1;
+    const armYRel = armCelData?.y_rel ?? 27;
+    // C64 find_cel_xy: hand_x = cx_tab[5] + x_rel, hand_y = cy_tab[5] - y_rel
+    const handX = cx_tab[5] + armXRel; // byte units
+    const handY = cy_tab[5] - armYRel; // scanline units
+    const holdScreenX = BASE_X + handX * BYTE_PX;
+    const holdScreenY = BASE_Y + handY * SCALE;
+    heldHeadInfo = { head: headForHold, x: holdScreenX, y: holdScreenY };
+  }
+
   for (const limbKey of drawOrder) {
     if (limbKey === 'head') {
       if (step.headOnBody) await drawHead(pose, cx_tab, cy_tab);
@@ -1860,34 +1881,20 @@ async function renderSequenceFrame(step) {
       // Skip neck/collar overlay when head is removed from body
       continue;
     } else {
+      // C64: held object drawn BEFORE right_arm (under the arm layer)
+      if (limbKey === 'right_arm' && heldHeadInfo) {
+        await drawMiniHeadAt(heldHeadInfo.head, heldHeadInfo.x, heldHeadInfo.y, true);
+      }
       const limbIdx = LIMB_ORDER.indexOf(limbKey);
       await drawBodyLimb(limbKey, pose, cx_tab[limbIdx], cy_tab[limbIdx]);
     }
   }
 
-  // Ground head positions use two different distances:
-  // - THROW target: where the player clicked to throw the head (arbitrary, further away).
-  //   C64 throw.m sends the object in a parabolic arc to the cursor position.
-  //   We simulate a throw ~8 byte columns away (a reasonable room distance).
-  // - GRAB point: where the avatar stands to pick up (the bent arm's reach).
-  //   The avatar walks to the object, stops at walk_offset distance, then bends.
-  //   In the sequence, we show the avatar already at the grab point.
+  // Ground head positions: throw distance from avatar center
   const THROW_DISTANCE = 4; // byte columns — player's chosen throw target
   const avatarCenterX = BASE_X + cx_tab[3] * BYTE_PX;
-  const groundRightX = avatarCenterX + THROW_DISTANCE * BYTE_PX; // thrown to the right
-  const groundLeftX  = avatarCenterX - THROW_DISTANCE * BYTE_PX; // new head on the left
-
-  // Draw held head — inside flip so it follows the avatar's arm
-  if (step.headInHand) {
-    const headForHold = step.headInHand === 'new' ? seqNewHead : seqOldHead;
-    const isBent = step.choreography === 'bend_over' || step.choreography === 'bend_back';
-    const armScreenX = BASE_X + cx_tab[5] * BYTE_PX;
-    const armScreenY = BASE_Y + cy_tab[5] * SCALE;
-    // Always position relative to the arm, not the throw target
-    const holdX = armScreenX;
-    const holdY = isBent ? (BASE_Y - 20) : (armScreenY - 80);
-    await drawMiniHeadAt(headForHold, holdX, holdY);
-  }
+  const groundRightX = avatarCenterX + THROW_DISTANCE * BYTE_PX;
+  const groundLeftX  = avatarCenterX - THROW_DISTANCE * BYTE_PX;
 
   if (seqFlipped) {
     ctx.restore();
@@ -1905,19 +1912,31 @@ async function renderSequenceFrame(step) {
   }
 }
 
-// Draw a head at an absolute screen position (x, y is the bottom-center anchor).
-async function drawMiniHeadAt(head, x, y) {
+// Draw a head at a position.
+// If useOrigin=true, (x,y) is a C64-style cel origin (byte/scanline units already
+// converted to screen pixels); each cel uses its x_offset/y_offset for placement.
+// If useOrigin=false, (x,y) is a bottom-center screen anchor.
+async function drawMiniHeadAt(head, x, y, useOrigin) {
   if (!head) return;
   const celIndices = getHeadCelsForView(head, 0); // side view
   for (const ci of celIndices.length > 0 ? celIndices : [0]) {
     const img = await loadImg(headCelPath(head.name, ci));
     if (!img) continue;
     const tmp = prepareCel(img, bodyColors, false);
-    // C64 renders objects at full scale
     const drawW = img.width * SCALE;
     const drawH = img.height * SCALE;
-    // x,y is bottom-center: place image so bottom-center aligns
-    ctx.drawImage(tmp, x - drawW / 2, y - drawH, drawW, drawH);
+    if (useOrigin) {
+      // C64 paint_1: screen_x = origin + x_offset, screen_y = origin - y_offset
+      const celKey = headCelFilename(head.name, ci);
+      const celMeta = headManifest?.[celKey];
+      const xOff = celMeta?.x_offset ?? 0; // byte units
+      const yOff = celMeta?.y_offset ?? 0; // scanline units
+      const drawX = x + xOff * BYTE_PX;
+      const drawY = y - yOff * SCALE;
+      ctx.drawImage(tmp, drawX, drawY, drawW, drawH);
+    } else {
+      ctx.drawImage(tmp, x - drawW / 2, y - drawH, drawW, drawH);
+    }
   }
 }
 
