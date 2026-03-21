@@ -194,7 +194,6 @@
 
     <div class="controls">
       <div class="control-group">
-        <label>View</label>
         <div class="btn-row">
           <button class="btn active" data-view="side">Side</button>
           <button class="btn" data-view="front">Front</button>
@@ -203,7 +202,6 @@
       </div>
 
       <div class="control-group">
-        <label>Pose</label>
         <div class="btn-row">
           <button class="btn active" data-pose="stand">Stand</button>
           <button class="btn" data-pose="walk">Walk</button>
@@ -214,7 +212,6 @@
       </div>
 
       <div class="control-group">
-        <label>Height <span id="heightLabel" style="color:var(--text-dim);font-size:0.85em">(tallest)</span></label>
         <div class="palette-row">
           <span style="font-size:0.75em">Tall</span>
           <input type="range" id="heightSlider" min="0" max="15" value="0" style="flex:1">
@@ -224,19 +221,18 @@
 
       <div class="control-group">
         <div class="btn-row">
-          <button class="btn primary full" id="randomBtn">Shuffle Random Avatar</button>
+          <button class="btn primary" id="randomBtn">Random Avatar</button>
+          <button class="btn primary" id="randomClothesBtn">Random Clothes</button>
         </div>
         <div class="btn-row" style="margin-top:4px">
           <button class="btn" id="prevBtn">&larr; Prev</button>
+          <canvas id="miniHeadCanvas" width="28" height="28" style="image-rendering:pixelated;border-radius:4px;cursor:pointer" title="Show in Grid"></canvas>
           <button class="btn" id="nextBtn">Next &rarr;</button>
         </div>
         <div class="btn-row" style="margin-top:4px">
           <button class="btn" id="framePrevBtn">&larr; Frame</button>
           <span id="frameLabel" style="color:var(--text-dim);font-size:0.75em;min-width:60px;text-align:center">—</span>
           <button class="btn" id="frameNextBtn">Frame &rarr;</button>
-        </div>
-        <div class="btn-row" style="margin-top:4px">
-          <button class="btn full" id="showHeadBtn">Show in Grid</button>
         </div>
         <div class="btn-row" style="margin-top:4px">
           <button class="btn sequence full" id="headChangeBtn">Head Change Sequence</button>
@@ -255,16 +251,11 @@
 
       <div class="control-group">
         <label>Body Colors</label>
-        <div class="palette-row">
-          <label><input type="checkbox" id="pureColors"> Pure emulated colors</label>
-        </div>
         <div style="display:flex; gap:6px; align-items:center;">
-          <span style="font-size:0.7em; color:var(--text-dim);">Blue</span>
-          <input type="color" id="color1" value="#312893">
-          <span style="font-size:0.7em; color:var(--text-dim);">Black</span>
-          <input type="color" id="color2" value="#000000">
-          <span style="font-size:0.7em; color:var(--text-dim);">Pink</span>
-          <input type="color" id="color3" value="#A96F63">
+          <input type="color" id="color1" value="#312893" title="Blue" aria-label="Blue body color">
+          <input type="color" id="color2" value="#000000" title="Black" aria-label="Black body color">
+          <input type="color" id="color3" value="#A96F63" title="Pink" aria-label="Pink body color">
+          <label style="font-size:0.7em; margin:0; cursor:pointer; white-space:nowrap;"><input type="checkbox" id="pureColors"> Pure emulated</label>
         </div>
       </div>
 
@@ -1493,6 +1484,25 @@ async function renderThumb(head, thumbCanvas) {
   }
 }
 
+async function updateMiniHead() {
+  if (!currentHead) return;
+  const c = document.getElementById('miniHeadCanvas');
+  const tc = c.getContext('2d');
+  tc.clearRect(0, 0, 28, 28);
+  tc.fillStyle = '#A3A3A3';
+  tc.fillRect(0, 0, 28, 28);
+  tc.imageSmoothingEnabled = false;
+  const celIndices = getHeadCelsForView(currentHead, 0);
+  for (const ci of celIndices.length > 0 ? celIndices : [0]) {
+    const img = await loadImg(headCelPath(currentHead.name, ci));
+    if (!img) continue;
+    const tmp = prepareCel(img, bodyColors, false);
+    const scale = Math.min(24/img.width, 24/img.height, 2);
+    const dw = img.width * scale, dh = img.height * scale;
+    tc.drawImage(tmp, (28-dw)/2, (28-dh)/2, dw, dh);
+  }
+}
+
 function selectHead(head) {
   currentHead = head;
   // Preload all cels for this head in background (prevents flash on first render)
@@ -1501,6 +1511,7 @@ function selectHead(head) {
   if (hasAnimatedHead() && !animInterval) startAnimation();
   else if (!hasAnimatedHead() && !isAnimatedPose(currentPose) && animInterval) stopAnimation(true);
   renderAvatar();
+  updateMiniHead();
   updateInfo(head);
   document.querySelectorAll('.head-card').forEach(c =>
     c.classList.toggle('selected', c.dataset.name === head.name));
@@ -1558,17 +1569,25 @@ document.querySelectorAll('[data-pose]').forEach(btn => {
   });
 });
 
-// Random
+// Random Avatar (head + height)
 document.getElementById('randomBtn').addEventListener('click', () => {
-  // Randomize height along with head
   const slider = document.getElementById('heightSlider');
   slider.value = Math.floor(Math.random() * 16);
   slider.dispatchEvent(new Event('input'));
   selectHead(HEADS[Math.floor(Math.random() * HEADS.length)]);
 });
 
+// Random Clothes (patterns only, keeps current palette)
+document.getElementById('randomClothesBtn').addEventListener('click', () => {
+  bodyPatterns.torso = Math.floor(Math.random() * CEL_PATTERNS.length);
+  bodyPatterns.arms = Math.floor(Math.random() * CEL_PATTERNS.length);
+  bodyPatterns.legs = Math.floor(Math.random() * CEL_PATTERNS.length);
+  rebuildPatternSwatches();
+  renderAvatar();
+});
+
 // Show in grid
-document.getElementById('showHeadBtn').addEventListener('click', () => {
+document.getElementById('miniHeadCanvas').addEventListener('click', () => {
   if (!currentHead) return;
   const card = document.querySelector(`.head-card[data-name="${currentHead.name}"]`);
   if (card) card.scrollIntoView({ behavior:'smooth', block:'nearest' });
@@ -1604,6 +1623,7 @@ function onPaletteChange() {
   readPalette();
   rebuildPatternSwatches();
   renderAvatar();
+  updateMiniHead();
   buildGrid();
 }
 
@@ -1613,9 +1633,6 @@ function onPaletteChange() {
 // Height slider
 document.getElementById('heightSlider').addEventListener('input', function() {
   avatarHeight = parseInt(this.value);
-  const labels = ['tallest','tall','tall','above avg','above avg','avg','avg','avg',
-                  'avg','below avg','below avg','short','short','shorter','shorter','shortest'];
-  document.getElementById('heightLabel').textContent = '(' + labels[avatarHeight] + ')';
   renderAvatar();
 });
 
@@ -1763,7 +1780,7 @@ const HEAD_CHANGE_STEPS = [
   { action:"GET new head",   desc:"Bending to pick up",                         view:"side",  choreography:"bend_over",   headOnBody:null, headInHand:null, oldOnGround:true, newOnGround:true, flipped:true, endFrame:true, auto:true },
   { action:"GET new head",   desc:"New head in hand",                           view:"side",  choreography:"stand",       headOnBody:null, headInHand:"new", oldOnGround:true, flipped:true, auto:true },
   // --- Action 4: PUT new head (head on shoulders)
-  { action:"PUT new head",   desc:"New head on shoulders!",                     view:"side",  choreography:"stand",     headOnBody:"new", headInHand:null,  flipped:true },
+  { action:"PUT new head",   desc:"New head on shoulders!",                     view:"front", choreography:"stand_front", headOnBody:"new", headInHand:null },
 ];
 
 function startSequence() {
@@ -1799,10 +1816,11 @@ function stopSequence() {
   } else {
     currentHead = seqOldHead;
   }
-  currentView = 'side';
+  // Restore view to match last step (front if completed, side otherwise)
+  currentView = (seqStep >= HEAD_CHANGE_STEPS.length - 1) ? 'front' : 'side';
   currentPose = 'stand';
   document.querySelectorAll('[data-view]').forEach(b => {
-    b.classList.toggle('active', b.dataset.view === 'side');
+    b.classList.toggle('active', b.dataset.view === currentView);
   });
   document.querySelectorAll('[data-pose]').forEach(b => {
     b.classList.toggle('active', b.dataset.pose === 'stand');
