@@ -605,22 +605,40 @@ function buildPoseFromAnimState() {
   return pose;
 }
 
-// Get the total number of animation frames for the current action
-// (LCM of all limb cycle lengths, or max play-once length)
-function getAnimFrameCount() {
+// Count frames for the current limb state (single phase)
+function getPhaseFrameCount() {
   let maxLen = 1;
   for (const limbName of LIMB_NAMES) {
     const state = limbAnimState[limbName];
     if (!state || state.start === state.end) continue;
     const len = state.end - state.start + 1;
     if (state.cycle) {
-      // For cycling limbs, use LCM
       maxLen = lcm(maxLen, len);
     } else {
       maxLen = Math.max(maxLen, len);
     }
   }
   return maxLen;
+}
+
+// Get the total number of animation frames including all phases
+// Bend has two phases (bend_over + bend_back), others are single-phase
+function getAnimFrameCount() {
+  if (currentPose === 'bend' && currentView === 'side') {
+    // Save current state, measure both phases
+    const savedStates = {};
+    for (const l of LIMB_NAMES) savedStates[l] = limbAnimState[l] ? { ...limbAnimState[l] } : null;
+
+    initAnimAction('bend', 'side'); // sets up bend_over
+    const phase1 = getPhaseFrameCount();
+    applyAction('bend_back');
+    const phase2 = getPhaseFrameCount();
+
+    // Restore
+    for (const l of LIMB_NAMES) limbAnimState[l] = savedStates[l];
+    return phase1 + phase2;
+  }
+  return getPhaseFrameCount();
 }
 
 function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
@@ -1365,14 +1383,38 @@ function updateFrameLabel() {
   label.textContent = `${(animFrame % count) + 1} / ${count}`;
 }
 
+// Replay animation from frame 0 to targetFrame, handling bend phase transitions
+function replayToFrame(targetFrame) {
+  if (avatarAnim) initAnimAction(currentPose, currentView);
+  bendPhase = currentPose === 'bend' ? 'over' : null;
+  for (let i = 0; i < targetFrame; i++) {
+    const moved = tickAnimation();
+    if (!moved && currentPose === 'bend') {
+      if (bendPhase === 'over') {
+        bendPhase = 'back';
+        applyAction('bend_back');
+      }
+    }
+  }
+}
+
+// Advance one frame, handling bend phase transitions
+function stepOneFrame() {
+  const moved = tickAnimation();
+  if (!moved && currentPose === 'bend') {
+    if (!bendPhase || bendPhase === 'over') {
+      bendPhase = 'back';
+      applyAction('bend_back');
+    }
+  }
+}
+
 // Frame stepper buttons
 document.getElementById('framePrevBtn').addEventListener('click', async () => {
   stopAnimation();
-  // Step backward: reset and advance to previous frame
-  if (avatarAnim) initAnimAction(currentPose, currentView);
   const count = getAnimFrameCount();
   const targetFrame = (animFrame - 1 + count) % count;
-  for (let i = 0; i < targetFrame; i++) tickAnimation();
+  replayToFrame(targetFrame);
   animFrame = targetFrame;
   updateFrameLabel();
   await renderAvatar();
@@ -1380,8 +1422,9 @@ document.getElementById('framePrevBtn').addEventListener('click', async () => {
 
 document.getElementById('frameNextBtn').addEventListener('click', async () => {
   stopAnimation();
-  tickAnimation();
-  animFrame++;
+  const count = getAnimFrameCount();
+  animFrame = (animFrame + 1) % count;
+  replayToFrame(animFrame);
   updateFrameLabel();
   await renderAvatar();
 });
