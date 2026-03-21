@@ -1809,8 +1809,9 @@ const HEAD_CHANGE_STEPS = [
   { action:"GET new head",   desc:"Turning around",                             view:"front", choreography:"stand_front", headOnBody:null, headInHand:null, oldOnGround:true, newOnGround:true, auto:true },
   { action:"GET new head",   desc:"Bending to pick up",                         view:"side",  choreography:"bend_over",   headOnBody:null, headInHand:null, oldOnGround:true, newOnGround:true, flipped:true, endFrame:true, auto:true },
   { action:"GET new head",   desc:"New head in hand",                           view:"side",  choreography:"stand",       headOnBody:null, headInHand:"new", oldOnGround:true, flipped:true, auto:true },
-  // --- Action 4: PUT new head (head on shoulders)
-  { action:"PUT new head",   desc:"New head on shoulders!",                     view:"front", choreography:"stand_front", headOnBody:"new", headInHand:null },
+  // --- Action 4: PUT new head (head on shoulders, then turn to face)
+  { action:"PUT new head",   desc:"New head on shoulders!",                     view:"side",  choreography:"stand",       headOnBody:"new", headInHand:null, flipped:true },
+  { action:"PUT new head",   desc:"Ta-da!",                                     view:"front", choreography:"stand_front", headOnBody:"new", headInHand:null, auto:true },
 ];
 
 function startSequence() {
