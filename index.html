@@ -60,12 +60,6 @@
     max-width: 100%;
     height: auto;
   }
-  .view-label {
-    text-align: center;
-    font-size: 0.7em;
-    color: #555;
-    margin-top: 4px;
-  }
   .controls { width: 100%; }
   .control-group { margin-bottom: 12px; }
   .control-group label {
@@ -195,7 +189,6 @@
   <div class="preview-panel">
     <div class="canvas-wrap">
       <canvas id="avatarCanvas" width="400" height="440"></canvas>
-      <div class="view-label" id="viewLabel">Side View &mdash; Standing</div>
     </div>
 
     <div class="controls">
@@ -1297,7 +1290,6 @@ async function drawHead(pose, cx_tab, cy_tab) {
 // ============================================================
 // ANIMATION
 // ============================================================
-const VIEW_LABELS = { side:'Side View', front:'Front View', back:'Back View' };
 
 function isAnimatedPose(pose) {
   // Any pose with cycling limbs or multi-frame play-once is animated
@@ -1491,8 +1483,6 @@ const SIDE_ONLY_POSES = ['bend', 'point', 'wave'];
 function updateViewPoseUI() {
   document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('active', b.dataset.view === currentView));
   document.querySelectorAll('[data-pose]').forEach(b => b.classList.toggle('active', b.dataset.pose === currentPose));
-  document.getElementById('viewLabel').textContent = VIEW_LABELS[currentView] + ' \u2014 ' +
-    currentPose.charAt(0).toUpperCase() + currentPose.slice(1);
 }
 
 // View buttons
@@ -1773,7 +1763,6 @@ function stopSequence() {
   document.querySelectorAll('[data-pose]').forEach(b => {
     b.classList.toggle('active', b.dataset.pose === 'stand');
   });
-  document.getElementById('viewLabel').textContent = 'Side View \u2014 Standing';
   // Reinitialize animation engine to clean standing state
   // (sequence renderer modifies limbAnimState directly)
   initAnimAction('stand', 'side');
@@ -1827,10 +1816,6 @@ function applySequenceStep() {
   // Set head for body rendering based on which head is on body
   if (step.headOnBody === 'old') currentHead = seqOldHead;
   else if (step.headOnBody === 'new') currentHead = seqNewHead;
-
-  // Update view label
-  const labels = { side:'Side View', front:'Front View', back:'Back View' };
-  document.getElementById('viewLabel').textContent = labels[currentView] + ' \u2014 ' + step.action;
 
   renderSequenceFrame(step);
 
