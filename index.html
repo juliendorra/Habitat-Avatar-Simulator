@@ -119,9 +119,10 @@
   .tag.female { background: #7b3080; }
   .palette-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
   .palette-row span { font-size: 0.7em; color: var(--text-dim); width: 55px; }
-  .palette-row input[type="color"] {
+  input[type="color"] {
     width: 36px; height: 24px; border: 1px solid var(--border);
-    border-radius: 3px; cursor: pointer; background: none; padding: 0;
+    border-radius: 3px; background: none; padding: 0;
+    pointer-events: none;
   }
   .pattern-zone { margin-bottom: 6px; }
   .pattern-zone > span { font-size: 0.7em; color: var(--text-dim); display: block; margin-bottom: 2px; }
