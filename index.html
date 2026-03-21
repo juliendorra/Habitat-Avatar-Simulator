@@ -905,6 +905,26 @@ async function getBodyCelImage(limbName, celIdx) {
   return img ? { img, ...celData } : null;
 }
 
+// Preload all body cel images (non-blocking, fires after manifest loads)
+function preloadBodyCels() {
+  if (!bodyManifest) return;
+  for (const limbName of Object.keys(bodyManifest)) {
+    const cels = bodyManifest[limbName].cels;
+    if (!cels) continue;
+    for (const celData of Object.values(cels)) {
+      loadImg('habitat_images_final/body/' + celData.file);
+    }
+  }
+}
+
+// Preload all cels for a given head (non-blocking)
+function preloadHeadCels(head) {
+  if (!head) return;
+  for (let i = 0; i < head.cels; i++) {
+    loadImg(headCelPath(head.name, i));
+  }
+}
+
 // ============================================================
 // AVATAR RENDERER
 // ============================================================
@@ -1439,6 +1459,8 @@ async function renderThumb(head, thumbCanvas) {
 
 function selectHead(head) {
   currentHead = head;
+  // Preload all cels for this head in background (prevents flash on first render)
+  preloadHeadCels(head);
   // Restart animation if new head is animated (or stop if it isn't)
   if (hasAnimatedHead() && !animInterval) startAnimation();
   else if (!hasAnimatedHead() && !isAnimatedPose(currentPose) && animInterval) stopAnimation(true);
@@ -2149,6 +2171,8 @@ document.getElementById('shareLinkBtn').addEventListener('click', () => {
 // INIT
 // ============================================================
 Promise.all([loadBodyManifest(), loadHeadManifest(), loadHeadConfig(), loadAvatarAnimations()]).then(() => {
+  // Preload all body cel images in background (prevents flash on first animation)
+  preloadBodyCels();
   // Init animation engine to default state
   if (avatarAnim) initAnimAction('stand', 'side');
   buildGrid();
