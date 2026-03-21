@@ -202,7 +202,10 @@
 <div class="app">
   <div class="preview-panel">
     <div class="canvas-wrap" style="position:relative">
-      <canvas id="avatarCanvas" width="400" height="440"></canvas>
+      <div id="canvasStack" style="position:relative;display:inline-block;max-width:100%">
+        <canvas id="avatarCanvas" width="400" height="440"></canvas>
+        <canvas id="crtCanvas" width="400" height="440" style="position:absolute;top:0;left:0;width:100%;height:100%;image-rendering:auto;display:none;pointer-events:none"></canvas>
+      </div>
       <button id="shareLinkBtn" title="Share" style="position:absolute;bottom:6px;right:8px;background:#fff;border:1px solid #ccc;color:#222;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:3px;backdrop-filter:blur(4px)">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
         Share
@@ -274,6 +277,7 @@
           <input type="color" id="color2" value="#000000" title="Black" aria-label="Black body color">
           <input type="color" id="color3" value="#A96F63" title="Pink" aria-label="Pink body color">
           <label style="font-size:0.7em; margin:0; cursor:pointer; white-space:nowrap;"><input type="checkbox" id="pureColors"> Pure emulated</label>
+          <label style="font-size:0.7em; margin:0; cursor:pointer; white-space:nowrap;"><input type="checkbox" id="crtToggle"> CRT</label>
         </div>
       </div>
 
@@ -1168,6 +1172,9 @@ async function renderAvatar() {
       await drawBodyLimb(limbKey, pose, cx_tab[limbIdx], cy_tab[limbIdx]);
     }
   }
+
+  // Apply CRT post-processing if enabled
+  if (crtEnabled) applyCRT();
 }
 
 async function drawBodyLimb(limbName, pose, chainX, chainY) {
@@ -1650,6 +1657,8 @@ document.getElementById('heightSlider').addEventListener('input', function() {
 
 // Pure emulated colors toggle
 document.getElementById('pureColors').addEventListener('change', function() {
+  // If CRT is on, pure must stay checked
+  if (crtEnabled && !this.checked) { this.checked = true; return; }
   const c = this.checked ? EMU_COLORS : CRT_COLORS;
   document.getElementById('color1').value = c.blue;
   document.getElementById('color2').value = c.black;
@@ -2378,6 +2387,278 @@ async function generateOGImage() {
   link.click();
   console.log('OG image downloaded as og-image.png');
 }
+
+// ============================================================
+// CRT SHADER (WebGL post-process — C64 CRT simulation)
+// Based on CRT-Lottes (public domain) by Timothy Lottes
+// ============================================================
+const CRT_VERTEX_SRC = `
+attribute vec2 a_pos;
+varying vec2 v_uv;
+void main() {
+  vec2 uv = a_pos * 0.5 + 0.5;
+  v_uv = vec2(uv.x, 1.0 - uv.y); // flip Y for canvas→WebGL
+  gl_Position = vec4(a_pos, 0.0, 1.0);
+}`;
+
+const CRT_FRAGMENT_SRC = `
+precision mediump float;
+varying vec2 v_uv;
+uniform sampler2D u_tex;
+uniform vec2 u_resolution;
+uniform vec2 u_texSize;
+uniform float u_scale; // pixel scale factor (4.0 for C64 → canvas)
+
+// --- C64 color constants (pure emulated → CRT phosphor) ---
+// The shader works on pure colors and adds CRT character
+
+const float PI = 3.14159265;
+
+// Barrel distortion (CRT curvature)
+const vec2 WARP = vec2(0.031, 0.041); // x,y curvature amount
+
+vec2 warp(vec2 pos) {
+  pos = pos * 2.0 - 1.0;
+  pos *= vec2(1.0 + pos.y * pos.y * WARP.x, 1.0 + pos.x * pos.x * WARP.y);
+  return pos * 0.5 + 0.5;
+}
+
+// sRGB ↔ linear conversion for correct blending
+vec3 toLinear(vec3 c) { return pow(c, vec3(2.2)); }
+vec3 toSRGB(vec3 c) { return pow(c, vec3(1.0 / 2.2)); }
+
+// Background color (#A3A3A3 = 0.639 in sRGB)
+const vec3 BG_COLOR = vec3(0.639);
+
+bool isBg(vec2 pos) {
+  vec4 c = texture2D(u_tex, pos);
+  return abs(c.r - BG_COLOR.r) < 0.02 && abs(c.g - BG_COLOR.g) < 0.02 && abs(c.b - BG_COLOR.b) < 0.02;
+}
+
+// Fetch texel with sRGB→linear + brightness boost
+vec3 fetch(vec2 pos) {
+  if (pos.x < 0.0 || pos.x > 1.0 || pos.y < 0.0 || pos.y > 1.0) return vec3(0.0);
+  vec4 c = texture2D(u_tex, pos);
+  return toLinear(c.rgb) * vec3(1.45); // bright CRT phosphor glow
+}
+
+// Scanline weight (Gaussian beam profile)
+float scanWeight(float pos, float beam) {
+  float x = pos * beam;
+  return exp2(-10.0 * x * x);
+}
+
+// Horizontal blur: 5-tap Gaussian for color bleeding (wider spread like analog signal)
+vec3 horz5(vec2 pos, float off) {
+  float px = off / u_texSize.x;
+  vec3 a = fetch(pos + vec2(-2.0 * px, 0.0));
+  vec3 b = fetch(pos + vec2(-1.0 * px, 0.0));
+  vec3 c = fetch(pos);
+  vec3 d = fetch(pos + vec2(1.0 * px, 0.0));
+  vec3 e = fetch(pos + vec2(2.0 * px, 0.0));
+  float wa = 0.10, wb = 0.25, wc = 0.30, wd = 0.25, we = 0.10;
+  return (a*wa + b*wb + c*wc + d*wd + e*we) / (wa+wb+wc+wd+we);
+}
+
+// Shadow mask (RGB phosphor triads, staggered rows)
+vec3 mask(vec2 pos) {
+  pos.x += pos.y * 3.0; // stagger
+  vec3 m = vec3(0.3333);
+  float x = fract(pos.x / 6.0);
+  if (x < 0.3333) m.r = 1.0;
+  else if (x < 0.6666) m.g = 1.0;
+  else m.b = 1.0;
+  return m;
+}
+
+void main() {
+  vec2 uv = warp(v_uv);
+
+  // Out of bounds after warp → transparent
+  if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
+    gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
+    return;
+  }
+
+  // Background pixels → transparent (no CRT effect on background)
+  if (isBg(uv)) {
+    gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
+    return;
+  }
+
+  // Pixel position in C64 scanline space (not canvas pixels)
+  vec2 pixPos = uv * u_texSize / u_scale;
+  float scanY = fract(pixPos.y);
+
+  // 5-tap horizontal color bleed (moderate analog signal spread)
+  vec3 color = horz5(uv, 1.2);
+
+  // Scanline beam (adaptive: brighter pixels → wider beam like real phosphors)
+  float lum = dot(color, vec3(0.2126, 0.7152, 0.0722));
+  float beam = mix(4.0, 2.2, lum); // wider beams overall for less darkening
+  float scan = scanWeight(scanY - 0.5, beam);
+  // Keep scanlines visible but not too dark (washed-out CRT look)
+  scan = mix(0.35, 1.0, scan);
+  color *= scan;
+
+  // Phosphor shadow mask (at display pixel level for fine detail)
+  vec2 maskPos = gl_FragCoord.xy;
+  vec3 m = mask(maskPos * 0.667); // RGB triads ~3px wide
+  color *= mix(vec3(1.0), m, 0.35); // reduced mask strength for washed look
+
+  // Strong bloom: phosphor glow bleeding light outward
+  float bloom = smoothstep(0.1, 0.6, lum) * 0.35;
+  color += color * bloom;
+  // Gentle mid-tone lift (phosphor glow)
+  color = mix(color, color * 1.15, 0.1);
+
+  // Gentle vignette (minimal darkening)
+  vec2 vig = uv * (1.0 - uv);
+  float vigWeight = pow(vig.x * vig.y * 15.0, 0.35);
+  color *= vigWeight;
+
+  // Back to sRGB
+  color = toSRGB(color);
+
+  // C64 CRT P22 phosphor color response (applied in sRGB for perceptual accuracy)
+  // Target: pure blue #0000FF → deep navy #312893
+  //         pure pink #FF55FF → brownish-rust #A96F63
+  // Heavy blue cut pushes magenta toward brown, slight green boost adds warmth
+  color.r *= 0.75;
+  color.g *= 1.45;
+  color.b *= 0.62;
+  color.r += 0.09; // red offset: warms blues to purple, pinks toward beige
+
+  // Lift darks so blue separates from black (CRT never had true black)
+  color = max(color, vec3(0.05));
+  // Blue phosphor glow: blue areas get a brightness lift
+  float blueness = max(0.0, color.b - max(color.r, color.g));
+  color += vec3(0.04, 0.03, 0.10) * smoothstep(0.0, 0.12, blueness);
+
+  // Strong desaturation: CRT phosphors produce soft, washed colors
+  float gray = dot(color, vec3(0.299, 0.587, 0.114));
+  color = mix(vec3(gray), color, 0.55);
+
+  gl_FragColor = vec4(clamp(color, 0.0, 1.0), 1.0);
+}
+`;
+
+let crtEnabled = false;
+let crtGL = null;
+let crtProgram = null;
+let crtTexture = null;
+let crtInitialized = false;
+
+function initCRT() {
+  const crtCanvas = document.getElementById('crtCanvas');
+  const gl = crtCanvas.getContext('webgl', { alpha: true, premultipliedAlpha: false, antialias: false, preserveDrawingBuffer: true });
+  if (!gl) { console.warn('WebGL not available for CRT shader'); return false; }
+  crtGL = gl;
+
+  // Compile shaders
+  function compile(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+      console.error('CRT shader compile error:', gl.getShaderInfoLog(s));
+      return null;
+    }
+    return s;
+  }
+  const vs = compile(gl.VERTEX_SHADER, CRT_VERTEX_SRC);
+  const fs = compile(gl.FRAGMENT_SHADER, CRT_FRAGMENT_SRC);
+  if (!vs || !fs) return false;
+
+  const prog = gl.createProgram();
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+    console.error('CRT program link error:', gl.getProgramInfoLog(prog));
+    return false;
+  }
+  crtProgram = prog;
+
+  // Fullscreen quad
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(prog, 'a_pos');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  // Texture from 2D canvas
+  crtTexture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, crtTexture);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+  crtInitialized = true;
+  return true;
+}
+
+function applyCRT() {
+  if (!crtInitialized && !initCRT()) return;
+  const gl = crtGL;
+  const crtCanvas = document.getElementById('crtCanvas');
+  const srcCanvas = document.getElementById('avatarCanvas');
+
+  // Match dimensions
+  crtCanvas.width = srcCanvas.width;
+  crtCanvas.height = srcCanvas.height;
+  gl.viewport(0, 0, crtCanvas.width, crtCanvas.height);
+  gl.clearColor(0, 0, 0, 0);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+  gl.useProgram(crtProgram);
+
+  // Upload source canvas as texture
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, crtTexture);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, srcCanvas);
+
+  // Set uniforms
+  gl.uniform1i(gl.getUniformLocation(crtProgram, 'u_tex'), 0);
+  gl.uniform2f(gl.getUniformLocation(crtProgram, 'u_resolution'), crtCanvas.width, crtCanvas.height);
+  gl.uniform2f(gl.getUniformLocation(crtProgram, 'u_texSize'), srcCanvas.width, srcCanvas.height);
+  gl.uniform1f(gl.getUniformLocation(crtProgram, 'u_scale'), SCALE);
+
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+
+// CRT toggle handler
+document.getElementById('crtToggle').addEventListener('change', function() {
+  crtEnabled = this.checked;
+  const crtCanvas = document.getElementById('crtCanvas');
+
+  const pureEl = document.getElementById('pureColors');
+  if (crtEnabled) {
+    // Force pure emulated colors (CRT shader starts from pure colors)
+    pureEl.checked = true;
+    pureEl.disabled = true;
+    pureEl.parentElement.style.opacity = '0.4';
+    const c = EMU_COLORS;
+    document.getElementById('color1').value = c.blue;
+    document.getElementById('color2').value = c.black;
+    document.getElementById('color3').value = c.pink;
+    onPaletteChange(); // this triggers renderAvatar which will call applyCRT
+    crtCanvas.style.display = 'block';
+  } else {
+    crtCanvas.style.display = 'none';
+    pureEl.disabled = false;
+    pureEl.parentElement.style.opacity = '';
+    // Restore CRT-attenuated colors (default)
+    pureEl.checked = false;
+    const c = CRT_COLORS;
+    document.getElementById('color1').value = c.blue;
+    document.getElementById('color2').value = c.black;
+    document.getElementById('color3').value = c.pink;
+    onPaletteChange();
+  }
+});
 
 // ============================================================
 // INIT
