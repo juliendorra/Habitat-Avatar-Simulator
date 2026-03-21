@@ -222,25 +222,34 @@ All animations run at ~6 fps (167ms per frame), matching the C64's PAL 50Hz VBla
 
 ## Avatar Height System
 
-### C64 Implementation (animate.m)
-Height is a 4-bit value (0–15) packed into the orientation byte alongside facing direction:
+### C64 Implementation (animate.m + custom.m)
+Height is a 3-bit value (0–7) packed into the orientation byte alongside facing direction:
 
 ```
 Orientation byte layout:
 Bit:  7    6    5    4    3    2    1    0
-      ?   [H3   H2   H1   H0] [facing bits]
-           └──── height ────┘   └─ direction ─┘
+     sex   ?  [H2   H1   H0] [facing bits]
+               └── height ──┘  └─ direction ─┘
 ```
 
-Extraction in `display_avatar`:
+**Extraction** in `display_avatar` (animate.m):
 ```
 lda orientation
-and #0x7F        ; clear bit 7
+and #0x7F        ; clear bit 7 (sex)
 lsr a            ; shift right ×3
 lsr a
 lsr a
-sta avatar_height  ; bits 6-3 → 4-bit value (0-15)
+sta avatar_height  ; bits 6-3 → positions 3-0
 ```
+This technically extracts 4 bits (0–15), but `custom.m` only uses 3 bits:
+
+**Customization** in `custom.m` (F3 key cycles height):
+```
+and  #0b00111000    ; mask bits 3-5 only (3 bits = 8 values)
+adc  #16            ; increment by 0b00010000
+and  #0b00111000    ; re-mask to 3 bits
+```
+Bit 6 is never set by the customization code, so the effective player range is **0–7** (8 levels).
 
 ### How It Works
 During limb positioning in `get_cel_loc_addr`, the height offset is added to upper-body limbs only:
@@ -260,15 +269,15 @@ cels_affected_by_height: byte 0,0,1,1,1,1
 
 The legs stay fixed while the entire upper body (torso, arms, head) shifts downward:
 - **Height 0** = tallest (no offset — maximum separation between legs and torso)
-- **Height 15** = shortest (upper body pushed down 15 scanlines toward legs)
+- **Height 7** = shortest (upper body pushed down 7 scanlines toward legs)
 
-The legs are ~28 scanlines tall. A height of 15 pushes the torso 15 scanlines into the legs, compressing the avatar. This 15-scanline range on a ~50-60 scanline avatar body gives roughly 25-30% height variation.
+The legs are ~28 scanlines tall. A height of 7 pushes the torso 7 scanlines into the legs, giving roughly 12% height variation — subtle but visible, especially when avatars stand side by side.
 
 ### Design Significance
-Height was an independent customization axis alongside head selection (which provided gender). Players could create tall female avatars, short male avatars, etc. The value was stored server-side in the `OBJECT_orientation` field, persisting across sessions and visible to other players.
+Height was an independent customization axis alongside head selection (which provided gender). Players could create tall female avatars, short male avatars, etc. The value was stored server-side in the `OBJECT_orientation` field, persisting across sessions and visible to other players. The Avatar Handbook does not document height as a feature, suggesting it may have been an understated or later-added option.
 
 ### Simulator Implementation
-The simulator exposes height via a slider (0=tallest, 15=shortest). The offset is applied during limb positioning:
+The simulator exposes height via a slider (0=tallest, 7=shortest). The offset is applied during limb positioning:
 ```javascript
 const CELS_AFFECTED_BY_HEIGHT = [0, 0, 1, 1, 1, 1];
 cy_tab[i] = cel_y + (CELS_AFFECTED_BY_HEIGHT[i] ? avatarHeight : 0);
@@ -283,7 +292,8 @@ Extracted from 169 C64 head `.m` source files by `tools/extract_head_data.py`:
 disk_face flags (byte 1 of header):
   bit 7 (0x80): has back overlay — draw head_placeholder in back view
   bit 6 (0x40): has face overlay — draw head_placeholder in side/front view
-  bit 5 (0x20): no-bend flag
+  bit 5 (0x20): no-bend flag — substitutes arm_get/arm_back for bend_over/bend_back
+                (only arm reaches, torso stays upright)
 
 start_end table (8 bytes):
   [side_start, side_end, front_start, front_end,
@@ -301,8 +311,8 @@ start_end table (8 bytes):
 | 0x80 | 20 | Back overlay only |
 | 0x40 | 21 | Face overlay only |
 | 0xC0 | 15 | Both overlays |
-| 0xA0 | 3 | Back overlay + no-bend |
-| 0x20 | 1 | No-bend only |
+| 0xA0 | 3 | Back overlay + no-bend (deviltail, test, test2) |
+| 0x20 | 1 | No-bend only (pony4) |
 
 ### Head Cel Positioning
 Heads are drawn as "contained objects" via `draw_prop`. The head origin is:

@@ -235,7 +235,7 @@
       <div class="control-group">
         <div class="palette-row">
           <span style="font-size:0.75em">Tall</span>
-          <input type="range" id="heightSlider" min="0" max="15" value="0" style="flex:1">
+          <input type="range" id="heightSlider" min="0" max="7" value="0" style="flex:1">
           <span style="font-size:0.75em">Short</span>
         </div>
       </div>
@@ -668,6 +668,14 @@ function setLimbGS(limbName, gs, startAtEnd) {
   }
 }
 
+// C64 chore.m: heads with disk_face bit 5 (0x20) set cannot bend.
+// bend_over is substituted with arm_get, bend_back with arm_back.
+function hasNoBendFlag() {
+  if (!headConfig || !currentHead) return false;
+  const cfg = headConfig[currentHead.name];
+  return cfg ? (cfg.disk_face & 0x20) !== 0 : false;
+}
+
 // Initialize the animation engine for a given pose+view.
 // Matches the C64 new_chore flow from chore.m exactly:
 //   1. Clear all 6 limbs to gs0 (new_chore clears AVATAR_cel_state)
@@ -695,7 +703,8 @@ function initAnimAction(poseName, viewName) {
                  'stand_back';
   } else {
     // Side view: use the base action directly
-    actionName = poseName === 'bend' ? 'bend_over' : poseName;
+    // C64 chore.m: no_bend heads substitute arm_get for bend_over
+    actionName = poseName === 'bend' ? (hasNoBendFlag() ? 'arm_get' : 'bend_over') : poseName;
   }
 
   // Step 3: Apply choreography (C64: init_avatar_chores for each byte)
@@ -1062,7 +1071,7 @@ function getHeadCelsForView(head, viewState) {
 const LIMB_ORDER = ['legs_right','legs_left','left_arm','torso','head_placeholder','right_arm'];
 // cels_affected_by_height: legs(0,1) unaffected, upper body(2-5) shifts
 const CELS_AFFECTED_BY_HEIGHT = [0, 0, 1, 1, 1, 1];
-let avatarHeight = 0; // 0=tallest, 15=shortest (scanline adjustment for upper body)
+let avatarHeight = 0; // 0=tallest, 7=shortest (C64 custom.m uses bits 3-5 = 3 bits = 8 values)
 
 // Bytes-to-display-pixels: 1 byte = 4 MC pixels = 8 PNG pixels (at 2x scale) × SCALE
 const BYTE_PX = 8 * SCALE; // = 32 display pixels per byte
@@ -1356,9 +1365,9 @@ function startAnimation() {
       // Bend: chain bend_over → bend_back (matching C64 two-action sequence)
       if (currentPose === 'bend' && !moved) {
         if (!bendPhase || bendPhase === 'over') {
-          // bend_over finished → apply bend_back to stand back up
+          // bend_over finished → apply bend_back (or arm_back for no_bend heads)
           bendPhase = 'back';
-          applyAction('bend_back');
+          applyAction(hasNoBendFlag() ? 'arm_back' : 'bend_back');
         } else {
           // bend_back finished → avatar is visually standing, stop
           bendPhase = null;
@@ -1591,7 +1600,7 @@ document.querySelectorAll('[data-pose]').forEach(btn => {
 // Random Avatar (head + height)
 document.getElementById('randomBtn').addEventListener('click', () => {
   const slider = document.getElementById('heightSlider');
-  slider.value = Math.floor(Math.random() * 16);
+  slider.value = Math.floor(Math.random() * 8);
   slider.dispatchEvent(new Event('input'));
   selectHead(HEADS[Math.floor(Math.random() * HEADS.length)]);
 });
