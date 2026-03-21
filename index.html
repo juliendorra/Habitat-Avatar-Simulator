@@ -2491,7 +2491,7 @@ void main() {
   float scanY = fract(pixPos.y);
 
   // 5-tap horizontal color bleed (moderate analog signal spread)
-  vec3 color = horz5(uv, 1.2);
+  vec3 color = horz5(uv, 1.8);
 
   // Scanline beam (adaptive: brighter pixels → wider beam like real phosphors)
   float lum = dot(color, vec3(0.2126, 0.7152, 0.0722));
@@ -2533,7 +2533,7 @@ void main() {
   color = max(color, vec3(0.05));
   // Blue phosphor glow: blue areas get a brightness lift
   float blueness = max(0.0, color.b - max(color.r, color.g));
-  color += vec3(0.04, 0.03, 0.10) * smoothstep(0.0, 0.12, blueness);
+  color += vec3(0.06, 0.04, 0.14) * smoothstep(0.0, 0.10, blueness);
 
   // Strong desaturation: CRT phosphors produce soft, washed colors
   float gray = dot(color, vec3(0.299, 0.587, 0.114));
