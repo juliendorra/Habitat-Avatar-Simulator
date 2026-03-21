@@ -8,7 +8,7 @@
 
 ## Why this tool exists
 
-Lucasfilm's **Habitat** (1986) was the first graphical multiplayer virtual world — and the first game to call its player characters *avatars*. Built for the Commodore 64 and Quantum Link (the network that became AOL), it let thousands of players inhabit a shared, persistent world where they could talk, trade, start businesses, get married, wage wars, and govern themselves.
+Lucasfilm's **Habitat** (1986) was the first graphical multiplayer virtual world — and the first game to call its player characters *avatars*.<sup>[1](#fn1)</sup> Built for the Commodore 64 and Quantum Link (the network that became AOL), it let thousands of players inhabit a shared, persistent world where they could talk, trade, start businesses, get married, wage wars, and govern themselves.
 
 Avatar customization was central to the experience. Players could change their clothing patterns using spray-on body color cans, adjust their height, and — most importantly — collect **heads**. Over 160 different heads existed in the game, sold through in-game vending machines (Vendroids) for Tokens, the virtual currency. Heads became collectibles, status symbols, and objects of trade, prefiguring the cosmetic economies that drive modern games.
 
@@ -37,7 +37,7 @@ This tool is useful for anyone studying the history of avatars in social platfor
 - **Constrained expressiveness** — a small set of poses (stand, walk, wave, point, bend) combined with head and clothing customization to create identity within tight technical limits
 - **Virtual economies** — the first instance of players buying, selling, and trading cosmetic items
 
-The term "avatar" itself entered the digital vocabulary through Habitat, drawn from Hindu mythology by Chip Morningstar and Randy Farmer. Every avatar system since — from Second Life to Fortnite — descends from this lineage.
+The word "avatar" had already appeared in gaming — Richard Garriott used it in *Ultima IV* (1985) — but as a diegetic title earned by the player character, not as a label for the player's representation itself. Habitat was the first to use it in the modern sense: every player character was an *avatar*, an embodiment of the person behind the screen. Chip Morningstar borrowed the term from Poul Anderson's space opera novel *The Avatar* (1978). Neal Stephenson's *Snow Crash* (1992) later cemented the word — and the concept of the *metaverse* — in popular culture.
 
 ## How it works
 
@@ -66,5 +66,11 @@ The offline Python scripts in `tools/` decode the original binary assets into PN
 - **[Habitat Chronicles](http://habitatchronicles.com/)** — ongoing historical documentation by the creators
 
 ## License
+
+---
+
+<a id="fn1">1.</a> The word "avatar" was first applied to a game character in Richard Garriott's *Ultima IV: Quest of the Avatar* (1985), but there it is **diegetic** — a title the protagonist earns within the game's fiction after mastering the eight Virtues. In Habitat (1986), the term is used in the modern, **extra-diegetic** sense: every player character is called an avatar, meaning the player's embodied representation in a shared virtual world. It is this usage — later popularized by Neal Stephenson's *Snow Crash* (1992) — that became the standard meaning in computing. See [Avatar (computing)](https://en.wikipedia.org/wiki/Avatar_(computing)) on Wikipedia.
+
+---
 
 The original Habitat art assets and source code are property of their respective rights holders. This simulator is a research and preservation tool built for historical study.
