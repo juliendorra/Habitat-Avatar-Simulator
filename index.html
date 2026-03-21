@@ -1001,8 +1001,17 @@ function getCelNum(limbName, stateIdx) {
   if (stateIdx === null || stateIdx === undefined) return null;
   const states = LIMB_STATES[limbName];
   if (!states || stateIdx >= states.length) return null;
-  const cel = states[stateIdx];
-  return cel === 255 ? null : cel;
+  let cel = states[stateIdx];
+  if (cel === 255) return null;
+  // C64 animate.m sex check: female avatars use cel 1 (breast variant) instead of cel 0
+  // Conditions: torso limb, graphic state 0, avatar_style 0 (normal), female head
+  if (limbName === 'torso' && cel === 0) {
+    const gs = limbAnimState.torso?.gs;
+    if (gs === 0 && currentHead?.gender === 'f') {
+      cel = 1; // female torso with breast shape
+    }
+  }
+  return cel;
 }
 
 function getPoseConfig() {
