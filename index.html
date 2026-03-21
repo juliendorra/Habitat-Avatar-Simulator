@@ -2630,6 +2630,9 @@ function applyCRT() {
   gl.uniform1f(gl.getUniformLocation(crtProgram, 'u_scale'), SCALE);
 
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+  // Hide avatar canvas so raw pure colors don't bleed through CRT transparency
+  srcCanvas.style.visibility = 'hidden';
 }
 
 // CRT toggle handler
@@ -2647,10 +2650,11 @@ document.getElementById('crtToggle').addEventListener('change', function() {
     document.getElementById('color1').value = c.blue;
     document.getElementById('color2').value = c.black;
     document.getElementById('color3').value = c.pink;
-    onPaletteChange(); // this triggers renderAvatar which will call applyCRT
     crtCanvas.style.display = 'block';
+    onPaletteChange(); // this triggers renderAvatar which will call applyCRT
   } else {
     crtCanvas.style.display = 'none';
+    document.getElementById('avatarCanvas').style.visibility = 'visible';
     pureEl.disabled = false;
     pureEl.parentElement.style.opacity = '';
     // Restore CRT-attenuated colors (default)
