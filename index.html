@@ -530,13 +530,13 @@ const ACTION_FOR_POSE_VIEW = {
   'walk_front': 'walk_front',
   'walk_back': 'walk_back',
   'wave_side': 'wave',
-  'wave_front': 'stand_front',
+  'wave_front': 'stand_front',   // fallback: wave is side-only
   'wave_back': 'stand_back',
   'point_side': 'point',
-  'point_front': 'stand_front',
+  'point_front': 'stand_front',  // fallback: point is side-only
   'point_back': 'stand_back',
   'bend_side': 'bend_over',
-  'bend_front': 'stand_front',
+  'bend_front': 'stand_front',   // fallback: bend is side-only
   'bend_back': 'stand_back',
 };
 
@@ -1463,14 +1463,25 @@ function updateInfo(head) {
 // ============================================================
 // UI EVENTS
 // ============================================================
+// Side-only poses: these C64 choreographies only exist for side view
+const SIDE_ONLY_POSES = ['bend', 'point', 'wave'];
+
+function updateViewPoseUI() {
+  document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('active', b.dataset.view === currentView));
+  document.querySelectorAll('[data-pose]').forEach(b => b.classList.toggle('active', b.dataset.pose === currentPose));
+  document.getElementById('viewLabel').textContent = VIEW_LABELS[currentView] + ' \u2014 ' +
+    currentPose.charAt(0).toUpperCase() + currentPose.slice(1);
+}
+
 // View buttons
 document.querySelectorAll('[data-view]').forEach(btn => {
   btn.addEventListener('click', () => {
     currentView = btn.dataset.view;
-    document.querySelectorAll('[data-view]').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('viewLabel').textContent = VIEW_LABELS[currentView] + ' \u2014 ' +
-      currentPose.charAt(0).toUpperCase() + currentPose.slice(1);
+    // Side-only poses revert to stand when switching to front/back
+    if (currentView !== 'side' && SIDE_ONLY_POSES.includes(currentPose)) {
+      currentPose = 'stand';
+    }
+    updateViewPoseUI();
     if (isAnimatedPose(currentPose)) startAnimation(); else stopAnimation(true);
     renderAvatar();
   });
@@ -1480,10 +1491,11 @@ document.querySelectorAll('[data-view]').forEach(btn => {
 document.querySelectorAll('[data-pose]').forEach(btn => {
   btn.addEventListener('click', () => {
     currentPose = btn.dataset.pose;
-    document.querySelectorAll('[data-pose]').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('viewLabel').textContent = VIEW_LABELS[currentView] + ' \u2014 ' +
-      currentPose.charAt(0).toUpperCase() + currentPose.slice(1);
+    // Side-only poses force side view
+    if (SIDE_ONLY_POSES.includes(currentPose) && currentView !== 'side') {
+      currentView = 'side';
+    }
+    updateViewPoseUI();
     if (isAnimatedPose(currentPose)) startAnimation();
     else { stopAnimation(true); }
     renderAvatar();
