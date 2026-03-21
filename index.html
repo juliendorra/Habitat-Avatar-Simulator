@@ -4,6 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Habitat Avatar Simulator (1986)</title>
+<!-- Open Graph -->
+<meta property="og:title" content="Habitat Avatar Simulator (1986)">
+<meta property="og:description" content="Explore every avatar customization from the first graphical virtual world. 160+ heads, 16 clothing patterns, multiple poses — decoded from the original C64 assets.">
+<meta property="og:image" content="https://juliendorra.com/habitat/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://juliendorra.com/habitat/">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Habitat Avatar Simulator (1986)">
+<meta name="twitter:description" content="Explore every avatar customization from the first graphical virtual world. 160+ heads, 16 clothing patterns, multiple poses — decoded from the original C64 assets.">
+<meta name="twitter:image" content="https://juliendorra.com/habitat/og-image.png">
 <style>
   :root {
     --bg: #1a1a2e;
@@ -2216,8 +2229,10 @@ document.getElementById('shareLinkBtn').addEventListener('click', () => {
 // ============================================================
 // OG IMAGE GENERATOR
 // ============================================================
-// Renders 6 avatars with different heads/poses/colors to a 1200×630 canvas
-// and triggers a PNG download. Call generateOGImage() from the console.
+// Renders 6 avatars with different heads/poses/patterns/heights to a 1200x630
+// canvas and triggers a PNG download. Call generateOGImage() from the console.
+// Uses the same CRT palette for all avatars (authentic to the game) and varies
+// only heads, poses, clothing patterns, heights, and facing direction.
 async function generateOGImage() {
   const OG_W = 1200, OG_H = 630;
   const ogCanvas = document.createElement('canvas');
@@ -2226,11 +2241,9 @@ async function generateOGImage() {
   const ogCtx = ogCanvas.getContext('2d');
   ogCtx.imageSmoothingEnabled = false;
 
-  // Background
   ogCtx.fillStyle = '#A3A3A3';
   ogCtx.fillRect(0, 0, OG_W, OG_H);
 
-  // Save global state
   const saved = {
     head: currentHead, view: currentView, pose: currentPose,
     colors: [...bodyColors], patterns: { ...bodyPatterns },
@@ -2242,46 +2255,60 @@ async function generateOGImage() {
   }
   seqActive = false;
 
-  // 6 curated avatars: [headName, pose, view, colors, patterns]
+  const CRT = ['#312893','#000000','#A96F63'];
+
   const configs = [
-    { head: 'darth0',    pose: 'stand', view: 'side',  colors: ['#312893','#000000','#A96F63'], pat: { legs:15, torso:15, arms:15 } },
-    { head: 'afro0',     pose: 'wave',  view: 'side',  colors: ['#68372b','#000000','#a96f63'], pat: { legs:5, torso:10, arms:5 } },
-    { head: 'penguin0',  pose: 'stand', view: 'front', colors: ['#312893','#000000','#6c5eb5'], pat: { legs:15, torso:6, arms:15 } },
-    { head: 'witch0',    pose: 'point', view: 'side',  colors: ['#6c5eb5','#000000','#a96f63'], pat: { legs:15, torso:15, arms:15 } },
-    { head: 'pirate2',   pose: 'stand', view: 'side',  colors: ['#a96f63','#000000','#68372b'], pat: { legs:14, torso:5, arms:14 } },
-    { head: 'robot0',    pose: 'stand', view: 'front', colors: ['#6c6c6c','#000000','#959595'], pat: { legs:15, torso:7, arms:15 } },
+    { head: 'darth0',    pose: 'stand', view: 'side',  pat: { legs:15, torso:15, arms:15 }, flipX: false, height: 0 },
+    { head: 'afro0',     pose: 'wave',  view: 'side',  pat: { legs:5, torso:10, arms:5 },   flipX: true,  height: 5 },
+    { head: 'penguin0',  pose: 'stand', view: 'front', pat: { legs:15, torso:6, arms:15 },  flipX: false, height: 10 },
+    { head: 'witch0',    pose: 'point', view: 'side',  pat: { legs:15, torso:15, arms:15 }, flipX: false, height: 2 },
+    { head: 'pirate2',   pose: 'stand', view: 'side',  pat: { legs:14, torso:5, arms:14 },  flipX: true,  height: 8 },
+    { head: 'robot0',    pose: 'stand', view: 'front', pat: { legs:15, torso:7, arms:15 },  flipX: true,  height: 0 },
   ];
 
-  // Staggered Y offsets (pixels from vertical center)
-  const yOffsets = [10, -30, 15, -25, 20, -20];
-  const xSpacing = OG_W / (configs.length + 1);
+  const yOffsets = [8, -15, 10, -12, 6, -10];
+  const margin = 20;
+  const usableW = OG_W - margin * 2;
+  const xSpacing = usableW / (configs.length + 1);
+
+  function getBounds(cvs) {
+    const c = cvs.getContext('2d');
+    const d = c.getImageData(0, 0, cvs.width, cvs.height).data;
+    let minX = cvs.width, minY = cvs.height, maxX = 0, maxY = 0;
+    for (let y = 0; y < cvs.height; y++) {
+      for (let x = 0; x < cvs.width; x++) {
+        const i = (y * cvs.width + x) * 4;
+        if (d[i+3] > 0) {
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+        }
+      }
+    }
+    return { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 };
+  }
 
   for (let i = 0; i < configs.length; i++) {
     const cfg = configs[i];
-
-    // Set global state for this avatar
     currentHead = HEADS.find(h => h.name === cfg.head);
     currentView = cfg.view;
-    bodyColors = cfg.colors;
+    bodyColors = CRT;
     bodyPatterns = { ...cfg.pat };
-    avatarHeight = 0;
+    avatarHeight = cfg.height;
 
-    // Preload head cels
     if (currentHead) {
       for (let c = 0; c < currentHead.cels; c++) {
         await loadImg(headCelPath(currentHead.name, c));
       }
     }
 
-    // Init animation to target pose
     initAnimAction(cfg.pose, cfg.view);
-    // For play-once poses, advance to final frame
     for (const l of LIMB_NAMES) {
       const st = limbAnimState[l];
       if (st && !st.cycle && st.end > st.start) st.frame = st.end;
     }
 
-    // Render to temp canvas
     const tmpCanvas = document.createElement('canvas');
     tmpCanvas.width = CW;
     tmpCanvas.height = CH;
@@ -2303,15 +2330,36 @@ async function generateOGImage() {
       }
     }
 
-    // Composite onto OG canvas (staggered row)
-    const destX = xSpacing * (i + 1);
-    const destY = OG_H / 2 + yOffsets[i];
-    const scale = OG_H / CH * 0.85;
-    const dw = CW * scale, dh = CH * scale;
-    ogCtx.drawImage(tmpCanvas, destX - dw / 2, destY - dh / 2, dw, dh);
+    let srcCanvas = tmpCanvas;
+    if (cfg.flipX) {
+      const flipped = document.createElement('canvas');
+      flipped.width = CW;
+      flipped.height = CH;
+      const fCtx = flipped.getContext('2d');
+      fCtx.translate(CW, 0);
+      fCtx.scale(-1, 1);
+      fCtx.drawImage(tmpCanvas, 0, 0);
+      srcCanvas = flipped;
+    }
+
+    const bounds = getBounds(srcCanvas);
+    const targetH = OG_H * 0.45;
+    const avatarScale = targetH / bounds.h;
+    const dw = bounds.w * avatarScale;
+    const dh = bounds.h * avatarScale;
+
+    const destX = margin + xSpacing * (i + 1);
+    const centerY = OG_H * 0.45 + yOffsets[i];
+
+    let dx = Math.max(margin, Math.min(OG_W - margin - dw, destX - dw / 2));
+    let dy = Math.max(margin, Math.min(OG_H - margin - dh, centerY - dh / 2));
+
+    ogCtx.drawImage(srcCanvas,
+      bounds.x, bounds.y, bounds.w, bounds.h,
+      dx, dy, dw, dh
+    );
   }
 
-  // Restore global state
   currentHead = saved.head;
   currentView = saved.view;
   bodyColors = saved.colors;
@@ -2322,10 +2370,8 @@ async function generateOGImage() {
   for (const l of LIMB_NAMES) {
     limbAnimState[l] = saved.animStates[l];
   }
-  // Re-render main canvas
   renderAvatar();
 
-  // Download
   const link = document.createElement('a');
   link.download = 'og-image.png';
   link.href = ogCanvas.toDataURL('image/png');
