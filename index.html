@@ -2012,6 +2012,9 @@ async function renderSequenceFrame(step) {
   if (step.newOnGround) {
     await drawMiniHeadAt(seqNewHead, groundLeftX, groundY);
   }
+
+  // Apply CRT post-processing if enabled (same as renderAvatar)
+  if (crtEnabled) applyCRT();
 }
 
 // Draw a head at a position.
