@@ -2046,6 +2046,13 @@ async function renderSequenceFrame(step) {
   const isBack = currentView === 'back';
   const { cx_tab, cy_tab } = await computeLimbPositions(pose, isBack);
 
+  // Sex change sequence: shift avatar left so it stands adjacent to the machine
+  // C64 v_punt_if_not_adjacent requires ~1 byte column gap between objects.
+  if (step.sexState && currentView === 'side') {
+    const shift = 4; // byte columns left — creates proper adjacent spacing
+    for (let i = 0; i < cx_tab.length; i++) cx_tab[i] -= shift;
+  }
+
   // Compute held object position using C64 method:
   // animate.m: find_cel_xy on arm's x_rel/y_rel gives the hand/hold point.
   // draw_contained_object: object drawn at (hand_x, hand_y) BEFORE the arm.
