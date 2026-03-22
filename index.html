@@ -1850,12 +1850,17 @@ const HEAD_CHANGE_STEPS = [
 // 2. Sex bit toggles → torso changes
 // 3. AV_ACT_get_shot → surprise/recoil reaction
 // 4. Return to standing
+// C64 sex_changer_do.m sequence:
+//   chore AV_ACT_operate → waitWhile → toggle sex → chore AV_ACT_hand_back →
+//   waitWhile → complexSound → lda #AV_ACT_get_shot → chainTo (fire & forget)
 const SEX_CHANGE_STEPS = [
-  { action:"Standing",    desc:"Avatar at the machine",     view:"side",  choreography:"stand",    sexState:'before' },
-  { action:"Operate",     desc:"Operating the machine",     view:"side",  choreography:"operate",  sexState:'before', endFrame:true },
-  { action:"Operate",     desc:"Sex changed!",              view:"side",  choreography:"stand",    sexState:'after',  auto:true },
-  { action:"Reaction",    desc:"Surprise!",                 view:"side",  choreography:"get_shot", sexState:'after',  endFrame:true, auto:true },
-  { action:"Done",        desc:"New body!",                 view:"front", choreography:"stand_front", sexState:'after', auto:true },
+  { action:"Standing",    desc:"Avatar at the machine",     view:"side",  choreography:"stand",       sexState:'before' },
+  // --- Action: Operate (arm reaches to machine)
+  { action:"Operate",     desc:"Operating the machine",     view:"side",  choreography:"operate",     sexState:'before', endFrame:true },
+  { action:"Operate",     desc:"Sex changed!",              view:"side",  choreography:"hand_back",   sexState:'after',  auto:true },
+  // --- Reaction: get_shot is fire-and-forget (chainTo, no wait) — show start frame only
+  { action:"Operate",     desc:"Surprise!",                 view:"side",  choreography:"get_shot",    sexState:'after',  auto:true },
+  { action:"Done",        desc:"New body!",                 view:"front", choreography:"stand_front",  sexState:'after', auto:true },
 ];
 
 let seqType = null; // 'head' or 'sex'
