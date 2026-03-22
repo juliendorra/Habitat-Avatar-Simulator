@@ -715,10 +715,20 @@ function initAnimAction(poseName, viewName) {
   }
 
   // Step 3: Apply choreography (C64: init_avatar_chores for each byte)
-  // The choreography data handles EVERYTHING — no manual overrides needed.
   // Side walk: legs_right=gs1, left_arm=gs1, right_arm=gs1 (legs_left NOT set = invisible)
   // Back walk: walk_back choreography includes legs_left=gs1 explicitly
   applyAction(actionName);
+
+  // Step 4: C64 chore.m front-view sex check
+  // When torso is set to gs4 AND action is stand_front or walk_front AND female,
+  // increment torso graphic state: gs4 → gs5 (female front torso with breast lines).
+  // This is separate from the side-view sex check in animate.m (cel 0→1).
+  if ((actionName === 'stand_front' || actionName === 'walk_front') && avatarSex === 'f') {
+    const ts = limbAnimState.torso;
+    if (ts && ts.gs === 4) {
+      setLimbGS('torso', 5); // gs5 = cel 5 (female front torso)
+    }
+  }
 }
 
 // Draw order per view (from C64 animate.m fv_cels/bv_cels)
@@ -1685,6 +1695,8 @@ document.querySelectorAll('[data-sex]').forEach(btn => {
   btn.addEventListener('click', () => {
     avatarSex = btn.dataset.sex;
     document.querySelectorAll('[data-sex]').forEach(b => b.classList.toggle('active', b.dataset.sex === avatarSex));
+    // Re-init animation engine — front view sex check is in initAnimAction
+    if (avatarAnim) initAnimAction(currentPose, currentView);
     renderAvatar();
   });
 });
