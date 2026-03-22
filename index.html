@@ -1861,8 +1861,9 @@ const SEX_CHANGE_STEPS = [
   { action:"DO",          desc:"Operating the machine",     view:"side",  choreography:"operate",     sexState:'before', endFrame:true },
   { action:"DO",          desc:"Sex changed!",              view:"side",  choreography:"hand_back",   sexState:'after',  auto:true },
   { action:"DO",          desc:"Surprise!",                 view:"side",  choreography:"get_shot",    sexState:'after',  auto:true },
+  { action:"DO",          desc:"New body!",                 view:"side",  choreography:"stand",       sexState:'after',  auto:true },
   { action:"DO",          desc:"Walking away...",            view:"side",  choreography:"stand",       sexState:'after',  noMachine:true, auto:true },
-  { action:"Done",        desc:"New body!",                 view:"front", choreography:"stand_front",  sexState:'after',  noMachine:true, auto:true },
+  { action:"Done",        desc:"Ta-da!",                    view:"front", choreography:"stand_front",  sexState:'after',  noMachine:true, auto:true },
 ];
 
 let seqType = null; // 'head' or 'sex'
