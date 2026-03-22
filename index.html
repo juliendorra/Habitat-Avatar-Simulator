@@ -233,10 +233,16 @@
       </div>
 
       <div class="control-group">
-        <div class="palette-row">
-          <span style="font-size:0.75em">Tall</span>
-          <input type="range" id="heightSlider" min="0" max="7" value="0" style="flex:1">
-          <span style="font-size:0.75em">Short</span>
+        <div class="palette-row" style="gap:12px">
+          <div class="palette-row" style="flex:0">
+            <button class="btn active" data-sex="m" style="min-width:28px">M</button>
+            <button class="btn" data-sex="f" style="min-width:28px">F</button>
+          </div>
+          <div class="palette-row" style="flex:1">
+            <span style="font-size:0.75em">Tall</span>
+            <input type="range" id="heightSlider" min="0" max="7" value="0" style="flex:1">
+            <span style="font-size:0.75em">Short</span>
+          </div>
         </div>
       </div>
 
@@ -1004,10 +1010,10 @@ function getCelNum(limbName, stateIdx) {
   let cel = states[stateIdx];
   if (cel === 255) return null;
   // C64 animate.m sex check: female avatars use cel 1 (breast variant) instead of cel 0
-  // Conditions: torso limb, graphic state 0, avatar_style 0 (normal), female head
+  // The sex bit (orientation bit 7) is independent from the head's gender.
   if (limbName === 'torso' && cel === 0) {
     const gs = limbAnimState.torso?.gs;
-    if (gs === 0 && currentHead?.gender === 'f') {
+    if (gs === 0 && avatarSex === 'f') {
       cel = 1; // female torso with breast shape
     }
   }
@@ -1081,6 +1087,7 @@ const LIMB_ORDER = ['legs_right','legs_left','left_arm','torso','head_placeholde
 // cels_affected_by_height: legs(0,1) unaffected, upper body(2-5) shifts
 const CELS_AFFECTED_BY_HEIGHT = [0, 0, 1, 1, 1, 1];
 let avatarHeight = 0; // 0=tallest, 7=shortest (C64 custom.m uses bits 3-5 = 3 bits = 8 values)
+let avatarSex = 'm'; // C64 orientation bit 7: 'm'=male torso cel 0, 'f'=female torso cel 1
 
 // Bytes-to-display-pixels: 1 byte = 4 MC pixels = 8 PNG pixels (at 2x scale) × SCALE
 const BYTE_PX = 8 * SCALE; // = 32 display pixels per byte
@@ -1542,6 +1549,11 @@ async function updateMiniHead() {
 
 function selectHead(head) {
   currentHead = head;
+  // C64 creation auto-syncs sex bit to match head gender
+  if (head.gender) {
+    avatarSex = head.gender;
+    document.querySelectorAll('[data-sex]').forEach(b => b.classList.toggle('active', b.dataset.sex === avatarSex));
+  }
   // Preload all cels for this head in background (prevents flash on first render)
   preloadHeadCels(head);
   // Restart animation if new head is animated (or stop if it isn't)
@@ -1666,6 +1678,15 @@ function onPaletteChange() {
 
 ['color1','color2','color3'].forEach(id =>
   document.getElementById(id).addEventListener('input', onPaletteChange));
+
+// Sex toggle (M/F) — C64 orientation bit 7, independent from head gender
+document.querySelectorAll('[data-sex]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    avatarSex = btn.dataset.sex;
+    document.querySelectorAll('[data-sex]').forEach(b => b.classList.toggle('active', b.dataset.sex === avatarSex));
+    renderAvatar();
+  });
+});
 
 // Height slider
 document.getElementById('heightSlider').addEventListener('input', function() {
@@ -2111,6 +2132,7 @@ document.addEventListener('keydown', e => {
 
 const DEFAULTS = {
   height: 0,
+  sex: 'm',
   colors: [CRT_COLORS.blue, CRT_COLORS.black, CRT_COLORS.pink],
   patterns: { torso: 15, arms: 15, legs: 15 },
 };
@@ -2119,6 +2141,7 @@ function encodeAvatarState() {
   const params = [];
   if (currentHead) params.push('head=' + currentHead.name);
   if (avatarHeight !== DEFAULTS.height) params.push('h=' + avatarHeight);
+  if (avatarSex !== DEFAULTS.sex) params.push('s=' + avatarSex);
   // Colors: strip '#' and join with dots
   const colorsChanged = bodyColors.some((c, i) => c.toLowerCase() !== DEFAULTS.colors[i].toLowerCase());
   if (colorsChanged) {
@@ -2145,7 +2168,8 @@ function decodeAvatarState(hash) {
     const val = part.slice(eq + 1);
     switch (key) {
       case 'head': state.head = val; break;
-      case 'h': { const n = parseInt(val); if (n >= 0 && n <= 15) state.height = n; break; }
+      case 'h': { const n = parseInt(val); if (n >= 0 && n <= 7) state.height = n; break; }
+      case 's': { if (val === 'm' || val === 'f') state.sex = val; break; }
       case 'c': {
         const parts = val.split('.');
         if (parts.length === 3 && parts.every(p => /^[0-9a-fA-F]{6}$/.test(p))) {
@@ -2173,6 +2197,8 @@ function applyStateFromHash() {
   const head = HEADS.find(h => h.name === state.head);
   if (!head) return false;
 
+  // Apply sex (before selectHead, which auto-syncs — URL sex overrides)
+  const urlSex = state.sex;
   // Apply height
   if (state.height !== undefined) {
     avatarHeight = state.height;
@@ -2201,6 +2227,13 @@ function applyStateFromHash() {
   }
 
   selectHead(head);
+  // Apply sex AFTER selectHead (which auto-syncs from head gender).
+  // URL sex overrides auto-sync — allows male head + female body from share links.
+  if (urlSex) {
+    avatarSex = urlSex;
+    document.querySelectorAll('[data-sex]').forEach(b => b.classList.toggle('active', b.dataset.sex === avatarSex));
+    renderAvatar();
+  }
   return true;
 }
 
