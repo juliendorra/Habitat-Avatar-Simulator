@@ -2128,7 +2128,10 @@ const SEXO_CELS = [
 ];
 async function drawSexoMachine(cx_tab) {
   // Position machine to the right of the avatar (like it's in the room)
-  const machineOriginX = BASE_X + (cx_tab[3] + 3) * BYTE_PX; // 3 byte cols right of torso
+  // Position machine to the right of the avatar arm's reach
+  // Cel E (largest) is 6 bytes wide with x_offset=-1, so it extends from origin-32 to origin+160
+  // Place origin so the machine fits within the canvas
+  const machineOriginX = CW - 6 * BYTE_PX; // rightmost large cel (E) fits within canvas
   const machineOriginY = BASE_Y; // feet level
   let originX = machineOriginX;
   let originY = machineOriginY;
