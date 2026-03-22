@@ -263,6 +263,7 @@
         </div>
         <div class="btn-row" style="margin-top:4px">
           <button class="btn sequence full" id="headChangeBtn">Head Change Sequence</button>
+          <button class="btn sequence full" id="sexChangeBtn">Sex Change Machine</button>
         </div>
         <div class="sequence-panel" id="sequencePanel">
           <div class="sequence-progress" id="sequenceProgress"></div>
@@ -1844,41 +1845,83 @@ const HEAD_CHANGE_STEPS = [
   { action:"PUT new head",   desc:"Ta-da!",                                     view:"front", choreography:"stand_front", headOnBody:"new", headInHand:null, auto:true },
 ];
 
+// Sex Change Machine sequence (from C64 sex_changer_do.m):
+// 1. AV_ACT_operate → arm reaches to operate machine
+// 2. Sex bit toggles → torso changes
+// 3. AV_ACT_get_shot → surprise/recoil reaction
+// 4. Return to standing
+const SEX_CHANGE_STEPS = [
+  { action:"Standing",    desc:"Avatar at the machine",     view:"side",  choreography:"stand",    sexState:'before' },
+  { action:"Operate",     desc:"Operating the machine",     view:"side",  choreography:"operate",  sexState:'before', endFrame:true },
+  { action:"Operate",     desc:"Sex changed!",              view:"side",  choreography:"stand",    sexState:'after',  auto:true },
+  { action:"Reaction",    desc:"Surprise!",                 view:"side",  choreography:"get_shot", sexState:'after',  endFrame:true, auto:true },
+  { action:"Done",        desc:"New body!",                 view:"front", choreography:"stand_front", sexState:'after', auto:true },
+];
+
+let seqType = null; // 'head' or 'sex'
+let sexSeqOldSex = null;
+
+function getActiveSteps() {
+  return seqType === 'sex' ? SEX_CHANGE_STEPS : HEAD_CHANGE_STEPS;
+}
+
 function startSequence() {
+  seqType = 'head';
   if (!currentHead) { selectHead(HEADS[0]); }
   seqOldHead = currentHead;
-  // Pick a different random head for the new head
   let newIdx;
   do { newIdx = Math.floor(Math.random() * HEADS.length); } while (HEADS[newIdx] === seqOldHead);
   seqNewHead = HEADS[newIdx];
+  beginSequence();
+}
+
+function startSexChangeSequence() {
+  seqType = 'sex';
+  sexSeqOldSex = avatarSex;
+  beginSequence();
+}
+
+function beginSequence() {
   seqStep = 0;
   seqActive = true;
   seqAutoplay = false;
   seqFlipped = false;
-  seqBentArmX = null; // recompute for this sequence
+  seqBentArmX = null;
   stopAnimation(true);
   document.getElementById('sequencePanel').classList.add('active');
-  document.getElementById('headChangeBtn').classList.add('active');
+  const activeBtn = seqType === 'sex' ? 'sexChangeBtn' : 'headChangeBtn';
+  document.getElementById(activeBtn).classList.add('active');
   buildSequenceProgress();
   applySequenceStep();
 }
 
 function stopSequence() {
+  const steps = getActiveSteps();
+  const completed = seqStep >= steps.length - 1;
   seqActive = false;
   seqAutoplay = false;
   if (seqAutoTimer) { clearTimeout(seqAutoTimer); seqAutoTimer = null; }
   document.getElementById('seqAutoBtn').textContent = 'Autoplay';
   document.getElementById('sequencePanel').classList.remove('active');
   document.getElementById('headChangeBtn').classList.remove('active');
-  // Restore to final head if completed, else restore old
-  if (seqStep >= HEAD_CHANGE_STEPS.length - 1) {
-    currentHead = seqNewHead;
-    selectHead(seqNewHead);
+  document.getElementById('sexChangeBtn').classList.remove('active');
+  if (seqType === 'sex') {
+    // Sex change: toggle sex if completed, restore if cancelled
+    if (completed) {
+      avatarSex = sexSeqOldSex === 'm' ? 'f' : 'm';
+      document.querySelectorAll('[data-sex]').forEach(b => b.classList.toggle('active', b.dataset.sex === avatarSex));
+    }
   } else {
-    currentHead = seqOldHead;
+    // Head change: restore to final head if completed, else restore old
+    if (completed) {
+      currentHead = seqNewHead;
+      selectHead(seqNewHead);
+    } else {
+      currentHead = seqOldHead;
+    }
   }
   // Restore view to match last step (front if completed, side otherwise)
-  currentView = (seqStep >= HEAD_CHANGE_STEPS.length - 1) ? 'front' : 'side';
+  currentView = completed ? 'front' : 'side';
   currentPose = 'stand';
   document.querySelectorAll('[data-view]').forEach(b => {
     b.classList.toggle('active', b.dataset.view === currentView);
@@ -1895,7 +1938,7 @@ function stopSequence() {
 function buildSequenceProgress() {
   const container = document.getElementById('sequenceProgress');
   container.innerHTML = '';
-  for (let i = 0; i < HEAD_CHANGE_STEPS.length; i++) {
+  for (let i = 0; i < getActiveSteps().length; i++) {
     const pip = document.createElement('div');
     pip.className = 'pip';
     container.appendChild(pip);
@@ -1911,23 +1954,23 @@ function updateSequenceProgress() {
 }
 
 function applySequenceStep() {
-  const step = HEAD_CHANGE_STEPS[seqStep];
+  const step = getActiveSteps()[seqStep];
   // Update step display
-  document.querySelector('#sequenceStep .step-num').textContent = `${seqStep + 1}/${HEAD_CHANGE_STEPS.length}`;
+  document.querySelector('#sequenceStep .step-num').textContent = `${seqStep + 1}/${getActiveSteps().length}`;
   document.querySelector('#sequenceStep .step-desc').textContent = `${step.action} — ${step.desc}`;
   // Update next button — show next user action (skip auto sub-steps)
   const nextBtn = document.getElementById('seqNextBtn');
-  if (seqStep >= HEAD_CHANGE_STEPS.length - 1) {
+  if (seqStep >= getActiveSteps().length - 1) {
     nextBtn.textContent = 'Done!';
     nextBtn.disabled = true;
   } else {
     // Find next non-auto step (the next user action)
     let nextAction = null;
-    for (let i = seqStep + 1; i < HEAD_CHANGE_STEPS.length; i++) {
-      if (!HEAD_CHANGE_STEPS[i].auto) { nextAction = HEAD_CHANGE_STEPS[i]; break; }
+    for (let i = seqStep + 1; i < getActiveSteps().length; i++) {
+      if (!getActiveSteps()[i].auto) { nextAction = getActiveSteps()[i]; break; }
     }
     nextBtn.textContent = nextAction ? nextAction.action : 'Done!';
-    nextBtn.disabled = !!HEAD_CHANGE_STEPS[seqStep + 1]?.auto; // disable during auto sub-steps
+    nextBtn.disabled = !!getActiveSteps()[seqStep + 1]?.auto; // disable during auto sub-steps
   }
   updateSequenceProgress();
 
@@ -1943,12 +1986,12 @@ function applySequenceStep() {
   renderSequenceFrame(step);
 
   // Auto-finish: when reaching the last step, exit after a brief pause
-  if (seqStep >= HEAD_CHANGE_STEPS.length - 1) {
+  if (seqStep >= getActiveSteps().length - 1) {
     seqAutoTimer = setTimeout(() => { stopSequence(); }, 1200);
   }
   // Check if next step is auto — if so, auto-advance after a pause
   else {
-    const nextStep = HEAD_CHANGE_STEPS[seqStep + 1];
+    const nextStep = getActiveSteps()[seqStep + 1];
     if (nextStep && nextStep.auto) {
       seqAutoTimer = setTimeout(() => { advanceSequence(); }, 800);
     } else if (seqAutoplay) {
@@ -1958,7 +2001,7 @@ function applySequenceStep() {
 }
 
 function advanceSequence() {
-  if (seqStep >= HEAD_CHANGE_STEPS.length - 1) {
+  if (seqStep >= getActiveSteps().length - 1) {
     stopSequence();
     return;
   }
@@ -1973,6 +2016,13 @@ async function renderSequenceFrame(step) {
   ctx.fillStyle = '#A3A3A3';
   ctx.fillRect(0, 0, CW, CH);
   ctx.imageSmoothingEnabled = false;
+
+  // Sex change sequence: temporarily override avatarSex for rendering
+  let savedSex = null;
+  if (step.sexState) {
+    savedSex = avatarSex;
+    avatarSex = step.sexState === 'after' ? (sexSeqOldSex === 'm' ? 'f' : 'm') : sexSeqOldSex;
+  }
 
   // Set up animation engine using exact C64 choreography (no hardcoded frames).
   // Mirrors the C64 new_chore flow: clear all to gs0, then apply action.
@@ -2016,11 +2066,13 @@ async function renderSequenceFrame(step) {
     heldHeadInfo = { head: headForHold, x: holdScreenX, y: holdScreenY };
   }
 
+  // Head visibility: head change steps use explicit headOnBody flag;
+  // sex change steps always show head (sexState defined, no headOnBody)
+  const showHeadOnBody = step.headOnBody || (step.sexState && !('headOnBody' in step));
   for (const limbKey of drawOrder) {
     if (limbKey === 'head') {
-      if (step.headOnBody) await drawHead(pose, cx_tab, cy_tab);
-    } else if (limbKey === 'head_placeholder' && !step.headOnBody) {
-      // Skip neck/collar overlay when head is removed from body
+      if (showHeadOnBody) await drawHead(pose, cx_tab, cy_tab);
+    } else if (limbKey === 'head_placeholder' && !showHeadOnBody) {
       continue;
     } else {
       // C64: held object drawn BEFORE right_arm (under the arm layer)
@@ -2052,6 +2104,9 @@ async function renderSequenceFrame(step) {
   if (step.newOnGround) {
     await drawMiniHeadAt(seqNewHead, groundLeftX, groundY);
   }
+
+  // Restore avatarSex after sex change sequence rendering
+  if (savedSex !== null) avatarSex = savedSex;
 
   // Apply CRT post-processing if enabled (same as renderAvatar)
   if (crtEnabled) applyCRT();
@@ -2090,6 +2145,11 @@ async function drawMiniHeadAt(head, x, y, useOrigin) {
 document.getElementById('headChangeBtn').addEventListener('click', () => {
   if (seqActive) stopSequence();
   else startSequence();
+});
+
+document.getElementById('sexChangeBtn').addEventListener('click', () => {
+  if (seqActive) stopSequence();
+  else startSexChangeSequence();
 });
 
 document.getElementById('seqNextBtn').addEventListener('click', () => {
