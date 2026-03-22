@@ -2105,11 +2105,49 @@ async function renderSequenceFrame(step) {
     await drawMiniHeadAt(seqNewHead, groundLeftX, groundY);
   }
 
+  // Draw sexo machine during sex change sequence
+  if (step.sexState) {
+    await drawSexoMachine(cx_tab);
+  }
+
   // Restore avatarSex after sex change sequence rendering
   if (savedSex !== null) avatarSex = savedSex;
 
   // Apply CRT post-processing if enabled (same as renderAvatar)
   if (crtEnabled) applyCRT();
+}
+
+// Draw the assembled sexo (sex change machine) prop.
+// Cel headers from C64 source (sources/c64/Images/Props/sexo.m):
+const SEXO_CELS = [
+  { file:'sexo_sexo_data_b.png', x_offset:0,  y_offset:13, x_rel:0,  y_rel:0 },
+  { file:'sexo_sexo_data_c.png', x_offset:-5, y_offset:51, x_rel:0,  y_rel:0 },
+  { file:'sexo_sexo_data_d.png', x_offset:1,  y_offset:16, x_rel:0,  y_rel:3 },
+  { file:'sexo_sexo_data_e.png', x_offset:-1, y_offset:41, x_rel:0,  y_rel:0 },
+  { file:'sexo_sexo_data_f.png', x_offset:-4, y_offset:24, x_rel:0,  y_rel:0 },
+];
+async function drawSexoMachine(cx_tab) {
+  // Position machine to the right of the avatar (like it's in the room)
+  const machineOriginX = BASE_X + (cx_tab[3] + 3) * BYTE_PX; // 3 byte cols right of torso
+  const machineOriginY = BASE_Y; // feet level
+  let originX = machineOriginX;
+  let originY = machineOriginY;
+  for (const cel of SEXO_CELS) {
+    const img = await loadImg('habitat_images_final/props/' + cel.file);
+    if (!img) continue;
+    const tmp = prepareCel(img, bodyColors, false);
+    const drawW = img.width * SCALE;
+    const drawH = img.height * SCALE;
+    // C64 paint_1: draw_x = origin + x_offset, draw_y = origin - y_offset
+    const drawX = originX + cel.x_offset * BYTE_PX;
+    const drawY = originY - cel.y_offset * SCALE;
+    ctx.drawImage(tmp, drawX, drawY, drawW, drawH);
+    // Chain: update origin via x_rel/y_rel (find_cel_xy)
+    if (cel.x_rel !== 0 || cel.y_rel !== 0) {
+      originX += cel.x_rel * BYTE_PX;
+      originY -= cel.y_rel * SCALE;
+    }
+  }
 }
 
 // Draw a head at a position.
