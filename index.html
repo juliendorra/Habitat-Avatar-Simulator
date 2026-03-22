@@ -1850,17 +1850,19 @@ const HEAD_CHANGE_STEPS = [
 // 2. Sex bit toggles → torso changes
 // 3. AV_ACT_get_shot → surprise/recoil reaction
 // 4. Return to standing
-// C64 sex_changer_do.m sequence:
-//   chore AV_ACT_operate → waitWhile → toggle sex → chore AV_ACT_hand_back →
-//   waitWhile → complexSound → lda #AV_ACT_get_shot → chainTo (fire & forget)
+// C64 sex change flow: user clicks GO (walk to machine), then DO (operate).
+// sex_changer_do.m: operate → wait → toggle sex → hand_back → wait →
+//   sound → get_shot (chainTo, fire & forget)
 const SEX_CHANGE_STEPS = [
-  { action:"Standing",    desc:"Avatar at the machine",     view:"side",  choreography:"stand",       sexState:'before' },
-  // --- Action: Operate (arm reaches to machine)
-  { action:"Operate",     desc:"Operating the machine",     view:"side",  choreography:"operate",     sexState:'before', endFrame:true },
-  { action:"Operate",     desc:"Sex changed!",              view:"side",  choreography:"hand_back",   sexState:'after',  auto:true },
-  // --- Reaction: get_shot is fire-and-forget (chainTo, no wait) — show start frame only
-  { action:"Operate",     desc:"Surprise!",                 view:"side",  choreography:"get_shot",    sexState:'after',  auto:true },
-  { action:"Done",        desc:"New body!",                 view:"front", choreography:"stand_front",  sexState:'after', auto:true },
+  // --- User action 1: GO (walk to machine)
+  { action:"GO",          desc:"Walking to the machine",    view:"side",  choreography:"walk",        sexState:'before' },
+  { action:"GO",          desc:"At the machine",            view:"side",  choreography:"stand",       sexState:'before', auto:true },
+  // --- User action 2: DO (operate — entire sequence auto-plays)
+  { action:"DO",          desc:"Operating the machine",     view:"side",  choreography:"operate",     sexState:'before', endFrame:true },
+  { action:"DO",          desc:"Sex changed!",              view:"side",  choreography:"hand_back",   sexState:'after',  auto:true },
+  { action:"DO",          desc:"Surprise!",                 view:"side",  choreography:"get_shot",    sexState:'after',  auto:true },
+  { action:"DO",          desc:"Walking away...",            view:"side",  choreography:"stand",       sexState:'after',  noMachine:true, auto:true },
+  { action:"Done",        desc:"New body!",                 view:"front", choreography:"stand_front",  sexState:'after',  noMachine:true, auto:true },
 ];
 
 let seqType = null; // 'head' or 'sex'
@@ -2053,7 +2055,7 @@ async function renderSequenceFrame(step) {
 
   // Sex change sequence: shift avatar left so it stands adjacent to the machine
   // C64 v_punt_if_not_adjacent requires ~1 byte column gap between objects.
-  if (step.sexState && currentView === 'side') {
+  if (step.sexState && !step.noMachine && currentView === 'side') {
     const shift = 4; // byte columns left — creates proper adjacent spacing
     for (let i = 0; i < cx_tab.length; i++) cx_tab[i] -= shift;
   }
@@ -2118,7 +2120,7 @@ async function renderSequenceFrame(step) {
   }
 
   // Draw sexo machine during sex change sequence
-  if (step.sexState) {
+  if (step.sexState && !step.noMachine) {
     await drawSexoMachine(cx_tab);
   }
 
