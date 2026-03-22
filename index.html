@@ -2128,13 +2128,13 @@ const SEXO_CELS = [
 ];
 async function drawSexoMachine(cx_tab) {
   // Position machine to the right of the avatar (like it's in the room)
-  // C64: machine cels extend LEFT from origin (large negative x_offsets).
-  // Place origin to the LEFT of the avatar so the cabinet faces the avatar.
-  // Cel B (cabinet): x_offset=0, so its left edge is at originX, right edge at originX+5*BYTE_PX.
-  // Cel B: y_offset=13, height=24 → extends (24-13)=11 scanlines below origin.
-  // Shift origin up by that overshoot so the base sits at avatar foot level.
-  const machineOriginX = BASE_X + (cx_tab[3] - 1) * BYTE_PX; // 1 byte col left of torso
-  const machineOriginY = BASE_Y - (24 - 13) * SCALE; // align base with avatar feet
+  // C64: avatar stands adjacent to the machine (v_punt_if_not_adjacent).
+  // Our canvas (400px) is much smaller than a C64 room (1280px), so we place the
+  // machine at a fixed position that fits. The cabinet (cel B, 5 bytes wide) is
+  // the rightmost cel. Cel B: y_offset=13, height=24 → extends 11 scanlines
+  // below origin, so shift up to align base with avatar feet.
+  const machineOriginX = CW - 5 * BYTE_PX - 4; // cabinet right edge near canvas edge
+  const machineOriginY = BASE_Y - (24 - 13) * SCALE;
   let originX = machineOriginX;
   let originY = machineOriginY;
   for (const cel of SEXO_CELS) {
