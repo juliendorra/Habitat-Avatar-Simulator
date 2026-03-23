@@ -2116,6 +2116,13 @@ async function renderSequenceFrame(step) {
     applyAction(step.choreography, !!step.endFrame);
   }
 
+  // C64 chore.m front-view sex check (same as initAnimAction Step 4)
+  const activeSex = savedSex !== null ? avatarSex : avatarSex; // avatarSex already set for sex seq
+  if ((step.choreography === 'stand_front' || step.choreography === 'walk_front') && activeSex === 'f') {
+    const ts = limbAnimState.torso;
+    if (ts && ts.gs === 4) setLimbGS('torso', 5);
+  }
+
   const pose = buildPoseFromAnimState();
   const drawOrder = DRAW_ORDER[currentView] || DRAW_ORDER.side;
 
