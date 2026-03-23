@@ -19,13 +19,20 @@
 <meta name="twitter:image" content="https://juliendorra.com/habitat/og-image.png">
 <style>
   :root {
-    --bg: #1a1a2e;
-    --panel: #16213e;
-    --accent: #0f3460;
-    --highlight: #e94560;
-    --text: #eee;
-    --text-dim: #999;
-    --border: #2a2a4a;
+    --bg: #C4B39A;
+    --panel: #B5A48C;
+    --accent: #534741;
+    --highlight: #A83030;
+    --text: #1E1810;
+    --text-dim: #5E5040;
+    --border: #8A7A65;
+    --key-top: #4A3E36;
+    --key-bottom: #2E2420;
+    --key-face: #3C322A;
+    --key-text: #D4C4A8;
+    --key-highlight-top: #8B2020;
+    --key-highlight-face: #A83030;
+    --key-highlight-bottom: #6A1818;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -74,26 +81,85 @@
     height: auto;
   }
   .controls { width: 100%; }
-  .control-group { margin-bottom: 12px; }
+  .control-group { margin-bottom: 16px; }
   .control-group label {
     display: block; font-size: 0.75em; color: var(--text-dim);
     margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px;
   }
-  .btn-row { display: flex; gap: 4px; width: 100%; flex-wrap: wrap; }
+  .btn-row { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; margin-bottom: 4px; }
   .btn {
-    flex: 1; padding: 7px 10px; background: var(--accent); color: var(--text);
-    border: 1px solid var(--border); border-radius: 4px; cursor: pointer;
-    font-family: inherit; font-size: 0.8em; transition: background 0.15s;
-    text-align: center; min-width: 60px;
+    flex: 1; padding: 6px 8px 8px; color: var(--key-text);
+    background: var(--key-face);
+    border: none; border-radius: 5px; cursor: pointer;
+    font-family: inherit; font-size: 0.72em;
+    text-align: center; min-width: 50px;
+    box-shadow:
+      0 -1px 0 1px var(--key-top),
+      0 3px 0 1px var(--key-bottom),
+      0 5px 4px rgba(0,0,0,0.35);
+    transition: all 0.08s ease;
+    position: relative;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
-  .btn:hover { background: var(--highlight); }
-  .btn.active { background: var(--highlight); font-weight: bold; }
-  .btn.primary { background: var(--highlight); font-size: 0.9em; padding: 10px; }
-  .btn.primary:hover { background: #ff5a75; }
+  .btn:hover {
+    background: #50443A;
+    box-shadow:
+      0 -1px 0 1px #5A4E44,
+      0 3px 0 1px var(--key-bottom),
+      0 5px 4px rgba(0,0,0,0.35);
+  }
+  .btn:active {
+    padding: 9px 10px 9px;
+    box-shadow:
+      0 -1px 0 1px var(--key-top),
+      0 1px 0 1px var(--key-bottom),
+      0 2px 2px rgba(0,0,0,0.3);
+    transform: translateY(2px);
+  }
+  .btn.active {
+    background: var(--key-highlight-face); color: #F0D8C0; font-weight: bold;
+    box-shadow:
+      0 -1px 0 1px var(--key-highlight-top),
+      0 3px 0 1px var(--key-highlight-bottom),
+      0 5px 4px rgba(0,0,0,0.35);
+  }
+  .btn.active:hover {
+    background: #BE3838;
+  }
+  .btn.primary {
+    background: var(--key-highlight-face); color: #F0D8C0;
+    font-size: 0.78em; padding: 8px 8px 10px;
+    box-shadow:
+      0 -1px 0 1px var(--key-highlight-top),
+      0 3px 0 1px var(--key-highlight-bottom),
+      0 5px 4px rgba(0,0,0,0.35);
+  }
+  .btn.primary:hover { background: #BE3838; }
+  .btn.primary:active {
+    padding: 11px 10px 11px;
+    box-shadow:
+      0 -1px 0 1px var(--key-highlight-top),
+      0 1px 0 1px var(--key-highlight-bottom),
+      0 2px 2px rgba(0,0,0,0.3);
+    transform: translateY(2px);
+  }
   .btn.full { flex: 0 0 100%; }
-  .btn.sequence { background: #8b5e3c; }
-  .btn.sequence:hover { background: #a06e4c; }
-  .btn.sequence.active { background: #a06e4c; font-weight: bold; }
+  .btn.sequence {
+    background: #5C3A22;
+    box-shadow:
+      0 -1px 0 1px #6E4A30,
+      0 3px 0 1px #3A2010,
+      0 5px 4px rgba(0,0,0,0.35);
+  }
+  .btn.sequence:hover { background: #6E4A30; }
+  .btn.sequence.active {
+    background: #7E5A38; font-weight: bold;
+    box-shadow:
+      0 -1px 0 1px #8E6A48,
+      0 3px 0 1px #4A2A14,
+      0 5px 4px rgba(0,0,0,0.35);
+  }
   .sequence-panel {
     display: none; background: var(--bg); border: 2px solid #8b5e3c; border-radius: 6px;
     padding: 10px; margin-top: 8px;
@@ -106,8 +172,8 @@
   }
   .sequence-step .step-num { color: #8b5e3c; font-weight: bold; }
   .sequence-step .step-desc { color: var(--text-dim); font-size: 0.9em; }
-  .sequence-controls { display: flex; gap: 4px; margin-top: 6px; }
-  .sequence-controls .btn { font-size: 0.75em; }
+  .sequence-controls { display: flex; gap: 10px; margin-top: 8px; }
+  .sequence-controls .btn { font-size: 0.72em; }
   .sequence-progress {
     display: flex; gap: 2px; margin-bottom: 6px;
   }
@@ -251,19 +317,19 @@
           <button class="btn primary" id="randomBtn">Random Avatar</button>
           <button class="btn primary" id="randomClothesBtn">Random Clothes</button>
         </div>
-        <div class="btn-row" style="margin-top:4px">
+        <div class="btn-row" style="margin-top:14px">
           <button class="btn" id="prevBtn">&larr; Prev</button>
           <canvas id="miniHeadCanvas" width="28" height="28" style="image-rendering:pixelated;border-radius:4px;cursor:pointer" title="Show in Grid"></canvas>
           <button class="btn" id="nextBtn">Next &rarr;</button>
         </div>
-        <div class="btn-row" style="margin-top:4px">
+        <div class="btn-row" style="margin-top:14px">
           <button class="btn" id="framePrevBtn">&larr; Frame</button>
           <span id="frameLabel" style="color:var(--text-dim);font-size:0.75em;min-width:60px;text-align:center">—</span>
           <button class="btn" id="frameNextBtn">Frame &rarr;</button>
         </div>
-        <div class="btn-row" style="margin-top:4px">
-          <button class="btn sequence full" id="headChangeBtn">Head Change Sequence</button>
-          <button class="btn sequence full" id="sexChangeBtn">Sex Change Machine</button>
+        <div class="btn-row" style="margin-top:14px">
+          <button class="btn sequence" id="headChangeBtn">Head Change Sequence &#9662;</button>
+          <button class="btn sequence" id="sexChangeBtn">Sex Change Machine &#9662;</button>
         </div>
         <div class="sequence-panel" id="sequencePanel">
           <div class="sequence-progress" id="sequenceProgress"></div>
