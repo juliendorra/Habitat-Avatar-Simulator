@@ -110,19 +110,15 @@
       0 5px 4px rgba(0,0,0,0.35);
   }
   .btn:active {
-    padding: 9px 10px 9px;
     box-shadow:
-      0 -1px 0 1px var(--key-top),
-      0 1px 0 1px var(--key-bottom),
-      0 2px 2px rgba(0,0,0,0.3);
-    transform: translateY(2px);
+      0 0 0 1px var(--key-bottom),
+      inset 0 2px 3px rgba(0,0,0,0.3);
   }
   .btn.active {
     background: var(--key-highlight-face); color: #F0D8C0; font-weight: bold;
     box-shadow:
-      0 -1px 0 1px var(--key-highlight-top),
-      0 3px 0 1px var(--key-highlight-bottom),
-      0 5px 4px rgba(0,0,0,0.35);
+      0 0 0 1px var(--key-highlight-bottom),
+      inset 0 2px 3px rgba(0,0,0,0.25);
   }
   .btn.active:hover {
     background: #BE3838;
@@ -137,12 +133,9 @@
   }
   .btn.primary:hover { background: #BE3838; }
   .btn.primary:active {
-    padding: 11px 10px 11px;
     box-shadow:
-      0 -1px 0 1px var(--key-highlight-top),
-      0 1px 0 1px var(--key-highlight-bottom),
-      0 2px 2px rgba(0,0,0,0.3);
-    transform: translateY(2px);
+      0 0 0 1px var(--key-highlight-bottom),
+      inset 0 2px 3px rgba(0,0,0,0.3);
   }
   .btn.full { flex: 0 0 100%; }
   .btn.sequence {
@@ -153,12 +146,16 @@
       0 5px 4px rgba(0,0,0,0.35);
   }
   .btn.sequence:hover { background: #6E4A30; }
+  .btn.sequence:active {
+    box-shadow:
+      0 0 0 1px #3A2010,
+      inset 0 2px 3px rgba(0,0,0,0.3);
+  }
   .btn.sequence.active {
     background: #7E5A38; font-weight: bold;
     box-shadow:
-      0 -1px 0 1px #8E6A48,
-      0 3px 0 1px #4A2A14,
-      0 5px 4px rgba(0,0,0,0.35);
+      0 0 0 1px #4A2A14,
+      inset 0 2px 3px rgba(0,0,0,0.25);
   }
   .sequence-panel {
     display: none; background: var(--bg); border: 2px solid #8b5e3c; border-radius: 6px;
@@ -2279,13 +2276,13 @@ async function drawMiniHeadAt(head, x, y, useOrigin) {
 
 // Sequence UI events
 document.getElementById('headChangeBtn').addEventListener('click', () => {
-  if (seqActive) stopSequence();
-  else startSequence();
+  if (seqActive && seqType === 'head') stopSequence();
+  else { if (seqActive) stopSequence(); startSequence(); }
 });
 
 document.getElementById('sexChangeBtn').addEventListener('click', () => {
-  if (seqActive) stopSequence();
-  else startSexChangeSequence();
+  if (seqActive && seqType === 'sex') stopSequence();
+  else { if (seqActive) stopSequence(); startSexChangeSequence(); }
 });
 
 document.getElementById('seqNextBtn').addEventListener('click', () => {
