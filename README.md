@@ -2,9 +2,6 @@
 
 **Explore every avatar customization from the first graphical virtual world.**
 
-<p align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/en/6/67/Habitat_Screenshot.png" alt="Habitat screenshot" width="480">
-</p>
 
 ## Why this tool exists
 
