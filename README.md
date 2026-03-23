@@ -2,6 +2,12 @@
 
 **Explore every avatar customization from the first graphical virtual world.**
 
+<p align="center">
+  <img src="habitat-capture-00001.png" height="160" alt="Habitat gameplay screenshot">
+  <img src="habitat-capture-00002.png" height="160" alt="Habitat gameplay screenshot">
+  <img src="habitat-capture-00003.png" height="160" alt="Habitat gameplay screenshot">
+</p>
+
 
 ## Why this tool exists
 
