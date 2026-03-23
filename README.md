@@ -64,10 +64,11 @@ The offline Python scripts in `tools/` decode the original binary assets into PN
 
 ## License
 
+The original Habitat art assets and source code are property of their respective rights holders. This simulator is a research and preservation tool built for historical study.
+
 ---
 
 <a id="fn1">1.</a> The word "avatar" was first applied to a game character in Richard Garriott's *Ultima IV: Quest of the Avatar* (1985), but there it is **diegetic** — a title the protagonist earns within the game's fiction after mastering the eight Virtues. In Habitat (1986), the term is used in the modern, **extra-diegetic** sense: every player character is called an avatar, meaning the player's embodied representation in a shared virtual world. It is this usage — later popularized by Neal Stephenson's *Snow Crash* (1992) — that became the standard meaning in computing. See [Avatar (computing)](https://en.wikipedia.org/wiki/Avatar_(computing)) on Wikipedia.
 
 ---
 
-The original Habitat art assets and source code are property of their respective rights holders. This simulator is a research and preservation tool built for historical study.
